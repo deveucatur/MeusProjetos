@@ -563,7 +563,7 @@ authenticator = stauth.Authenticate(credentials, "Teste", "abcde", 30)
 
 col1, col2,col3 = st.columns([1,3,1])
 with col2:
-    name, authentication_status, username = authenticator.login('Acesse o sistema 9box', 'main')
+    name, authentication_status, username = authenticator.login('Acesse a ferramenta PROJEU', 'main')
 
 if authentication_status == False:
     with col2:
