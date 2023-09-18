@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 from util import font_TITLE
 import mysql.connector
+from time import sleep
 
 icone = Image.open('imagens/icone.png')
 st.set_page_config(
@@ -158,18 +159,22 @@ if btt_criar_prj:
             '{nomeProjeto}', '{obj_proj}', 
             (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{mvp_name}', '{mvp_produt}', 
             '{pdt_entrFinal}', {int(dat_inic.year)}, '{dat_inic}', 'Backlog' , '{ivsProget}'); """)
-
+        
+        print('PROJETO CRIADO!')
+        print('---'*30)
+        print('VINCULANDO COLABORADORES AO PROJETO')
+        sleep(1.5)
         conexao.commit()
         for list_colb in list_colbs:
             comand_insert_colabs = f"""INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel) VALUES 
-            ((SELECT id_proj FROM projeu_projetos WHERE name_proj = "{nomeProjeto}" AND gestor_id_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor})), (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]}), '{list_colb[1]}')"""
+            ((SELECT id_proj FROM projeu_projetos WHERE name_proj = "{nomeProjeto}" AND gestor_id_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor} limit 1)), (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]} limit 1), '{list_colb[1]}')"""
             
             mycursor.execute(comand_insert_colabs)
             conexao.commit()
-
-        st.success('Projeto criado!')
+        print('COLABORADORES VINCULADOS')    
+        st.toast('Sucesso na criação do Projeto!', icon='✅')
     except:
-        st.error('Por gentileza, preencher todos os campos corretamente.')
+        st.toast('Erro na criação do projeto.', icon='❌')
     
 
     
