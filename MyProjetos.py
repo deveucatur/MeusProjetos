@@ -128,11 +128,8 @@ comand = f"""SELECT
     ) as matriculaEQUIPE
 FROM 
     projeu_projetos
-WHERE
-    projeu_projetos.gestor_id_fgkey in (SELECT id_user FROM projeu_users WHERE Matricula = {mat_gestor})
 GROUP BY
     projeu_projetos.id_proj;"""
-
 
 mycursor.execute(comand)
 ddPaging = mycursor.fetchall()
@@ -563,7 +560,7 @@ authenticator = stauth.Authenticate(credentials, "Teste", "abcde", 30)
 
 col1, col2,col3 = st.columns([1,3,1])
 with col2:
-    name, authentication_status, username = authenticator.login('Acesse a ferramenta PROJEU', 'main')
+    name, authentication_status, username = authenticator.login('Acesse o sistema PROJEU', 'main')
 
 if authentication_status == False:
     with col2:
