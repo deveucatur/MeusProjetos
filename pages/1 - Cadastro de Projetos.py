@@ -3,13 +3,13 @@ from PIL import Image
 from util import font_TITLE
 import mysql.connector
 from time import sleep
+from datetime import date
 
 icone = Image.open('imagens/icone.png')
 st.set_page_config(
     page_title="Cadastro de Projetos",
     page_icon=icone,
     layout="wide")
-
 
 ########CONECTANDO AO BANCO DE DADOS########
 conexao = mysql.connector.connect(
@@ -18,8 +18,7 @@ conexao = mysql.connector.connect(
     user='ninebox',
     host='nineboxeucatur.c7rugjkck183.sa-east-1.rds.amazonaws.com',
     database='projeu'
-)
-
+    )
 
 def formatar_numero_string(numero_str):
 
@@ -64,9 +63,11 @@ JOIN projeu_macropr m ON p.macroprocesso_fgkey = m.id;"""
 )
 
 dados_page = mycursor.fetchall()
+
+mycursor.execute("SELECT DISTINCT(name_proj) FROM projeu_projetos;")
+dd_proj = [x[0] for x in mycursor.fetchall()]
 dd_prog = list(set([x[0] for x in dados_page]))
 dd_macr = list(set([x[1] for x in dados_page]))
-
 
 mycursor.execute("""SELECT Matricula, 
                  Nome FROM projeu_users;"""
@@ -74,10 +75,8 @@ mycursor.execute("""SELECT Matricula,
 users = mycursor.fetchall()
 mycursor.close()
 
-#A IDEIA É QUE OS USUÁRIOS SELECIONADOS DURANTE O PREENCHIMENTO DO FORMULÁRIO SEJAM PEGOS AS INFORMAÇÕES DO BANCO DE DADOS DE USUÁRIO
 fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');
 '''
-
 font_TITLE('CADASTRO DE PROJETOS', fonte_Projeto,"'Bebas Neue', sans-serif", 49, 'center')
 complix = ['SEGURO', 'ACESSÍVEL', 'ABSTRATO I', 'ABSTRATO II', 'ABSTRATO III', 'SINGULAR I', 'SINGULAR II',
         'SINGULAR III']
@@ -98,7 +97,7 @@ with col1:
         matric_gestor = st.text_input('Matricula Gestor', [x[0] for x in users if x[1] == gestorProjeto][0], disabled=True)
     
     mvp_name = st.text_input('MVP')
-    pdt_entrFinal = st.text_area('Produto Final')
+    pdt_entrFinal = st.text_area('Produto Projeto')
 
 with col2:
     nomePrograma = st.selectbox('Programa', dd_prog)
@@ -111,6 +110,19 @@ with col2:
     mvp_produt = st.text_input('Produto MVP')    
 
     obj_proj = st.text_area('Objetivo Projeto')
+
+st.write('---')
+col1, col2 = st.columns([3,1])
+with col1:
+    font_TITLE('PRINCIPAIS ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
+with col2:
+    qntd_entr = st.number_input('Quantidade', min_value=1, step=1, key='Entregas')
+
+
+listEntregas = []
+st.caption('Entregas')
+for a_entr in range(qntd_entr):
+    listEntregas.append(st.text_input('', label_visibility="collapsed", key=f'Entreg{a_entr}'))
 
 st.write('---')
 col1, col2 = st.columns([3,1])
@@ -128,6 +140,7 @@ with col_equip2:
 with col_equip3:
     st.caption('Função')
 
+#A IDEIA É QUE OS USUÁRIOS SELECIONADOS DURANTE O PREENCHIMENTO DO FORMULÁRIO SEJAM PEGOS AS INFORMAÇÕES DO BANCO DE DADOS DE USUÁRIO
 list_colbs = []
 for colb_a in range(qntd_clb):
     with col_equip2:
@@ -145,36 +158,77 @@ with colb3:
     st.text(' ')
     btt_criar_prj = st.button('Criar Projeto')
 
+
 if btt_criar_prj:
-    mycursor = conexao.cursor()
-    try:
-        mycursor.execute(f"""INSERT INTO projeu_projetos(
-            type_proj_fgkey, macroproc_fgkey, progrm_fgkey, name_proj, 
-            objtv_projet, gestor_id_fgkey, nome_mvp,
-            produto_mvp, produto_entrega_final,  
-            ano, date_posse_gestor,  status_proj, investim_proj
-            ) VALUES (
-            (SELECT id_type FROM projeu_type_proj WHERE type_proj = '{typ_proj}'), (SELECT id FROM projeu_macropr WHERE macroprocesso = '{MacroProjeto}'), 
-            (SELECT id_prog FROM projeu_programas WHERE nome_prog = '{nomePrograma}'), 
-            '{nomeProjeto}', '{obj_proj}', 
-            (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{mvp_name}', '{mvp_produt}', 
-            '{pdt_entrFinal}', {int(dat_inic.year)}, '{dat_inic}', 'Backlog' , '{ivsProget}'); """)
-        
-        print('PROJETO CRIADO!')
-        print('---'*30)
-        print('VINCULANDO COLABORADORES AO PROJETO')
-        sleep(1.5)
-        conexao.commit()
-        for list_colb in list_colbs:
-            comand_insert_colabs = f"""INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel) VALUES 
-            ((SELECT id_proj FROM projeu_projetos WHERE name_proj = "{nomeProjeto}" AND gestor_id_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor} limit 1)), (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]} limit 1), '{list_colb[1]}')"""
-            
-            mycursor.execute(comand_insert_colabs)
-            conexao.commit()
-        print('COLABORADORES VINCULADOS')    
-        st.toast('Sucesso na criação do Projeto!', icon='✅')
-    except:
-        st.toast('Erro na criação do projeto.', icon='❌')
+    if nomeProjeto not in dd_proj:
+        if 0 not in [len(str(x)) if type(x) == date else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, mvp_name, pdt_entrFinal, nomePrograma, dat_inic, ivsProget, mvp_produt, 
+obj_proj, listEntregas, list_colbs]]:
+            mycursor = conexao.cursor()
+            try:
+                ############# INSERINDO O PROJETO #############
+                cmd_criar_project = f"""INSERT INTO projeu_projetos(
+                    type_proj_fgkey, macroproc_fgkey, progrm_fgkey, name_proj, 
+                    objtv_projet, gestor_id_fgkey, nome_mvp,
+                    produto_mvp, produto_entrega_final,  
+                    ano, date_posse_gestor,  status_proj, investim_proj
+                    ) VALUES (
+                    (SELECT id_type FROM projeu_type_proj WHERE type_proj = '{typ_proj}'), (SELECT id FROM projeu_macropr WHERE macroprocesso = '{MacroProjeto}'), 
+                    (SELECT id_prog FROM projeu_programas WHERE nome_prog = '{nomePrograma}'), 
+                    '{nomeProjeto}', '{obj_proj}', 
+                    (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{mvp_name}', '{mvp_produt}', 
+                    '{pdt_entrFinal}', {int(dat_inic.year)}, '{dat_inic}', 'Backlog' , '{ivsProget}'); """
+                
+                mycursor.execute(cmd_criar_project)
+                conexao.commit()
+                print('PROJETO CRIADO!')
+                print('---'*30)
+                print('VINCULANDO COLABORADORES AO PROJETO')
+                sleep(2)
+
+                ############# INSERINDO COMPLEXIDADE #############
+                cmd_insert_complx = f'''INSERT INTO projeu_complexidade (proj_fgkey, date_edic) 
+                VALUES (
+                (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{nomeProjeto}' LIMIT 1),
+                '{date.today()}'
+                );'''
+                mycursor.execute(cmd_insert_complx)
+                conexao.commit()
+                print('LINHA DE COMPLEXIDADE VINCULADO AO BANCO DE DADOS!')
+                sleep(2)
+
+                ############# INSERINDO EQUIPE #############
+                for list_colb in list_colbs:
+                    comand_insert_colabs = f"""INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel) VALUES 
+                    ((SELECT id_proj FROM projeu_projetos WHERE name_proj = "{nomeProjeto}" AND gestor_id_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor} limit 1) limit 1), (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]} limit 1), '{list_colb[1]}');"""
+                    
+                    mycursor.execute(comand_insert_colabs)
+                    conexao.commit()
+
+                print('COLABORADORES VINCULADOS')
+                sleep(2)
+                
+                ############# INSERINDO PRINCIPAIS ENTREGAS #############
+                for name_entr in listEntregas:
+                    cmd_insert_princp = f'''INSERT INTO projeu_princEntregas (
+                    entreg, 
+                    id_proj_fgkey
+                    )
+                    values (
+                        '{name_entr}',
+                        (
+                        SELECT id_proj FROM projeu_projetos WHERE name_proj = '{nomeProjeto}')
+                        )'''
+                    mycursor.execute(cmd_insert_princp)
+                    conexao.commit()
+
+                st.toast('Sucesso na criação do Projeto!', icon='✅')
+                mycursor.close()
+            except:
+                st.toast('Erro ao cadastrar projeto na base de dados.', icon='❌')
+        else:
+            st.toast('Primeiramente, preencha todos os campos corretamente.', icon='❌')
+    else:
+        st.toast('Já existe um projeto com esse nome.', icon='❌')
     
 
     
