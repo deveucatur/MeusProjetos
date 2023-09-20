@@ -30,8 +30,8 @@ mycursor = conexao.cursor()
 comand = f"""SELECT 
     projeu_projetos.id_proj, 
     projeu_projetos.name_proj,
-    (SELECT Nome FROM projeu_users WHERE Matricula = {mat_gestor}) AS name_gestor,
-    (SELECT Matricula FROM projeu_users WHERE Matricula = {mat_gestor}) AS matricula_gestor,
+    (SELECT Nome FROM projeu_users WHERE id_user = projeu_projetos.gestor_id_fgkey) AS name_gestor, 
+    (SELECT Matricula FROM projeu_users WHERE id_user = projeu_projetos.gestor_id_fgkey) AS matricula_gestor,
     (SELECT type_proj FROM projeu_type_proj WHERE id_type = projeu_projetos.type_proj_fgkey) AS type_proj,
     (SELECT macroprocesso FROM projeu_macropr WHERE id = projeu_projetos.macroproc_fgkey) AS macroprocesso,
     (SELECT nome_prog FROM projeu_programas WHERE id_prog = projeu_projetos.progrm_fgkey) AS programa,
@@ -573,7 +573,7 @@ elif authentication_status:
         authenticator.logout('Logout', 'main')
 
     matriUser = [x[1] for x in dadosUser if x[3] == username][0]
-    ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split(',')]
+    ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split(',') or matriUser == x[3]]
 
     fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
     if len(ddPaging):
