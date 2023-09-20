@@ -649,8 +649,8 @@ elif authentication_status:
             st.text(' ')
             st.text(' ')
             font_TITLE('MEU DESEMPENHO NO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
-
-            dffMyProject = Counter([x[4] for x in EntregasBD if x[7] == matriUser]) if len(EntregasBD) > 0 else Counter(['-'])
+            
+            dffMyProject = Counter([x[4] for x in EntregasBD if x[7] == matriUser]) if len([x for x in EntregasBD if x[7] == matriUser]) > 0 else Counter(['-'])
             dif_comum = dffMyProject.most_common(1)
             complexidade = dif_comum[0][0]
             cardMyProject(f'{name}', [len([x for x in EntregasBD if x[7] == matriUser]), len([x for x in EntregasBD if str(x[5]).strip() == "🟩 Concluído" and x[7] == matriUser]), sum([x[3] for x in EntregasBD if x[7] == matriUser]), complexidade])
@@ -753,10 +753,13 @@ elif authentication_status:
                             with st.expander(f'Sprint {idx_spr}'):
                                 #FILTRANDO ENTREGAS DAQUELA SPRINT
                                 spEntregas = [x for x in SprintsEntregs if x[0] == idx_spr]
+                                
+                                #PREPARANDO OS DADOS PARA APRESENTAR NO CARD DA SPRINT
                                 contagem_dif = Counter([x[4] for x in spEntregas])                
                                 dif_comum = contagem_dif.most_common(1)
-
-                                cardGRANDE(['Colaboradores', 'Atividades', 'Entregues', 'Avanço', 'Horas', 'Complexidade'], [len([x for x in spEntregas if x[2] != None]), len([x for x in spEntregas if x[1] != None]), len([x for x in spEntregas if str(x[5]).strip() == '🟩 Concluído']), '0%', sum([x[3] for x in spEntregas]), mapear_dificuldade(dif_comum[0][0])])
+                                
+                                porc_avan = f'{int((len([x for x in spEntregas if str(x[5]).strip() == "🟩 Concluído"]) / len([x for x in spEntregas if x[1] != None])) * 100) if len([x for x in spEntregas if x[1] != None]) > 0 else 0}%'           
+                                cardGRANDE(['Colaboradores', 'Atividades', 'Entregues', 'Avanço', 'Horas', 'Complexidade'], [len(list(set([x[2] for x in spEntregas if x[2] != None]))), len([x for x in spEntregas if x[1] != None]), len([x for x in spEntregas if str(x[5]).strip() == '🟩 Concluído']), porc_avan, sum([x[3] for x in spEntregas]), mapear_dificuldade(dif_comum[0][0])])
                                 st.text(' ')
                                 st.text(' ')
 
@@ -814,27 +817,28 @@ elif authentication_status:
                                     button_atual = st.button('Atualizar', key=f'{idx_spr} {idx_parm}')        
                                     if button_atual:
                                         mycursor = conexao.cursor()
+                                        
                                         for list_atual in listDadosAux:
                                             if list_atual[5] != None: #SE A ENTREGA DA "list_atual" JÁ ESTIVER DENTRO DO BANCO DE DADOS SOMENTE VAI ATUALIZAR AS INFORMAÇÕES SOBRE A ENTREGA
                                                 columnsUP = ['nome_Entrega', 'executor', 'hra_necess', 'stt_entrega', 'compl_entrega']
                                                 
                                                 for idxColum in range(len(columnsUP)):
-                                                    cmd_update = f'''UPDATE projeu_entregas SET {columnsUP[idxColum]} = {f"'{list_atual[idxColum]}'" if idxColum != 1 else f"(SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[idxColum]}' LIMIT 1)"} WHERE id_entr = {list_atual[5]};'''
+                                                    cmd_update = f'''UPDATE projeu_entregas SET {columnsUP[idxColum]} = {f'"{list_atual[idxColum]}"' if idxColum != 1 else f'(SELECT id_user FROM projeu_users WHERE Nome = "{list_atual[idxColum]}" LIMIT 1)'} WHERE id_entr = {list_atual[5]};'''
                                                     mycursor.execute(cmd_update)
                                                     conexao.commit()
                                                 
                                             else: #INSERT DA ENTREGA CASO ELA NÃO ESTEJA PRESENTE DENTRO DO BANCO DE DADOS
                                                 if list_atual[0] != None and list_atual[0] != '': 
-                                                    cmd_insert = f"""
+                                                    cmd_insert = f'''
                                                         INSERT INTO projeu_entregas (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
                                                             values((SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {spEntregas[0][0]}  
                                                                 AND id_proj_fgkey = 
                                                                     (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{dadosOrigin[0][1]}') LIMIT 1),
-                                                                    '{list_atual[0]}', 
+                                                                    "{list_atual[0]}", 
                                                                     (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
                                                                     {list_atual[2]},
-                                                                    '{list_atual[3]}',
-                                                                    '{list_atual[4]}');"""
+                                                                    "{list_atual[3]}",
+                                                                    "{list_atual[4]}");'''
                                                     mycursor.execute(cmd_insert)
                                                     conexao.commit()
                                         mycursor.close()
@@ -859,11 +863,11 @@ elif authentication_status:
                                         mycursor = conexao.cursor()
                                         cmd_exc = f"""DELETE FROM projeu_entregas 
                                                     WHERE 
-                                                        id_sprint = (SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {idx_spr} LIMIT 1) 
-                                                        AND nome_entrega = '{atvdd_exc}' 
+                                                        nome_entrega = '{atvdd_exc}' 
                                                         AND executor = (SELECT id_user FROM projeu_users WHERE Nome = '{exec_exc}' LIMIT 1)
                                                         AND compl_entrega = '{compl_exc}'
                                                         AND stt_entrega = '{stt_exc}';"""
+                                                        
                                         mycursor.execute(cmd_exc)
                                         conexao.commit()
 
