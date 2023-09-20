@@ -66,8 +66,8 @@ dados_page = mycursor.fetchall()
 
 mycursor.execute("SELECT DISTINCT(name_proj) FROM projeu_projetos;")
 dd_proj = [x[0] for x in mycursor.fetchall()]
-dd_prog = list(set([x[0] for x in dados_page]))
-dd_macr = list(set([x[1] for x in dados_page]))
+prog_macro = [list(x) for x in dados_page]
+
 
 mycursor.execute("""SELECT Matricula, 
                  Nome FROM projeu_users;"""
@@ -88,7 +88,7 @@ with col1:
     with colaux1:
         typ_proj = st.selectbox('Tipo Projeto', ['Estratégicos', 'OKR', 'Implantação'])
     with colaux2:
-        MacroProjeto = st.selectbox('Macroprocesso', dd_macr)    
+        MacroProjeto = st.selectbox('Macroprocesso', list(set([x[1] for x in prog_macro])))    
 
     colG1, colG2 = st.columns([1,3]) 
     with colG2:
@@ -100,7 +100,7 @@ with col1:
     pdt_entrFinal = st.text_area('Produto Projeto')
 
 with col2:
-    nomePrograma = st.selectbox('Programa', dd_prog)
+    nomePrograma = st.selectbox('Programa', [x[0] for x in prog_macro if x[1] == MacroProjeto])
 
     colD1, colD2 = st.columns([2,1]) 
     with colD1:
@@ -148,7 +148,7 @@ for colb_a in range(qntd_clb):
     with col_equip1:
         colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0], label_visibility="collapsed", disabled=True, key=f'MatriculaColabs{colb_a}')
     with col_equip3:
-        colb_funç = st.selectbox('Função', ['Especialista', 'Executor'], label_visibility="collapsed", key=f'funcaoColab{colb_a}')
+        colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],1, label_visibility="collapsed", key=f'funcaoColab{colb_a}')
     list_colbs.append([colab_matric, colb_funç])
 
 st.text(' ')
