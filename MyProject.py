@@ -782,7 +782,7 @@ elif authentication_status:
                                     spEntregas.extend([[idx_spr, None, None, 0 , '---', '🟨 Backlog', None] for x in range(qnt_att)])
 
                                     st.text(' ')
-                                    col0, col1, col2, col3, col4, col5 = st.columns([0.13, 1, 0.3, 0.25, 0.25, 0.2])
+                                    col1, col2, col3, col4, col5 = st.columns([1, 0.3, 0.25, 0.25, 0.2])
                                     with col0:
                                         st.caption('ID')
                                     with col1:
@@ -797,8 +797,6 @@ elif authentication_status:
                                         st.caption('Compl')
 
                                     for ativIDX in range(len(spEntregas)): 
-                                        with col0:
-                                            id_entreg = st.text_input('id', key=f'id_entrega{idx_spr} - {ativIDX} - {idx_parm}', label_visibility="collapsed")                   
                                         with col1:
                                             name_entreg = st.text_input('Atividade', spEntregas[ativIDX][1] if spEntregas[ativIDX][1] != None else '', key=f'atividade{idx_spr} - {ativIDX} - {idx_parm}', label_visibility="collapsed")
                                         with col4:
