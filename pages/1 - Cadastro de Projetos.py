@@ -109,8 +109,23 @@ with col2:
         ivsProget = st.text_input('Investimento', placeholder='R$ 0,00')
     mvp_produt = st.text_input('Produto MVP')    
 
-    obj_proj = st.text_area('Objetivo Projeto')
+    obj_proj = st.text_area('Resultado Esperado')
 
+
+##### ADCIONANDO MÉTRICAS #####
+st.write('---')
+col1, col2 = st.columns([3,1])
+with col1:
+    font_TITLE('MÉTRICAS', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
+with col2:
+    qntd_metric = st.number_input('Quantidade', min_value=1, step=1, key=f'Metricas')
+
+listMetric = []
+st.caption('Métricas')
+for a_metrc in range(qntd_metric):
+    listMetric.append(st.text_input('', label_visibility="collapsed", key=f'Metricas{a_metrc}'))
+
+##### ADCIONANDO AS PRÍNCIPAIS ENTREGAS #####
 st.write('---')
 col1, col2 = st.columns([3,1])
 with col1:
@@ -118,19 +133,18 @@ with col1:
 with col2:
     qntd_entr = st.number_input('Quantidade', min_value=1, step=1, key='Entregas')
 
-
 listEntregas = []
 st.caption('Entregas')
 for a_entr in range(qntd_entr):
     listEntregas.append(st.text_input('', label_visibility="collapsed", key=f'Entreg{a_entr}'))
 
+##### ADCIONANDO A EQUIPE #####
 st.write('---')
 col1, col2 = st.columns([3,1])
 with col1:
     font_TITLE('CADASTRO EQUIPE', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
 with col2:
     qntd_clb = st.number_input('Quantidade', min_value=1, step=1)
-
 
 col_equip1, col_equip2, col_equip3 = st.columns([0.3, 2, 1])
 with col_equip1:
@@ -183,7 +197,19 @@ obj_proj, listEntregas, list_colbs]]:
                 print('PROJETO CRIADO!')
                 print('---'*30)
                 print('VINCULANDO COLABORADORES AO PROJETO')
-                sleep(2)
+                sleep(1)
+
+                ############# INSERINDO MÉTRICAS DO PROJETO #############
+                dd_metric = ''
+                for metric_name in listMetric:
+                    dd_metric += f"((SELECT id_proj FROM projeu_projetos WHERE name_proj = '{nomeProjeto}'), '{metric_name}'),"
+                dd_metric = dd_metric[:len(dd_metric)-1]
+
+                cmd_metric = f"""INSERT INTO projeu_metricas(id_prj_fgkey, name_metric) 
+                                    VALUES {dd_metric};"""
+                mycursor.execute(cmd_metric)
+                conexao.commit()
+                sleep(1)
 
                 ############# INSERINDO COMPLEXIDADE #############
                 cmd_insert_complx = f'''INSERT INTO projeu_complexidade (proj_fgkey, date_edic) 
@@ -194,7 +220,7 @@ obj_proj, listEntregas, list_colbs]]:
                 mycursor.execute(cmd_insert_complx)
                 conexao.commit()
                 print('LINHA DE COMPLEXIDADE VINCULADO AO BANCO DE DADOS!')
-                sleep(2)
+                sleep(1)
 
                 ############# INSERINDO EQUIPE #############
                 for list_colb in list_colbs:
@@ -205,7 +231,7 @@ obj_proj, listEntregas, list_colbs]]:
                     conexao.commit()
 
                 print('COLABORADORES VINCULADOS')
-                sleep(2)
+                sleep(1)
                 
                 ############# INSERINDO PRINCIPAIS ENTREGAS #############
                 for name_entr in listEntregas:
