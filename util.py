@@ -1,4 +1,5 @@
 import streamlit as st
+from datetime import datetime
 
 fonte = '''<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +14,12 @@ fonte3 = '''<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Koulen&family=Passion+One&display=swap" rel="stylesheet">'''
 
 fonte4 = '''@import url('https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Koulen&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
+
+
+def string_to_datetime(string):
+    date = datetime.strptime(str(string), "%Y-%m-%d").date()
+    return date
+
 
 def font_TITLE(texto, fonte, fonte1, tam_font, text_alinham = None, cor = 'gray11'):
 #FONTE = URL DA FONTE
@@ -191,7 +198,7 @@ def displayInd(title, valor, min_val, max_val):
 
     .title2-text {
     color: #374151;
-    font-size: 18px;
+    font-size: 15px;
     font-family: 'Poppins', sans-serif;
     }
 
@@ -203,7 +210,7 @@ def displayInd(title, valor, min_val, max_val):
 
     .data2 p {
         color: #1F2937;
-        font-size: 2.25rem;
+        font-size: 27px;
         line-height: 2.5rem;
         font-weight: 700;
         font-family: 'Poppins', sans-serif;
@@ -218,7 +225,7 @@ def displayInd(title, valor, min_val, max_val):
                             <p class="title2-text">{title}</p>
                                 </div>
                                 <div class="data2">
-                            <p>{int(valor)}</p>
+                            <p>{valor}</p>
                         </div>
                     </div>
                 '''
@@ -299,7 +306,7 @@ def cardGRANDE(title, valor):
 
     .dataG p {
         color: #1F2937;
-        font-size: 50px;
+        font-size: 43px;
         line-height: 2.5rem;
         font-weight: 450;
         font-family: 'Poppins', sans-serif;
