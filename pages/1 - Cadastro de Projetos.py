@@ -109,7 +109,7 @@ with col2:
         ivsProget = st.text_input('Investimento', placeholder='R$ 0,00')
     mvp_produt = st.text_input('Produto MVP')    
 
-    obj_proj = st.text_area('Resultado Esperado')
+    result_esperd = st.text_area('Resultado Esperado')
 
 
 ##### ADCIONANDO MÉTRICAS #####
@@ -176,21 +176,22 @@ with colb3:
 if btt_criar_prj:
     if nomeProjeto not in dd_proj:
         if 0 not in [len(str(x)) if type(x) == date else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, mvp_name, pdt_entrFinal, nomePrograma, dat_inic, ivsProget, mvp_produt, 
-obj_proj, listEntregas, list_colbs]]:
+result_esperd, listEntregas, list_colbs]]:
             mycursor = conexao.cursor()
             try:
                 ############# INSERINDO O PROJETO #############
                 cmd_criar_project = f"""INSERT INTO projeu_projetos(
                     type_proj_fgkey, macroproc_fgkey, progrm_fgkey, name_proj, 
-                    objtv_projet, gestor_id_fgkey, nome_mvp,
+                    result_esperad, gestor_id_fgkey, nome_mvp,
                     produto_mvp, produto_entrega_final,  
                     ano, date_posse_gestor,  status_proj, investim_proj
                     ) VALUES (
                     (SELECT id_type FROM projeu_type_proj WHERE type_proj = '{typ_proj}'), (SELECT id FROM projeu_macropr WHERE macroprocesso = '{MacroProjeto}'), 
                     (SELECT id_prog FROM projeu_programas WHERE nome_prog = '{nomePrograma}'), 
-                    '{nomeProjeto}', '{obj_proj}', 
+                    '{nomeProjeto}', '{result_esperd}', 
                     (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{mvp_name}', '{mvp_produt}', 
                     '{pdt_entrFinal}', {int(dat_inic.year)}, '{dat_inic}', 'Backlog' , '{ivsProget}'); """
+
                 
                 mycursor.execute(cmd_criar_project)
                 conexao.commit()
