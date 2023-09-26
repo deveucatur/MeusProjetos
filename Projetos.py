@@ -1,9 +1,7 @@
 import streamlit as st
 from PIL import Image
 from datetime import datetime, timedelta
-from util import font_TITLE
-from util import cardMyProject
-from util import cardGRANDE
+from util import font_TITLE, string_to_datetime, cardMyProject, cardGRANDE
 from collections import Counter
 import mysql.connector 
 import streamlit_authenticator as stauth
@@ -25,7 +23,6 @@ conexao = mysql.connector.connect(
     database='projeu'
 )
 
-mat_gestor = 56126
 mycursor = conexao.cursor()
 comand = f"""SELECT 
     projeu_projetos.id_proj, 
@@ -37,7 +34,7 @@ comand = f"""SELECT
     (SELECT nome_prog FROM projeu_programas WHERE id_prog = projeu_projetos.progrm_fgkey) AS programa,
     projeu_projetos.nome_mvp,
     projeu_projetos.investim_proj,
-    projeu_projetos.objtv_projet as objetivo_projet,
+    projeu_projetos.result_esperad as objetivo_projet,
     projeu_projetos.produto_entrega_final,
     (
         SELECT GROUP_CONCAT(number_sprint) 
@@ -536,10 +533,6 @@ def mapear_dificuldade(dificuldade):
         return '---'  # Retornar None ou lançar um erro para outros valores
 
 
-def string_to_datetime(string):
-    date = datetime.strptime(str(string), "%Y-%m-%d").date()
-    return date
-
 names = [x[2] for x in dadosUser]
 usernames = [x[3] for x in dadosUser]
 hashed_passwords = [x[8] for x in dadosUser]
@@ -703,6 +696,7 @@ elif authentication_status:
                     mycursor.close()
                     st.toast('Sucesso na adição da sprint!', icon='✅')
                     st.text(' ')
+                    st.rerun()
 
                 if button_exSprint:
                     mycursor = conexao.cursor()
@@ -727,6 +721,7 @@ elif authentication_status:
 
                             mycursor.close()
                             st.toast('Excluido!', icon='✅') 
+                            st.rerun()
                         else:
                             st.toast('Primeiramente, é necessário excluir todas as atividades dessa sprint.', icon='❌')
                     else:
@@ -825,6 +820,7 @@ elif authentication_status:
                                                     mycursor.execute(cmd_update)
                                                     conexao.commit()
                                                 
+                                                
                                             else: #INSERT DA ENTREGA CASO ELA NÃO ESTEJA PRESENTE DENTRO DO BANCO DE DADOS
                                                 if list_atual[0] != None and list_atual[0] != '': 
                                                     cmd_insert = f'''
@@ -841,6 +837,7 @@ elif authentication_status:
                                                     conexao.commit()
                                         mycursor.close()
                                         st.toast('Dados Atualizados!', icon='✅')
+                                        st.rerun()
 
                                 with tab2:
                                     font_TITLE('EXCLUIR', fonte_Projeto,"'Bebas Neue', sans-serif", 23, 'left')  
@@ -871,6 +868,7 @@ elif authentication_status:
 
                                         st.toast('Entrega Excluida!', icon='✅')
                                         mycursor.close()
+                                        st.rerun()
     else:
         st.text(' ')
         st.text(' ')
