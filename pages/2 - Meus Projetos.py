@@ -5,6 +5,7 @@ from util import font_TITLE, string_to_datetime, cardMyProject, cardGRANDE
 from collections import Counter
 import mysql.connector 
 import streamlit_authenticator as stauth
+from utilR import PlotCanvas
 
 
 icone = Image.open('imagens/icone.png')
@@ -24,7 +25,8 @@ conexao = mysql.connector.connect(
 )
 
 mycursor = conexao.cursor()
-comand = f"""SELECT 
+comand = f"""
+SELECT 
     projeu_projetos.id_proj, 
     projeu_projetos.name_proj,
     (SELECT Nome FROM projeu_users WHERE id_user = projeu_projetos.gestor_id_fgkey) AS name_gestor, 
@@ -34,7 +36,7 @@ comand = f"""SELECT
     (SELECT nome_prog FROM projeu_programas WHERE id_prog = projeu_projetos.progrm_fgkey) AS programa,
     projeu_projetos.nome_mvp,
     projeu_projetos.investim_proj,
-    projeu_projetos.result_esperad as objetivo_projet,
+    projeu_projetos.result_esperad as resultado_esperad,
     projeu_projetos.produto_entrega_final,
     (
         SELECT GROUP_CONCAT(number_sprint) 
@@ -122,7 +124,18 @@ comand = f"""SELECT
         FROM projeu_users AS PU
         INNER JOIN projeu_registroequipe AS PR ON PU.id_user = PR.id_colab 
         WHERE PR.id_projeto = projeu_projetos.id_proj
-    ) as matriculaEQUIPE
+    ) as matriculaEQUIPE,
+    projeu_projetos.produto_mvp,
+    (
+        SELECT group_concat(entreg)
+        FROM projeu_princEntregas
+        WHERE projeu_princEntregas.id_proj_fgkey = projeu_projetos.id_proj
+    )as PrincipaisEntregas,
+    (
+        SELECT group_concat(name_metric)
+        FROM projeu_metricas
+        WHERE id_prj_fgkey = projeu_projetos.id_proj
+    ) AS metricas
 FROM 
     projeu_projetos
 GROUP BY
@@ -135,392 +148,6 @@ comandUSERS = 'SELECT * FROM projeu_users;'
 mycursor.execute(comandUSERS)
 dadosUser = mycursor.fetchall()
 mycursor.close()
-
-def tableRow():
-    projeto = projetos
-    mvp = mvps
-    investimento = investimentos
-
-    projetoCode = ""
-    for i in range(len(projeto)):
-        projetoCode += f"""<tr class="tdata1">
-                <td>{projeto[i]}</td>
-            </tr>"""
-
-    mvpCode = ""
-    for i in range(len(mvp)):
-        mvpCode += f"""<tr class="tdata2">
-                <td>{mvp[i]}</td>
-            </tr>"""
-
-    investimentoCode = ""
-    for i in range(len(investimento)):
-        investimentoCode += f"""<tr class="tdata3">
-                <td>R${investimento[i]}</td>
-            </tr>"""
-
-    htmlRow = f"""<div class="flex-row">
-            <div class="box">
-                <div class="box1">
-                    <table class="table1">
-                        <tr class="thead1">
-                            <th>Projeto<img src="https://cdn-icons-png.flaticon.com/128/10484/10484735.png" alt="Icone da tabela Projetos" class="table-icon"></th>
-                        </tr>
-                        <div>{projetoCode}</div>
-                    </table>
-                </div>
-            </div>
-            <div class="box">
-                <div class="box2">
-                    <table class="table2">
-                        <tr class="thead2">
-                            <th>MVP<img src="https://cdn-icons-png.flaticon.com/128/9238/9238294.png" alt="Icone da tabela MVPs" class="table-icon"></th>
-                        </tr>
-                        <div>{mvpCode}</div>
-                    </table>
-                </div>
-            </div>
-            <div class="box">
-                <div class="box3">
-                    <table class="table3">
-                        <tr class="thead3">
-                            <th>Investimento<img src="https://cdn-icons-png.flaticon.com/128/7928/7928255.png" alt="Icone da tabela Investimentos" class="table-icon"></th>
-                        </tr>
-                        <div>{investimentoCode}</div>
-                    </table>
-                </div>
-            </div>
-        </div>"""
-    
-    return htmlRow
-
-
-def tableEqp():
-    gestor = gestores
-    especialista = especialistas
-    squad = squads
-
-    gestorCode = ""
-    for i in range(len(gestor)):
-        gestorCode += f"""<tr class="tdata4">
-                <td>{gestor[i]}</td>
-            </tr>"""
-
-    especialistaCode = ""
-    for i in range(len(especialista)):
-        especialistaCode += f"""<tr class="tdata4">
-                <td>{especialista[i]}</td>
-            </tr>"""
-
-    squadCode = ""
-    for i in range(len(squad)):
-        squadCode += f"""<tr class="tdata4">
-                <td>{squad[i]}</td>
-            </tr>"""
-
-    htmlEqp = f"""
-        <div class="box">
-            <div class="box4">
-                <table class="table4">
-                    <tr class="thead4">
-                        <th>Equipe<img src="https://cdn-icons-png.flaticon.com/128/5069/5069162.png" alt="Icone da tabela Equipe" class="table-icon"></th>
-                    </tr>
-                    <tr class="thead4-eqp">
-                        <th><img src="https://cdn-icons-png.flaticon.com/128/3916/3916615.png" alt="Ícone do gestor para a tabela de Equipe" class="table-icon"> Gestor</th>
-                    </tr>
-                    <div>{gestorCode}</div>
-                    <tr class="thead4-eqp">
-                        <th><img src="https://cdn-icons-png.flaticon.com/128/9795/9795619.png" alt="Ícone do especialista para a tabela de Equipe" class="table-icon"> Especialista</th>
-                    </tr>
-                    <div>{especialistaCode}</div>
-                    <tr class="thead4-eqp">
-                        <th><img src="https://cdn-icons-png.flaticon.com/128/9856/9856655.png" alt="Ícone do squad para a tabela de Equipe" class="table-icon"> Squad</th>
-                    </tr>
-                    <div>{squadCode}</div>
-                </table>
-            </div>
-        </div>
-    """
-    return htmlEqp
-
-def tableUnic():
-    entrega = entregas
-
-    entregaCode = ""
-    for i in range(len(entrega)):
-        entregaCode += f"""<tr class="tdata5">
-                <td>{entrega[i]}</td>
-            </tr>"""
-
-    htmlUnic = f"""
-        <div class="box">
-            <div class="box5">
-                <table class="table5">
-                    <tr class="thead5">
-                        <th>Principais entregas<img src="https://cdn-icons-png.flaticon.com/128/10801/10801807.png" alt="Icone da tabela Principais entregas" class="table-icon"></th>
-                    </tr>
-                    <div>{entregaCode}</div>
-                </table>
-            </div>
-        </div>
-    """
-    return htmlUnic
-
-def tableCol():
-    resultado = resultados
-    metrica = metricas
-
-    resultadoCode = ""
-    for i in range(len(resultado)):
-        resultadoCode += f"""<tr class="tdata6">
-                <td>{resultado[i]}</td>
-            </tr>"""
-        
-    metricaCode = ""
-    for i in range(len(metrica)):
-        metricaCode += f"""<tr class="tdata7">
-                <td>{metrica[i]}</td>
-            </tr>"""
-
-    htmlCol = f"""
-        <div class="flex-column">
-            <div class="box">
-                <div class="box6">
-                    <table class="table6">
-                        <tr class="thead6">
-                            <th>Resultado esperado<img src="https://cdn-icons-png.flaticon.com/128/9797/9797853.png" alt="Icone da tabela Resultado esperado" class="table-icon"></th>
-                        </tr>
-                        <div>{resultadoCode}</div>
-                    </table>
-                </div>
-            </div>
-            <div class="box">
-                <div class="box7">
-                    <table class="table7">
-                        <tr class="thead7">
-                            <th>Métricas<img src="https://cdn-icons-png.flaticon.com/128/7931/7931125.png" alt="Icone da tabela Métricas" class="table-icon"></th>
-                        </tr>
-                        <div>{metricaCode}</div>
-                    </table>
-                </div>
-            </div>
-        </div>
-    """
-    return htmlCol
-
-def tableGeral():
-    dadosRow = tableRow()
-    dadosEqp = tableEqp()
-    dadosUnic = tableUnic()
-    dadosCol = tableCol()
-
-    htmlGeral = f"""
-        <div class="flex-container">
-            <div>{dadosRow}</div>
-            <div class="flex-row">
-                <div>{dadosEqp}</div>
-                <div>{dadosUnic}</div>
-                <div>{dadosCol}</div>
-            </div>
-        </div>
-    """
-    return htmlGeral
-
-canvaStyle = """body{
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #fff;
-    }
-
-    .box1,
-    .box2,
-    .box3,
-    .box4,
-    .box5,
-    .box6,
-    .box7{
-        width: 100%;
-        height: auto;
-        max-width: 400px;
-        max-height: 400px;
-        overflow: auto;
-        overflow-x: hidden;
-        margin: 5px;
-    }
-
-
-    .box1:hover,
-    .box2:hover,
-    .box3:hover,
-    .box4:hover,
-    .box5:hover,
-    .box6:hover,
-    .box7:hover{
-        transform: scale(0.98);
-        border-radius: 20px;
-    }
-
-    .box1:hover{
-        box-shadow: 0px 0px 25px rgba(74, 172, 252, 1);
-    }
-
-    .box2:hover{
-        box-shadow: 0px 0px 25px rgba(255, 161, 189, 1);
-    }
-
-    .box3:hover{
-        box-shadow: 0px 0px 25px rgba(255, 115, 84, 1);
-    }
-
-    .box4:hover{
-        box-shadow: 0px 0px 25px rgba(73, 197, 57, 1);
-    }
-
-    .box5:hover{
-        box-shadow: 0px 0px 25px rgba(141, 52, 135, 1);
-    }
-
-    .box6:hover{
-        box-shadow: 0px 0px 25px rgba(255, 187, 78, 1);
-    }
-
-    .box7:hover{
-        box-shadow: 0px 0px 25px rgba(255, 255, 68, 1);
-    }
-
-    .table1,
-    .table2,
-    .table3,
-    .table4,
-    .table5,
-    .table6,
-    .table7{
-        width: 400px;
-        border-collapse: collapse;
-        border-radius: 10px;
-        overflow: hidden; 
-    }
-
-    .thead1{
-        background-color: #4aacfc;
-    }
-
-    .thead2{
-        background-color: #ffa1bd;
-    }
-
-    .thead3{
-        background-color: #ff7354;
-    }
-
-    .thead4{
-        background-color: #49c539;
-    }
-
-    .thead5{
-        background-color: #8d348793;
-    }
-
-    .thead6{
-        background-color: #ffbb4e;
-    }
-
-    .thead7{
-        background-color: #ffff44;
-    }
-
-    .thead4-eqp{
-        align-items: center;
-        background-color: #b1ffa7;
-        border-bottom: 1px solid #1eff00;
-    }
-
-    .thead1 th,
-    .thead2 th,
-    .thead3 th,
-    .thead4 th,
-    .thead5 th,
-    .thead6 th,
-    .thead7 th{
-        text-align: center;
-    }
-
-    .thead4-eqp{
-        text-align: center;
-    }
-
-    .thead1 img,
-    .thead2 img,
-    .thead3 img,
-    .thead4 img,
-    .thead5 img,
-    .thead6 img,
-    .thead7 img,
-    .thead4-eqp img{
-        vertical-align: middle;
-        margin-left: 10px;
-        width: 20px;
-        height: auto;
-    }
-
-    .tdata1 td{
-        border-top: 1px solid #008cff;
-        background-color: #c8e6ff;
-    }
-
-    .tdata2 td{
-        border-top: 1px solid #ffb7c9;
-        background-color: #ffd8fd;
-    }
-
-    .tdata3 td{
-        border-top: 1px solid #ff2600;
-        background-color: #ffe1d7;
-    }
-
-    .tdata4 td{
-        / border-top: 1px solid #1eff00; /
-        background-color: #ccffc5;
-    }
-
-    .tdata5 td{
-        border-top: 1px solid #96008c93;
-        background-color: #e2cee193;
-    }
-
-    .tdata6 td{
-        border-top: 1px solid #f3aa47;
-        background-color: #fff7d5;
-    }
-
-    .tdata7 td{
-        border-top: 1px solid #b3b301;
-        background-color: #ffffc3;
-    }
-
-    .flex-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .flex-row {
-        display: flex;
-        justify-content: center;
-        height: auto;
-    }
-
-    .flex-column {
-        display: flex;
-        flex-direction: column;
-        height: auto;
-        max-height: 100px;
-        min-width: 400px;
-    }"""
-
 
 def mapear_dificuldade(dificuldade):
     if dificuldade == 'Fácil':
@@ -607,34 +234,39 @@ elif authentication_status:
             ############CANVAS APRESENTANDO O PROJETO############
             font_TITLE('Canvas', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
             projetos = [dadosOrigin[0][1]] if dadosOrigin[0][1] != "None" else " "
-            mvps = [dadosOrigin[0][7]] if dadosOrigin[0][7] != "None" else " "
+            mvps = [dadosOrigin[0][7]] if dadosOrigin[0][7] != "None" else " "  
             investimentos = [f"{dadosOrigin[0][8]}"] if f"{dadosOrigin[0][8]}" != "None" else " "
             gestores = [f"{dadosOrigin[0][2]}"] if f"{dadosOrigin[0][2]}" != "None" else " "
             
-            if dadosOrigin[0][21] != None:
-                for i in range(len(dadosOrigin[0][21])): especialistas = f"{dadosOrigin[0][21]}".split(',') if f"{dadosOrigin[0][21]}" != "None" else " "
-            else:
-                especialistas = " "
-            squads = [" "]
-            equipe = [gestores, especialistas, squads]
-            if dadosOrigin[0][16] != None:
-                for i in range(len(dadosOrigin[0][16])): entregas = f"{dadosOrigin[0][16]}".split(',') if f"{dadosOrigin[0][16]}" != "None" else " "
-            else:
-                entregas = " "
+            pessoas = str(dadosOrigin[0][21]).split(',') if dadosOrigin[0][21] != None else ''
+            funcao = str(dadosOrigin[0][22]).split(',') if dadosOrigin[0][22] != None else ''
+            equipBD = [[pessoas[x], funcao[x]] for x in range(len(pessoas))]
+
             resultados = []
             for i in range(len(dadosOrigin)):
                 if dadosOrigin[i][9] != None:
                     resultados.append(f"{dadosOrigin[i][9]}")
                 else:
                     resultados = " "
-            metricas = []
-            for i in range(len(dadosOrigin)):
-                if dadosOrigin[i][10] != None:
-                    metricas.append(f"{dadosOrigin[i][10]}")
-                else:
-                    metricas = " "
+            
+            if dadosOrigin[0][16] != None:
+                entregas = str(dadosOrigin[0][25]).split(';') if ';' in str(dadosOrigin[0][25]) else str(dadosOrigin[0][25]).split(',')
+            else:
+                entregas = ' '
 
-            html = tableGeral()
+            metricas = str(dadosOrigin[0][26]).split(',') if dadosOrigin[0][26] != None else ' '
+            prodProjetos = str(dadosOrigin[0][10]).split(',') if dadosOrigin[0][10] != None else " "
+            prodMvps = str(dadosOrigin[0][24]).split(',') if dadosOrigin[0][24] != None else " "
+
+            canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos)
+            htmlRow = canvas.CreateHTML()
+            htmlEqp = canvas.tableEqp()
+            htmlUnic = canvas.tableUnic()
+            htmlCol = canvas.tableCol()
+
+            html = canvas.tableGeral(htmlRow, htmlEqp, htmlUnic, htmlCol)
+            canvaStyle = canvas.cssStyle()
+
             st.write(f'<div>{html}</div>', unsafe_allow_html=True)
             st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
 
@@ -691,8 +323,13 @@ elif authentication_status:
                     cmd_addSprint = f'''INSERT INTO projeu_sprints(number_sprint, id_proj_fgkey, status_sprint, date_inic_sp, date_fim_sp) 
                     VALUES ({number_sprint_new}, (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{project_filter}'), '{type_sprint_new}', STR_TO_DATE('{dat_inc_new}', '%Y-%m-%d'), STR_TO_DATE('{dat_fim_new}', '%Y-%m-%d'));'''
                     mycursor.execute(cmd_addSprint)
-                    
                     conexao.commit()
+                    
+                    if number_sprint_new == 1:
+                        cmdUP_stt_proj = f'UPDATE projeu_projetos SET status_proj = "Em Andamento" WHERE id_proj = {dadosOrigin[0][0]};'
+                        mycursor.execute(cmdUP_stt_proj)
+                        conexao.commit()
+                        
                     mycursor.close()
                     st.toast('Sucesso na adição da sprint!', icon='✅')
                     st.text(' ')
@@ -755,9 +392,7 @@ elif authentication_status:
                                 
                                 porc_avan = f'{int((len([x for x in spEntregas if str(x[5]).strip() == "🟩 Concluído"]) / len([x for x in spEntregas if x[1] != None])) * 100) if len([x for x in spEntregas if x[1] != None]) > 0 else 0}%'           
                                 cardGRANDE(['Colaboradores', 'Atividades', 'Entregues', 'Avanço', 'Horas', 'Complexidade'], [len(list(set([x[2] for x in spEntregas if x[2] != None]))), len([x for x in spEntregas if x[1] != None]), len([x for x in spEntregas if str(x[5]).strip() == '🟩 Concluído']), porc_avan, sum([x[3] for x in spEntregas]), mapear_dificuldade(dif_comum[0][0])])
-                                st.text(' ')
-                                st.text(' ')
-
+         
                                 col1, col2, col3 = st.columns([3,1,1])
                                 with col1:
                                     st.text(' ')
