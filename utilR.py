@@ -1470,7 +1470,9 @@ def nineboxDatasUnidades_home(dadosNineboxUni, links):
     qtdUnidades = dadosNineboxUni[1] 
     style = ["green"]
     txtHtml = []
+    imgRank = [f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692905.png"/>""", f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692911.png"/>""", f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692913.png"/>""", f"""<p>4º</p>""", f"""<p>5º</p>""", f"""<p>6º</p>""", f"""<p>7º</p>""", f"""<p>8º</p>""", f"""<p>9º</p>""", f"""<p>10º</p>"""]
     href = [f'''<a href = "{y}"> ''' for y in links] if len([x for x in links if x != None]) > 0 else ['' for y in range(len(links))]
+    rank = [f'''{y}''' for y in imgRank] if len([x for x in links if x == None]) > 0 else ['' for y in range(len(imgRank))]
     for i in range(len(qtdUnidades)):
         txtAux = ""
 
@@ -1478,7 +1480,10 @@ def nineboxDatasUnidades_home(dadosNineboxUni, links):
             for j in range(len(qtdUnidades[i])):
                 dados_ninebox = f"""<table class="tb2">
                         <tr class="tb-person-{style[i]}2">
-                            <td>{href[j]}{qtdUnidades[i][j]}</a></td>
+                            <td>
+                                <div class="rank">{rank[j]}</div>
+                                {href[j]}{qtdUnidades[i][j]}</a>
+                            </td>
                         </tr>
                     </table>"""
                 
@@ -1508,6 +1513,21 @@ def css_9box_home():
         justify-content: center;
         font-family: 'Bebas Neue', sans-serif;
         font-color: black;
+    }
+
+    p{
+        font-weight: bold;
+        font-size: 20px;
+        margin: 0 8px;
+    }
+
+    img{
+        max-width: 30px;
+        max-height: 30px;
+    }
+
+    .rank{
+        display: inline-block;
     }
 
     .st-emotion-cache-uvn0xz tr {
@@ -1618,12 +1638,12 @@ def css_9box_home():
 
     .tb-person-green2{
         background-color: #DCDBDB;
+        width: 100%;
     }
 
     .tb-person-green2:last-child td{
         border: none;
     }
-
 
     .box-green2::-webkit-scrollbar {
         width: 12px;
@@ -1650,6 +1670,7 @@ def css_9box_home():
 
     .tb-person-green2:hover td{
         background-color: #c0ffa9;
+        width: 100%;
     }
 
 
