@@ -10,8 +10,6 @@ from utilR import PlotCanvas
 import streamlit_authenticator as stauth
 
 
-
-
 icone = Image.open('imagens/icone.png')
 st.set_page_config(
     page_title="Gerir Projetos",
@@ -361,14 +359,15 @@ elif authentication_status:
 
     colbox, colbox1, colbox2 = st.columns(3)
     with colbox:
-        html1 = ninebox(1, nineboxDatasUnidades(dadosbox), dadosbox, 'Aguardando Início')
+        html1 = ninebox(2, nineboxDatasUnidades(dadosbox), dadosbox, 'Aguardando Início')
+        st.write(f'<style>{ninebox_style}</style>', unsafe_allow_html=True)
+        st.write(f'<div>{html1}</div>', unsafe_allow_html=True)
+        
+    with colbox1:
+        html1 = ninebox(1, nineboxDatasUnidades(dadosbox), dadosbox, 'Em Andamento')
         st.write(f'<style>{ninebox_style}</style>', unsafe_allow_html=True)
         st.write(f'<div>{html1}</div>', unsafe_allow_html=True)    
             
-    with colbox1:
-        html1 = ninebox(2, nineboxDatasUnidades(dadosbox), dadosbox, 'Em Andamento')
-        st.write(f'<style>{ninebox_style}</style>', unsafe_allow_html=True)
-        st.write(f'<div>{html1}</div>', unsafe_allow_html=True)
     with colbox2:
         html1 = ninebox(0, nineboxDatasUnidades(dadosbox), dadosbox, 'Paralisado')
         st.write(f'<style>{ninebox_style}</style>', unsafe_allow_html=True)
