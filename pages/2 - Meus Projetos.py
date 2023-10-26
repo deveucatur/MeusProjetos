@@ -6,7 +6,7 @@ from collections import Counter
 import mysql.connector 
 import streamlit_authenticator as stauth
 from utilR import PlotCanvas
-
+from time import sleep
 
 icone = Image.open('imagens/icone.png')
 st.set_page_config(
@@ -24,6 +24,7 @@ conexao = mysql.connector.connect(
     database='projeu'
 )
 
+
 mycursor = conexao.cursor()
 comand = f"""
 SELECT 
@@ -36,7 +37,7 @@ SELECT
     (SELECT nome_prog FROM projeu_programas WHERE id_prog = projeu_projetos.progrm_fgkey) AS programa,
     projeu_projetos.nome_mvp,
     projeu_projetos.investim_proj,
-    projeu_projetos.result_esperad as resultado_esperad,
+    projeu_projetos.result_esperad as objetivo_projet,
     projeu_projetos.produto_entrega_final,
     (
         SELECT GROUP_CONCAT(number_sprint) 
@@ -125,19 +126,48 @@ SELECT
         INNER JOIN projeu_registroequipe AS PR ON PU.id_user = PR.id_colab 
         WHERE PR.id_projeto = projeu_projetos.id_proj
     ) as matriculaEQUIPE,
-    projeu_projetos.produto_mvp,
+    projeu_projetos.status_proj AS STATUS_PROJETO,
+    projeu_projetos.produto_mvp AS PRODUTO_MVP,
+    projeu_projetos.prazo_entreg_final,
     (
-        SELECT group_concat(entreg)
-        FROM projeu_princEntregas
-        WHERE projeu_princEntregas.id_proj_fgkey = projeu_projetos.id_proj
-    )as PrincipaisEntregas,
+        SELECT GROUP_CONCAT(id_sprint) 
+        FROM projeu_sprints 
+        WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
+    ) as id_sprint,
+    projeu_projetos.date_aprov_proj,
+    projeu_projetos.date_posse_gestor,
+    projeu_projetos.date_imersao_squad,
+    projeu_projetos.status_proj,
     (
-        SELECT group_concat(name_metric)
-        FROM projeu_metricas
-        WHERE id_prj_fgkey = projeu_projetos.id_proj
-    ) AS metricas
+		SELECT 
+			GROUP_CONCAT(entreg) 
+		FROM projeu_princEntregas 
+		WHERE id_proj_fgkey = projeu_projetos.id_proj
+	) AS PRINCIPAIS_ENTREGAS,
+    (
+		SELECT 
+			GROUP_CONCAT(name_metric) 
+		FROM projeu_metricas 
+		WHERE id_prj_fgkey = projeu_projetos.id_proj
+	) AS METRICAS,
+    (
+		SELECT 
+			GROUP_CONCAT(projeu_sprints.check_sprint) 
+		FROM projeu_sprints 
+		WHERE id_proj_fgkey = projeu_projetos.id_proj
+	) AS CHECK_SPRINT,
+    (
+		SELECT 
+			GROUP_CONCAT(projeu_sprints.data_check) 
+		FROM projeu_sprints 
+		WHERE id_proj_fgkey = projeu_projetos.id_proj
+	) AS DATA_CHECK,
+    PC.complxdd AS COMPLEXIDADE_PROJETO,
+    PC.nivel AS NIVEL_COMPLEXIDADE
 FROM 
     projeu_projetos
+JOIN 
+	projeu_complexidade PC on PC.proj_fgkey = projeu_projetos.id_proj
 GROUP BY
     projeu_projetos.id_proj;"""
 
@@ -205,25 +235,25 @@ elif authentication_status:
             
             dadosOrigin = [x for x in ddPaging if x[1] == project_filter]
             cmd_entregas = f"""SELECT 
-                                    (SELECT number_sprint FROM projeu_sprints WHERE id_sprint = projeu_entregas.id_sprint) AS NUMERO_SPRINT, 
-                                    nome_Entrega AS NOME_ENTREGA, 
-                                    (select Nome FROM projeu_users WHERE id_user = executor) AS EXECUTOR, 
-                                    hra_necess AS HORAS, 
-                                    compl_entrega AS COMPLEXIDADE,
-                                    stt_entrega AS STATUS,
-                                    id_entr,
-                                    (SELECT Matricula FROM projeu_users WHERE id_user = executor) AS MATRICULA_EXECUTOR
-                                FROM projeu_entregas 
-                                    WHERE 
-                                        id_sprint IN ( 
-                                            SELECT id_sprint 
-                                            FROM projeu_sprints 
-                                            WHERE id_proj_fgkey = (
-                                                SELECT id_proj 
-                                                FROM projeu_projetos 
-                                                WHERE name_proj = '{project_filter}'
-                                                ) 
-                                            );"""
+                                (SELECT number_sprint FROM projeu_sprints WHERE id_sprint = projeu_entregas.id_sprint) AS NUMERO_SPRINT, 
+                                nome_Entrega AS NOME_ENTREGA, 
+                                (select Nome FROM projeu_users WHERE id_user = executor) AS EXECUTOR, 
+                                hra_necess AS HORAS, 
+                                compl_entrega AS COMPLEXIDADE,
+                                stt_entrega AS STATUS,
+                                id_entr,
+                                (SELECT Matricula FROM projeu_users WHERE id_user = executor) AS MATRICULA_EXECUTOR
+                            FROM projeu_entregas 
+                                WHERE 
+                                    id_sprint IN ( 
+                                        SELECT id_sprint 
+                                        FROM projeu_sprints 
+                                        WHERE id_proj_fgkey = (
+                                            SELECT id_proj 
+                                            FROM projeu_projetos 
+                                            WHERE name_proj = '{project_filter}'
+                                            ) 
+                                        );"""
             
         if len(dadosOrigin) > 0:
             mycursor = conexao.cursor()  
@@ -249,14 +279,14 @@ elif authentication_status:
                 else:
                     resultados = " "
             
-            if dadosOrigin[0][16] != None:
-                entregas = str(dadosOrigin[0][25]).split(';') if ';' in str(dadosOrigin[0][25]) else str(dadosOrigin[0][25]).split(',')
+            if dadosOrigin[0][32] != None:
+                entregas = str(dadosOrigin[0][32]).split(',')
             else:
                 entregas = ' '
-
-            metricas = str(dadosOrigin[0][26]).split(',') if dadosOrigin[0][26] != None else ' '
+            
+            metricas = str(dadosOrigin[0][33]).split(',') if dadosOrigin[0][33] != None and dadosOrigin[0][33] != '' else ' '
             prodProjetos = str(dadosOrigin[0][10]).split(',') if dadosOrigin[0][10] != None else " "
-            prodMvps = str(dadosOrigin[0][24]).split(',') if dadosOrigin[0][24] != None else " "
+            prodMvps = str(dadosOrigin[0][25]).split(',') if dadosOrigin[0][25] != None else " "
 
             canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos)
             htmlRow = canvas.CreateHTML()
@@ -283,11 +313,11 @@ elif authentication_status:
             st.text(' ')
             st.text(' ')
 
+            func_split = lambda x: x.split(",") if x is not None else [x]
             param_sprint = ['PRÉ MVP', 'MVP', 'PÓS MVP']
             font_TITLE('SPRINTS DO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
             with st.expander('Adcionar Sprint'):
                 #FUNÇÃO PARA IDENTIFICAR SE A COLUNA DO BANCO DE DADOS ESTÁ VAZIA 
-                func_split = lambda x: x.split(",") if x is not None else [x]
                 maior_idx = max([param_sprint.index(x)+1 if x != None else 0 for x in func_split(dadosOrigin[0][12])])
                 
                 if None in func_split(dadosOrigin[0][11]):
@@ -300,11 +330,10 @@ elif authentication_status:
 
                 disabledON = True if on_ex else False
                 disabledOF = False if on_ex else True
-                
+
                 col0, col1, col2, col3 = st.columns([0.5,3,1,1])
                 with col0:
-                    number_sprint_new = st.text_input('Sprint', max(listAddSprON_EX[0]) if on_ex else listAddSprOF_EX[0], disabled=True)
-                    number_sprint_new = int(number_sprint_new)
+                    number_sprint_new = int(st.text_input('Sprint', max(listAddSprON_EX[0]) if on_ex else listAddSprOF_EX[0], disabled=True))
                 with col1:
                     type_sprint_new = st.selectbox('Tipo', [listAddSprON_EX[1][listAddSprON_EX[0].index(number_sprint_new)]] if on_ex else listAddSprOF_EX[1], disabled=disabledON)
                 with col2:
@@ -336,9 +365,9 @@ elif authentication_status:
                     st.rerun()
 
                 if button_exSprint:
-                    mycursor = conexao.cursor()
                     NoTentrg = False
                     if on_ex:
+                        mycursor = conexao.cursor()
                         if len(EntregasBD) == 0:
                             NoTentrg = True
                         else:
@@ -363,10 +392,11 @@ elif authentication_status:
                             st.toast('Primeiramente, é necessário excluir todas as atividades dessa sprint.', icon='❌')
                     else:
                         st.toast('Primeiramente, ative a opção de excluir sprint.', icon='❌')
-
+            
             if func_split(dadosOrigin[0][11])[0] != None:
+                
                 # ----> DADOS [NUMBER_SPRINT, STATUS_SPRINT,  DATA INC SPRINT, DATA FIM SPRINT]
-                sprints = [[func_split(dadosOrigin[0][11])[x], param_sprint.index(func_split(dadosOrigin[0][12])[x]), func_split(dadosOrigin[0][13])[x], func_split(dadosOrigin[0][14])[x]] for x in range(len(func_split(dadosOrigin[0][11])))]
+                sprints = [[func_split(dadosOrigin[0][11])[x], param_sprint.index(func_split(dadosOrigin[0][12])[x]), func_split(dadosOrigin[0][13])[x], func_split(dadosOrigin[0][14])[x], func_split(dadosOrigin[0][27])[x], func_split(dadosOrigin[0][34])[x]] for x in range(len(func_split(dadosOrigin[0][11])))]
                 
                 for idx_parm in range(len(param_sprint)):
                     ddSprint = [sprints[x] for x in range(len(sprints)) if str(sprints[x][1]) == str(idx_parm)] #DESCOBRINDO QUAL A SPRINT DAQUELE STATUS
@@ -380,29 +410,34 @@ elif authentication_status:
                     if len(ddSprint)> 0:
                         font_TITLE(f'{param_sprint[idx_parm]}', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left')
 
-                        for idx_spr in list(set([x[0] for x in SprintsEntregs])):
+                        for idx_spr in [int(x) for x in func_split(dadosOrigin[0][11])]:
                             listDadosAux = []
                             with st.expander(f'Sprint {idx_spr}'):
+                                id_sprint = [x[4] for x in  ddSprint if str(x[0]).strip() == str(idx_spr).strip()][0]
+
                                 #FILTRANDO ENTREGAS DAQUELA SPRINT
                                 spEntregas = [x for x in SprintsEntregs if x[0] == idx_spr]
                                 
                                 #PREPARANDO OS DADOS PARA APRESENTAR NO CARD DA SPRINT
                                 contagem_dif = Counter([x[4] for x in spEntregas])                
                                 dif_comum = contagem_dif.most_common(1)
-                                
+
+                                block_sprint = True if str(ddSprint[list(x[4] for x in ddSprint).index(id_sprint)][5]) == str(0) else False
+
                                 porc_avan = f'{int((len([x for x in spEntregas if str(x[5]).strip() == "🟩 Concluído"]) / len([x for x in spEntregas if x[1] != None])) * 100) if len([x for x in spEntregas if x[1] != None]) > 0 else 0}%'           
                                 cardGRANDE(['Colaboradores', 'Atividades', 'Entregues', 'Avanço', 'Horas', 'Complexidade'], [len(list(set([x[2] for x in spEntregas if x[2] != None]))), len([x for x in spEntregas if x[1] != None]), len([x for x in spEntregas if str(x[5]).strip() == '🟩 Concluído']), porc_avan, sum([x[3] for x in spEntregas]), mapear_dificuldade(dif_comum[0][0])])
          
-                                col1, col2, col3 = st.columns([3,1,1])
-                                with col1:
-                                    st.text(' ')
-                                    font_TITLE('ATIVIDADES', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left','#228B22')
+                               
+                                st.text(' ')
+                                font_TITLE('ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left','#228B22')
 
-                                with col2:
-                                    st.caption('Status Sprint') 
-                                    font_TITLE('Executando', fonte_Projeto,"'Bebas Neue', sans-serif", 27, 'left')#MUDAR DE ACORDO COM AS ATIVIDADES DA SPRINT - SE TODOAS AS ATIVIDADES ESTIVEREM COMPLETA A SPRINT ESTÁ CONCLUIDA - [Concluída, Executando, Backlog, Atrasada]
+                                especialist_proj = [list(func_split(dadosOrigin[0][21]))[x] for x in range(len(func_split(dadosOrigin[0][22]))) if str(list(func_split(dadosOrigin[0][22]))[x]).upper() == 'ESPECIALISTA']
+                                especialist_sprint = st.multiselect('Especialistas',especialist_proj, especialist_proj, key=f'especialista multi{idx_spr}')
                                 
                                 st.text(' ')
+                                spEntregas = [x for x in spEntregas if x[1] != None and x[2] != None and x[3] != None]
+                                
+                                
                                 tab1, tab2 = st.tabs(['Atualizar Entregas', 'Excluir Entregas'])
                                 with tab1:
                                     #FORMULÁRIO APRESENTANDO AS ENTREGAS
@@ -411,99 +446,166 @@ elif authentication_status:
                                     
                                     spEntregas.extend([[idx_spr, None, None, 0 , '---', '🟨 Backlog', None] for x in range(qnt_att)])
 
-                                    st.text(' ')
-                                    col1, col2, col3, col4, col5 = st.columns([1, 0.3, 0.25, 0.25, 0.2])
-                                    with col0:
-                                        st.caption('ID')
-                                    with col1:
-                                        st.caption('Atividades')
-                                    with col2:
-                                        st.caption('Status')
-                                    with col3:
-                                        st.caption('Executor')
-                                    with col4:
-                                        st.caption('Hrs Neces')
-                                    with col5:
-                                        st.caption('Compl')
+                                    if len(spEntregas) > 0:
+                                        with st.form(f'Formulário Entregas {idx_parm} - {id_sprint}'):
+                                            st.text(' ')
+                                            
 
-                                    for ativIDX in range(len(spEntregas)): 
-                                        with col1:
-                                            name_entreg = st.text_input('Atividade', spEntregas[ativIDX][1] if spEntregas[ativIDX][1] != None else '', key=f'atividade{idx_spr} - {ativIDX} - {idx_parm}', label_visibility="collapsed")
-                                        with col4:
-                                            horas_entreg = st.number_input('Horas', value=spEntregas[ativIDX][3],min_value=0, step=1, key=f'horas{idx_spr} - {ativIDX} - {idx_parm}', label_visibility="collapsed")
-                                        with col3:
-                                            opc_colb = func_split(dadosOrigin[0][21])
-                                            colab_entreg = st.selectbox('Colaborador', opc_colb, opc_colb.index(spEntregas[ativIDX][2]) if spEntregas[ativIDX][2] != None and spEntregas[ativIDX][2] != '' else 0, key=f'colab{idx_spr} - {ativIDX} - {idx_parm}', label_visibility="collapsed")
-                                        with col2:
-                                            opc_stt = ['🟨 Backlog', '🟥 Impeditivo', '🟦 Executando',  '🟩 Concluído']
-                                            status_entreg = st.selectbox('Status', opc_stt, opc_stt.index(str(spEntregas[ativIDX][5]).strip()) if spEntregas[ativIDX][5] != None and spEntregas[ativIDX][5] != '' else 0, key=f'status{idx_spr}  - {idx_parm} - {ativIDX}', label_visibility="collapsed")
-                                        with col5:
-                                            opc_compl = ['Fácil', 'Médio', 'Difícil']
-                                            compl_entreg = st.selectbox('Compl.', opc_compl, opc_compl.index(spEntregas[ativIDX][4]) if spEntregas[ativIDX][4] != None and spEntregas[ativIDX][4] != '---' else 0, key=f'complex{idx_spr}  - {idx_parm}- {ativIDX}', label_visibility="collapsed")
+                                            for ativIDX in range(len(spEntregas)): 
+                                                col1, col2, col4 = st.columns([0.6, 0.3, 0.12])
+                                                with col1:
+                                                    st.caption(f'Entrega {ativIDX+1}')
+                                                with col2:
+                                                    st.caption('Status | Executor')
+                                                #    st.caption('Executor')
+                                                with col4:
+                                                    st.caption('Hr | Compl')
+                                                #with col5:
+                                                #    st.caption('Compl')
+                                                with col1:
+                                                    name_entreg = st.text_area('Atividade', spEntregas[ativIDX][1] if spEntregas[ativIDX][1] != None else '', key=f'atividade{idx_spr} - {ativIDX} - {idx_parm}', disabled=False, label_visibility="collapsed")
+                                                with col4:
+                                                    horas_entreg = st.number_input('Horas', value=spEntregas[ativIDX][3],min_value=0, step=1, key=f'horas{idx_spr} - {ativIDX} - {idx_parm}',disabled=block_sprint, label_visibility="collapsed")
 
-                                        listDadosAux.append([name_entreg, colab_entreg, horas_entreg, status_entreg, compl_entreg, spEntregas[ativIDX][6]]) 
-                                    button_atual = st.button('Atualizar', key=f'{idx_spr} {idx_parm}')        
-                                    if button_atual:
-                                        mycursor = conexao.cursor()
+                                                    opc_compl = ['Fácil', 'Médio', 'Difícil']
+
+                                                    compl_entreg = st.selectbox('Compl.', opc_compl, opc_compl.index(spEntregas[ativIDX][4]) if spEntregas[ativIDX][4] != None and spEntregas[ativIDX][4] != '---' else 0, key=f'complex{idx_spr}  - {idx_parm}- {ativIDX}', disabled=block_sprint, label_visibility="collapsed")
+
+                                                with col2:
+                                                    opc_stt = ['🟨 Backlog', '🟥 Impeditivo', '🟦 Executando',  '🟩 Concluído']
+                                                    status_entreg = st.selectbox('Status', opc_stt, opc_stt.index(str(spEntregas[ativIDX][5]).strip()) if spEntregas[ativIDX][5] != None and spEntregas[ativIDX][5] != '' else 0, key=f'status{idx_spr}  - {idx_parm} - {ativIDX}', disabled=block_sprint, label_visibility="collapsed")
+                                                    
+                                                    opc_colb = func_split(dadosOrigin[0][21])
+                                                    colab_entreg = st.selectbox('Colaborador', opc_colb, opc_colb.index(spEntregas[ativIDX][2]) if spEntregas[ativIDX][2] != None and spEntregas[ativIDX][2] != '' else 0, key=f'colab{idx_spr} - {ativIDX} - {idx_parm}',disabled=block_sprint, label_visibility="collapsed")
                                         
-                                        for list_atual in listDadosAux:
-                                            if list_atual[5] != None: #SE A ENTREGA DA "list_atual" JÁ ESTIVER DENTRO DO BANCO DE DADOS SOMENTE VAI ATUALIZAR AS INFORMAÇÕES SOBRE A ENTREGA
-                                                columnsUP = ['nome_Entrega', 'executor', 'hra_necess', 'stt_entrega', 'compl_entrega']
-                                                
-                                                for idxColum in range(len(columnsUP)):
-                                                    cmd_update = f'''UPDATE projeu_entregas SET {columnsUP[idxColum]} = {f'"{list_atual[idxColum]}"' if idxColum != 1 else f'(SELECT id_user FROM projeu_users WHERE Nome = "{list_atual[idxColum]}" LIMIT 1)'} WHERE id_entr = {list_atual[5]};'''
-                                                    mycursor.execute(cmd_update)
-                                                    conexao.commit()
-                                                
-                                                
-                                            else: #INSERT DA ENTREGA CASO ELA NÃO ESTEJA PRESENTE DENTRO DO BANCO DE DADOS
-                                                if list_atual[0] != None and list_atual[0] != '': 
-                                                    cmd_insert = f'''
-                                                        INSERT INTO projeu_entregas (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
-                                                            values((SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {spEntregas[0][0]}  
-                                                                AND id_proj_fgkey = 
-                                                                    (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{dadosOrigin[0][1]}') LIMIT 1),
-                                                                    "{list_atual[0]}", 
-                                                                    (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
-                                                                    {list_atual[2]},
-                                                                    "{list_atual[3]}",
-                                                                    "{list_atual[4]}");'''
-                                                    mycursor.execute(cmd_insert)
-                                                    conexao.commit()
-                                        mycursor.close()
-                                        st.toast('Dados Atualizados!', icon='✅')
-                                        st.rerun()
+
+                                                listDadosAux.append([name_entreg, colab_entreg, horas_entreg, status_entreg, compl_entreg, spEntregas[ativIDX][6]]) 
+                                            
+                                            listDadosAux = [x for x in listDadosAux if x[0] != '' and x[0] != None]
+                                            entrgasBD_by_sprint = [x for x in EntregasBD if str(x[0]).strip() == str(idx_spr).strip()]
+
+                                            limp_entrg = lambda entr: str(entr).strip().replace('"', "'")
+                                            if len(entrgasBD_by_sprint) > 0:
+                                                col1, col2, col3 = st.columns([1,3,7])
+                                                with col1:
+                                                    #, key=f'{idx_spr} {idx_parm}'
+                                                    button_atual = st.form_submit_button('Atualizar')        
+                                                with col2:
+                                                    # key=f'Finalizar Sprint {idx_spr} {idx_parm}',
+                                                    button_final = st.form_submit_button('Finalizar Sprint', disabled=block_sprint)
+
+                                                if button_atual:
+                                                    mycursor = conexao.cursor()
+
+                                                    for list_atual in listDadosAux:
+                                                        if list_atual[5] != None: #SE A ENTREGA DA "list_atual" JÁ ESTIVER DENTRO DO BANCO DE DADOS SOMENTE VAI ATUALIZAR AS INFORMAÇÕES SOBRE A ENTREGA
+                                                            columnsUP = ['nome_Entrega', 'executor', 'hra_necess', 'stt_entrega', 'compl_entrega']
+
+                                                            for idxColum in range(len(columnsUP)):
+                                                                cmd_update = f'''UPDATE projeu_entregas SET {columnsUP[idxColum]} = {f'"{list_atual[idxColum]}"' if idxColum != 1 else f'(SELECT id_user FROM projeu_users WHERE Nome = "{list_atual[idxColum]}" LIMIT 1)'} WHERE id_entr = {list_atual[5]};'''
+                                                                mycursor.execute(cmd_update)
+                                                                conexao.commit()
+
+
+                                                        else: #INSERT DA ENTREGA CASO ELA NÃO ESTEJA PRESENTE DENTRO DO BANCO DE DADOS
+                                                            if list_atual[0] != None and list_atual[0] != '': 
+                                                                tables = ['projeu_entregas', 'projeu_entregas_planejamento']
+
+                                                                for table_name in tables:
+                                                                    cmd_insert = f'''
+                                                                        INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
+                                                                            values((SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {spEntregas[0][0]}  
+                                                                                AND id_proj_fgkey = 
+                                                                                    (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{dadosOrigin[0][1]}') LIMIT 1),
+                                                                                    "{limp_entrg(list_atual[0])}", 
+                                                                                    (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
+                                                                                    {list_atual[2]},
+                                                                                    "{list_atual[3]}",
+                                                                                    "{list_atual[4]}");'''
+                                                                    mycursor.execute(cmd_insert)
+                                                                    conexao.commit()
+
+
+                                                    mycursor.close()
+                                                    st.toast('Dados Atualizados!', icon='✅')
+                                                    st.rerun()
+
+                                                if button_final:
+                                                    mycursor = conexao.cursor()
+                                                    columns_final = ['check_sprint', 'data_check']
+                                                    values_final = [0, f'"{datetime.today()}"']
+
+                                                    for idx_column in range(len(columns_final)):
+                                                        cmd_final = f'''UPDATE projeu_sprints SET {columns_final[idx_column]} = {values_final[idx_column]} WHERE id_sprint = {int(id_sprint)};'''
+                                                        mycursor.execute(cmd_final)
+                                                        conexao.commit()
+
+                                                    mycursor.close()
+                                                    st.toast('Sprint Finalizada!', icon='✅')
+                                                    sleep(2)
+                                                    st.rerun()
+                                            else:
+                                                #, key=f'INICIAR {idx_spr} {idx_parm}'
+                                                button_inic_entreg = st.form_submit_button('Enviar')
+                                                if button_inic_entreg:
+                                                    mycursor = conexao.cursor()
+                                                    tables = ['projeu_entregas', 'projeu_entregas_planejamento']
+
+                                                    for table_name in tables:
+                                                        for list_atual in listDadosAux:
+                                                            cmd_insert = f'''
+                                                                INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
+                                                                    values((SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {spEntregas[0][0]}  
+                                                                        AND id_proj_fgkey = 
+                                                                            (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{dadosOrigin[0][1]}') LIMIT 1),
+                                                                            "{limp_entrg(list_atual[0])}", 
+                                                                            (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
+                                                                            {list_atual[2]},
+                                                                            "{list_atual[3]}",
+                                                                            "{list_atual[4]}");'''
+
+                                                            mycursor.execute(cmd_insert)
+                                                            conexao.commit()
+                                                    st.toast('Entregas Enviadas!', icon='✅')
+                                                    mycursor.close()
+                                                    sleep(3)
+                                                    st.rerun()
+                                                    
 
                                 with tab2:
                                     font_TITLE('EXCLUIR', fonte_Projeto,"'Bebas Neue', sans-serif", 23, 'left')  
-                                    atvdd_exc = st.selectbox('Atividade', [x[1] for x in spEntregas if x[1] != None and x[1] != ' '], key=f'NameExAtivid {idx_spr} - {idx_parm}')
 
-                                    col_sel0, col_sel1, col_sel2, col_sel3 = st.columns([3,1,1,1])
-                                    with col_sel0:
-                                        exec_exc = st.text_input('Executor', value=f'{[x[2] for x in spEntregas if x[1] == atvdd_exc][0]}', disabled=True, key=f'ExcutExAtivid {idx_spr} - {idx_parm}')
-                                    with col_sel1:
-                                        compl_exc = st.text_input('Complexidade', value=[x[4] for x in spEntregas if x[1] == atvdd_exc and str(x[2]) == str(exec_exc)][0], disabled=True, key=f'ComplexidadeExAtivid {idx_spr} - {idx_parm}')
-                                    with col_sel2:
-                                        hrs_exc = st.text_input('Horas', value=[x[3] for x in spEntregas if x[1] == atvdd_exc and str(x[2]) == str(exec_exc)][0], disabled=True, key=f'HorsExAtivid {idx_spr} - {idx_parm}')
-                                    with col_sel3:
-                                        stt_exc = st.text_input('Status', value=[x[5] for x in spEntregas if x[1] == atvdd_exc and str(x[2]) == str(exec_exc)][0], disabled=True, key=f'StatusExAtivid {idx_spr} - {idx_parm}')
-                                    buttonEX = st.button('Excluir', key=f'Excluir{idx_spr} - {idx_parm}')
+                                    if len(spEntregas) > 0:
+                                        atvdd_exc = st.selectbox('Atividade', [x[1] for x in spEntregas if x[1] != None and x[1] != ' '], key=f'NameExAtivid {idx_spr} - {idx_parm}')
 
-                                    if buttonEX: 
-                                        mycursor = conexao.cursor()
-                                        cmd_exc = f"""DELETE FROM projeu_entregas 
-                                                    WHERE 
-                                                        nome_entrega = '{atvdd_exc}' 
-                                                        AND executor = (SELECT id_user FROM projeu_users WHERE Nome = '{exec_exc}' LIMIT 1)
-                                                        AND compl_entrega = '{compl_exc}'
-                                                        AND stt_entrega = '{stt_exc}';"""
-                                                        
-                                        mycursor.execute(cmd_exc)
-                                        conexao.commit()
+                                        col_sel0, col_sel1, col_sel2, col_sel3 = st.columns([3,1,1,1])
+                                        with col_sel0:
+                                            exec_exc = st.text_input('Executor', value=f'{[x[2] for x in spEntregas if x[1] == atvdd_exc][0]}', disabled=True, key=f'ExcutExAtivid {idx_spr} - {idx_parm}')
+                                        with col_sel1:
+                                            compl_exc = st.text_input('Complexidade', value=[x[4] for x in spEntregas if x[1] == atvdd_exc and str(x[2]) == str(exec_exc)][0], disabled=True, key=f'ComplexidadeExAtivid {idx_spr} - {idx_parm}')
+                                        with col_sel2:
+                                            hrs_exc = st.text_input('Horas', value=[x[3] for x in spEntregas if x[1] == atvdd_exc and str(x[2]) == str(exec_exc)][0], disabled=True, key=f'HorsExAtivid {idx_spr} - {idx_parm}')
+                                        with col_sel3:
+                                            stt_exc = st.text_input('Status', value=[x[5] for x in spEntregas if x[1] == atvdd_exc and str(x[2]) == str(exec_exc)][0], disabled=True, key=f'StatusExAtivid {idx_spr} - {idx_parm}')
+                                        buttonEX = st.button('Excluir', key=f'Excluir{idx_spr} - {idx_parm}')
 
-                                        st.toast('Entrega Excluida!', icon='✅')
-                                        mycursor.close()
-                                        st.rerun()
+                                        if buttonEX: 
+                                            mycursor = conexao.cursor()
+                                            cmd_exc = f"""DELETE FROM projeu_entregas 
+                                                        WHERE 
+                                                            nome_entrega = '{atvdd_exc}' 
+                                                            AND executor = (SELECT id_user FROM projeu_users WHERE Nome = '{exec_exc}' LIMIT 1)
+                                                            AND compl_entrega = '{compl_exc}'
+                                                            AND stt_entrega = '{stt_exc}';"""
+                                                            
+                                            mycursor.execute(cmd_exc)
+                                            conexao.commit()
+
+                                            st.toast('Entrega Excluida!', icon='✅')
+                                            mycursor.close()
+                                            st.rerun()
+                                #else:
+                                #    st.error('AINDA NÃO HÁ ENTREGAS PROGRAMADAS PARA ESSA SPRINT.')
     else:
         st.text(' ')
         st.text(' ')
