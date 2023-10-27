@@ -26,6 +26,11 @@ conexao = mysql.connector.connect(
 
 
 mycursor = conexao.cursor()
+mycursor.execute("""SELECT Matricula, 
+                 Nome FROM projeu_users;"""
+)
+users = mycursor.fetchall()
+
 comand = f"""
 SELECT 
     projeu_projetos.id_proj, 
@@ -104,6 +109,7 @@ SELECT
         SELECT GROUP_CONCAT(id_registro) 
         FROM projeu_registroequipe 
         WHERE projeu_registroequipe.id_projeto = projeu_projetos.id_proj
+        AND projeu_registroequipe.status_reg = 'A'
     ) as id_registro,
     (
         SELECT GROUP_CONCAT(Nome) 
@@ -112,12 +118,14 @@ SELECT
             SELECT id_colab 
             FROM projeu_registroequipe 
             WHERE projeu_registroequipe.id_projeto = projeu_projetos.id_proj
+            AND projeu_registroequipe.status_reg = 'A'
         )
     ) as colaborador,
     (
         SELECT GROUP_CONCAT(papel) 
         FROM projeu_registroequipe 
         WHERE projeu_registroequipe.id_projeto = projeu_projetos.id_proj
+        AND projeu_registroequipe.status_reg = 'A'
     ) as PAPEL,
     (
         SELECT 
@@ -125,6 +133,7 @@ SELECT
         FROM projeu_users AS PU
         INNER JOIN projeu_registroequipe AS PR ON PU.id_user = PR.id_colab 
         WHERE PR.id_projeto = projeu_projetos.id_proj
+        AND PR.status_reg = 'A'
     ) as matriculaEQUIPE,
     projeu_projetos.status_proj AS STATUS_PROJETO,
     projeu_projetos.produto_mvp AS PRODUTO_MVP,
@@ -300,8 +309,94 @@ elif authentication_status:
             st.write(f'<div>{html}</div>', unsafe_allow_html=True)
             st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
 
-            #####APRESENTANDO HORAS TOTAIS GASTAS NO PROJETO DAQUELE COLABORADOR
             st.text(' ')
+            func_split = lambda x: x.split(",") if x is not None else [x]
+            #ESPAÇO PARA MANIPULAR OS COLABORADORES VINCULADOS À AQUELE PROJETO
+            with st.expander('Equipe do Projeto'):
+                matriculasEQUIP = func_split(dadosOrigin[0][23])
+                equipe_atual = {matriculasEQUIP[idx_mat]: [matriculasEQUIP[idx_mat], func_split(dadosOrigin[0][21])[idx_mat], func_split(dadosOrigin[0][22])[idx_mat],  func_split(dadosOrigin[0][20])[idx_mat]] for idx_mat in range(len(matriculasEQUIP)) if matriculasEQUIP[idx_mat] != str(dadosOrigin[0][3]).strip()}
+
+                tab1, tab2 = st.tabs(['Adcionar', 'Excluir'])
+                
+                with tab1:
+                    col1, col2 = st.columns([3,1])
+                    #with col1:
+                    #    font_TITLE('ADICIONAR COLABORADORES À EQUIPE', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left')
+                    with col2:
+                        qntd_clb = st.number_input('Quantidade', min_value=0, step=1)
+                    
+                    for a in range(qntd_clb):
+                        equipe_atual[f'{a}'] = ['', '', 'Executor']        
+                    
+                    col_equip1, col_equip2, col_equip3 = st.columns([0.3, 2, 1])
+                    with col_equip1:
+                        st.caption('Matricula')
+                    with col_equip2:
+                        st.caption('Colaboradores')
+                    with col_equip3:
+                        st.caption('Função')
+
+                    list_colbs = []
+                    equipe_list = [x for x in equipe_atual.values()]
+
+                    for colb_a in range(len(equipe_list)):
+                        with col_equip2:
+                            colb_name = st.selectbox('Colaboradores', [x[1] for x in users], list([x[1] for x in users]).index(equipe_list[colb_a][1]),label_visibility="collapsed", key=f'Nome Colab{colb_a}')        
+                        with col_equip1:
+                            colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0], label_visibility="collapsed", disabled=True, key=f'MatriculaColabs{colb_a}')
+                        with col_equip3:
+                            colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],list(['Especialista', 'Executor']).index(equipe_list[colb_a][2]), label_visibility="collapsed", key=f'funcaoColab{colb_a}')
+                        list_colbs.append([colab_matric, colb_funç])
+
+                    button_att_equipe = st.button('Atualizar', key='Atualizar Equipe WITH')
+                    if button_att_equipe:
+                        equipe_limp = [x for x in list_colbs if str(x[0]).strip() != '0']
+                        mycursor = conexao.cursor()
+
+                        for matric, func in equipe_limp:
+                            if str(matric).strip() in [str(x).strip() for x in equipe_atual.keys()]: #VERIFICANDO SE O COLABORADOR JÁ ESTÁ VINCULADO A EQUIPE
+                                if str(equipe_atual[matric][2]).strip() != str(func).strip(): #VERIFICANDO SE OUVE ALGUMA MUDANÇA NOS COLABORADORES JÁ VINCULADOS
+                                    cmd_att_equipe = f'UPDATE projeu_registroequipe SET papel = "{func}" WHERE id_registro = {equipe_atual[matric][3]}'
+                                    mycursor.execute(cmd_att_equipe)
+                                    conexao.commit()
+                            else: #SE FOR UM COLABORADOR NOVO NA EQUIPE
+                                cmd_new_equip = f'''INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel)
+	                                            VALUES (
+                                                    {dadosOrigin[0][0]}, 
+                                                    (SELECT id_user FROM projeu_users WHERE Matricula = {matric}), 
+                                                    '{func}');'''
+                                st.info(cmd_new_equip)
+                                mycursor.execute(cmd_new_equip)
+                                conexao.commit()
+                            
+                        mycursor.close()
+                        st.rerun()
+                        st.toast('Dados Atualizados!', icon='✅') 
+                with tab2:
+                    
+                    font_TITLE('EXCLUIR COLABORADOR DA EQUIPE', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left')
+                    st.text(' ')
+                    col1, col2, col3 = st.columns([0.6,3,2])
+                    
+                    with col2:
+                        colab_ex = st.selectbox('Colaborador', [str(x).strip() for x in func_split(dadosOrigin[0][21]) if x != ''])
+                    with col1:
+                        matric_ex = st.text_input('Matricula', [x[0] for x in users if str(x[1]).strip().lower() == str(colab_ex).strip().lower()][0], disabled=True)
+                    with col3:
+                        funca_ex = st.text_input('Função', equipe_atual[matric_ex][2], disabled=True)
+
+                    button_ex_equip = st.button('Excluir', key='EXCLUIR COLABORADOR DO PROJETO')
+                    if button_ex_equip:
+                        mycursor = conexao.cursor()
+                        cmd_ex_equip = f'UPDATE projeu_registroequipe SET status_reg = "I" WHERE id_registro = {equipe_atual[matric_ex][3]};'
+
+                        mycursor.execute(cmd_ex_equip)
+                        conexao.commit()
+                    
+                        st.rerun()
+
+
+            #####APRESENTANDO HORAS TOTAIS GASTAS NO PROJETO DAQUELE COLABORADOR
             st.text(' ')
             font_TITLE('MEU DESEMPENHO NO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
             
@@ -313,8 +408,9 @@ elif authentication_status:
             st.text(' ')
             st.text(' ')
 
-            func_split = lambda x: x.split(",") if x is not None else [x]
             param_sprint = ['PRÉ MVP', 'MVP', 'PÓS MVP']
+            
+
             font_TITLE('SPRINTS DO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
             with st.expander('Adcionar Sprint'):
                 #FUNÇÃO PARA IDENTIFICAR SE A COLUNA DO BANCO DE DADOS ESTÁ VAZIA 
@@ -392,7 +488,7 @@ elif authentication_status:
                             st.toast('Primeiramente, é necessário excluir todas as atividades dessa sprint.', icon='❌')
                     else:
                         st.toast('Primeiramente, ative a opção de excluir sprint.', icon='❌')
-            
+    
             if func_split(dadosOrigin[0][11])[0] != None:
                 
                 # ----> DADOS [NUMBER_SPRINT, STATUS_SPRINT,  DATA INC SPRINT, DATA FIM SPRINT]
@@ -604,8 +700,7 @@ elif authentication_status:
                                             st.toast('Entrega Excluida!', icon='✅')
                                             mycursor.close()
                                             st.rerun()
-                                #else:
-                                #    st.error('AINDA NÃO HÁ ENTREGAS PROGRAMADAS PARA ESSA SPRINT.')
+                              
     else:
         st.text(' ')
         st.text(' ')
