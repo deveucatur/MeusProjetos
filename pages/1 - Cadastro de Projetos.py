@@ -83,7 +83,7 @@ mycursor.close()
 ########################## APRESENTAÇÃO DO FRONT ##########################
 names = [x[2] for x in usersBD]
 usernames = [x[3] for x in usersBD]
-hashed_passwords = [x[8] for x in usersBD]
+hashed_passwords = [x[7] for x in usersBD]
 
 def convert_to_dict(names, usernames, passwords):
     credentials = {"usernames": {}}
