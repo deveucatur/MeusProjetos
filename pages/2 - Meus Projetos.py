@@ -201,7 +201,7 @@ def mapear_dificuldade(dificuldade):
 
 names = [x[2] for x in dadosUser]
 usernames = [x[3] for x in dadosUser]
-hashed_passwords = [x[8] for x in dadosUser]
+hashed_passwords = [x[7] for x in dadosUser]
 
 def convert_to_dict(names, usernames, passwords):
     credentials = {"usernames": {}}
