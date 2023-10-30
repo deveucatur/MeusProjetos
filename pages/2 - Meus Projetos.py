@@ -525,8 +525,12 @@ elif authentication_status:
          
                                
                                 st.text(' ')
-                                font_TITLE('ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left','#228B22')
-
+                                colPROJ1, colPROJ2 = st.columns([2,1])
+                                with colPROJ1:
+                                    font_TITLE('ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+                                with colPROJ2:
+                                    font_TITLE('STATUS DO PROJETO - EM ANDAMENTO', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+                                    
                                 especialist_proj = [list(func_split(dadosOrigin[0][21]))[x] for x in range(len(func_split(dadosOrigin[0][22]))) if str(list(func_split(dadosOrigin[0][22]))[x]).upper() == 'ESPECIALISTA']
                                 especialist_sprint = st.multiselect('Especialistas',especialist_proj, especialist_proj, key=f'especialista multi{idx_spr}')
                                 
@@ -585,10 +589,26 @@ elif authentication_status:
                                                 col1, col2, col3 = st.columns([1,3,7])
                                                 with col1:
                                                     #, key=f'{idx_spr} {idx_parm}'
-                                                    button_atual = st.form_submit_button('Atualizar')        
-                                                with col2:
-                                                    # key=f'Finalizar Sprint {idx_spr} {idx_parm}',
-                                                    button_final = st.form_submit_button('Finalizar Sprint', disabled=block_sprint)
+                                                    button_atual = st.form_submit_button('Atualizar', disabled=block_sprint)        
+                                                if str(matriUser).strip() == str(dadosOrigin[0][3]).strip():
+                                                    with col2:
+                                                        # key=f'Finalizar Sprint {idx_spr} {idx_parm}',
+                                                        button_final = st.form_submit_button('Finalizar Sprint', disabled=block_sprint) 
+                                                    
+                                                    if button_final:
+                                                        mycursor = conexao.cursor()
+                                                        columns_final = ['check_sprint', 'data_check']
+                                                        values_final = [0, f'"{datetime.today()}"']
+
+                                                        for idx_column in range(len(columns_final)):
+                                                            cmd_final = f'''UPDATE projeu_sprints SET {columns_final[idx_column]} = {values_final[idx_column]} WHERE id_sprint = {int(id_sprint)};'''
+                                                            mycursor.execute(cmd_final)
+                                                            conexao.commit()
+
+                                                        mycursor.close()
+                                                        st.toast('Sprint Finalizada!', icon='✅')
+                                                        sleep(2)
+                                                        st.rerun()
 
                                                 if button_atual:
                                                     mycursor = conexao.cursor()
@@ -626,20 +646,6 @@ elif authentication_status:
                                                     st.toast('Dados Atualizados!', icon='✅')
                                                     st.rerun()
 
-                                                if button_final:
-                                                    mycursor = conexao.cursor()
-                                                    columns_final = ['check_sprint', 'data_check']
-                                                    values_final = [0, f'"{datetime.today()}"']
-
-                                                    for idx_column in range(len(columns_final)):
-                                                        cmd_final = f'''UPDATE projeu_sprints SET {columns_final[idx_column]} = {values_final[idx_column]} WHERE id_sprint = {int(id_sprint)};'''
-                                                        mycursor.execute(cmd_final)
-                                                        conexao.commit()
-
-                                                    mycursor.close()
-                                                    st.toast('Sprint Finalizada!', icon='✅')
-                                                    sleep(2)
-                                                    st.rerun()
                                             else:
                                                 #, key=f'INICIAR {idx_spr} {idx_parm}'
                                                 button_inic_entreg = st.form_submit_button('Enviar')
@@ -700,8 +706,26 @@ elif authentication_status:
                                             st.toast('Entrega Excluida!', icon='✅')
                                             mycursor.close()
                                             st.rerun()
-                              
-    else:
+                if str(matriUser).strip() == str(dadosOrigin[0][3]).strip():
+                    button_final_proj = st.button('Finalizar Projeto', key='FINAL DO PROJETO')
+                    
+                    if  button_final_proj:
+                        if str(dadosOrigin[0][24]).strip() in ['Em Andamento'] and 'PÓS MVP' in [str(x).strip().upper() for x in func_split(dadosOrigin[0][12])]:
+                            mycursor = conexao.cursor()
+
+                            cmd_final_proj1 = f'UPDATE projeu_projetos SET check_proj = 1 WHERE id_proj = {dadosOrigin[0][0]};'           
+                            mycursor.execute(cmd_final_proj1)
+                            conexao.commit()
+
+                            cmd_final_proj2 = f'UPDATE projeu_projetos SET status_proj = "Concluído" WHERE id_proj = {dadosOrigin[0][0]};'           
+                            mycursor.execute(cmd_final_proj2)
+                            conexao.commit()
+
+                            mycursor.close()
+                        else:
+                            st.toast('Primeiramente, para finalizar o projeto é necessário que haja ao menos uma sprint PÓS-MVP', icon='❌')
+
+    else:               
         st.text(' ')
         st.text(' ')
         font_TITLE(f'AINDA NÃO HÁ PROJETOS VINCULADOS A VOCÊ!! ⏳', fonte_Projeto,"'Bebas Neue', sans-serif", 22, 'center')
