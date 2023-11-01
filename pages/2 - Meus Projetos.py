@@ -522,7 +522,6 @@ elif authentication_status:
 
                                 porc_avan = f'{int((len([x for x in spEntregas if str(x[5]).strip() == "🟩 Concluído"]) / len([x for x in spEntregas if x[1] != None])) * 100) if len([x for x in spEntregas if x[1] != None]) > 0 else 0}%'           
                                 cardGRANDE(['Colaboradores', 'Atividades', 'Entregues', 'Avanço', 'Horas', 'Complexidade'], [len(list(set([x[2] for x in spEntregas if x[2] != None]))), len([x for x in spEntregas if x[1] != None]), len([x for x in spEntregas if str(x[5]).strip() == '🟩 Concluído']), porc_avan, sum([x[3] for x in spEntregas]), mapear_dificuldade(dif_comum[0][0])])
-         
                                
                                 st.text(' ')
                                 colPROJ1, colPROJ2 = st.columns([2,1])
@@ -550,18 +549,14 @@ elif authentication_status:
                                         with st.form(f'Formulário Entregas {idx_parm} - {id_sprint}'):
                                             st.text(' ')
                                             
-
                                             for ativIDX in range(len(spEntregas)): 
                                                 col1, col2, col4 = st.columns([0.6, 0.3, 0.12])
                                                 with col1:
                                                     st.caption(f'Entrega {ativIDX+1}')
                                                 with col2:
                                                     st.caption('Status | Executor')
-                                                #    st.caption('Executor')
                                                 with col4:
                                                     st.caption('Hr | Compl')
-                                                #with col5:
-                                                #    st.caption('Compl')
                                                 with col1:
                                                     name_entreg = st.text_area('Atividade', spEntregas[ativIDX][1] if spEntregas[ativIDX][1] != None else '', key=f'atividade{idx_spr} - {ativIDX} - {idx_parm}', disabled=False, label_visibility="collapsed")
                                                 with col4:
@@ -647,7 +642,6 @@ elif authentication_status:
                                                     st.rerun()
 
                                             else:
-                                                #, key=f'INICIAR {idx_spr} {idx_parm}'
                                                 button_inic_entreg = st.form_submit_button('Enviar')
                                                 if button_inic_entreg:
                                                     mycursor = conexao.cursor()
@@ -706,6 +700,7 @@ elif authentication_status:
                                             st.toast('Entrega Excluida!', icon='✅')
                                             mycursor.close()
                                             st.rerun()
+
                 if str(matriUser).strip() == str(dadosOrigin[0][3]).strip():
                     button_final_proj = st.button('Finalizar Projeto', key='FINAL DO PROJETO')
                     
