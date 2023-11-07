@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 from utilR import menuGeral, font_TITLE, PlotCanvas, ninebox_home, css_9box_home, nineboxDatasUnidades_home
 from time import sleep
-import mysql.connector
+import mysql.connector 
 import streamlit_authenticator as stauth
 
 st.set_page_config(layout="wide")
@@ -143,8 +143,7 @@ mycursor.execute(sqlProjetoGover)
 projetoNomeGover = mycursor.fetchall()
 
 
-sqlCanva = f"""
-SELECT 
+sqlCanva = f"""SELECT 
 	id_proj, 
 	name_proj, 
     produto_entrega_final, 
@@ -182,7 +181,7 @@ SELECT
         FROM 
             projeu_princEntregas 
         WHERE id_proj_fgkey = projeu_projetos.id_proj
-    ) AS entregas, 
+    ) AS entregas,
     investim_proj,
     PM.macroprocesso,
     PP.nome_prog
@@ -190,15 +189,13 @@ FROM projeu_projetos
 JOIN 
     projeu_macropr PM ON PM.id = projeu_projetos.macroproc_fgkey
 JOIN 
-    projeu_programas PP ON PP.id_prog = projeu_projetos.progrm_fgkey;
-"""
+    projeu_programas PP ON PP.id_prog = projeu_projetos.progrm_fgkey;"""
 mycursor.execute(sqlCanva)
 dadosCanva = mycursor.fetchall()
 
 comandUSERS = 'SELECT * FROM projeu_users;'
 mycursor.execute(comandUSERS)
 dadosUser = mycursor.fetchall()
-mycursor.close()
 
 names = [x[2] for x in dadosUser]
 usernames = [x[3] for x in dadosUser]
@@ -229,10 +226,17 @@ elif authentication_status == None:
     with col2:
         st.warning('Insira seu Email e Senha')
 elif authentication_status:
+    with st.sidebar:
+        authenticator.logout('Logout', 'main')
 
     matriUser = [x[1] for x in dadosUser if x[3] == username][0]
     perfilUsuario = [x[8] for x in dadosUser if str(x[1]).strip() == str(matriUser).strip()][0]
     font_TITLE('HOME', fonte_Projeto,"'Bebas Neue', sans-serif", 42, 'left')
+
+    sqlEntregas = f"""SELECT id_sprint, nome_Entrega, executor, stt_entrega FROM projeu_entregas WHERE stt_entrega NOT LIKE '%Concluído%' AND executor = {matriUser};"""
+    mycursor.execute(sqlEntregas)
+    entregaProj = mycursor.fetchall()
+    mycursor.close()
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -280,9 +284,11 @@ elif authentication_status:
         
 
     with col2:
-        
         font_TITLE('Atividades Pendentes', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left')
         if str(perfilUsuario).upper() in ['L', 'A']:
+            if len(projetoNomeLider) == 'None' or len(projetoNomeLider) <= 0:
+                st.info("Você não possui atividades pendentes no momento.")
+
             for k in range(len(projetoNomeLider)):
                 with st.expander(f"Avaliar Complexidade | {projetoNomeLider[k][0]}"):
                     titleClass = ["Orientação do Projeto", "Impacto do Projeto"]
@@ -393,8 +399,10 @@ elif authentication_status:
                         st.toast('Dados Atualizados!', icon='✅')
                         sleep(3)
                         st.rerun()
+        elif str(perfilUsuario).strip().upper() in ['GV', 'A']:
+            if len(projetoNomeGover) == 'None' or len(projetoNomeGover) <= 0:
+                st.info("Você não possui atividades pendentes no momento.")
 
-        elif str(perfilUsuario).strip().upper() == ['GV', 'A']:
             for k in range(len(projetoNomeGover)):
                 with st.expander(f"Avaliar Complexidade | {projetoNomeLider[k][0]}"):
                     titleClass = ["Escopo do Projeto", "Squads do Projeto"]
@@ -504,3 +512,48 @@ elif authentication_status:
                         st.toast('Dados Atualizados!', icon='✅')
                         sleep(3)
                         st.rerun()
+        else:
+            if entregaProj == 'None' or len(entregaProj) <= 0:
+                st.info("Você não possui atividades pendentes no momento.")
+
+        for i in range(len(entregaProj)):
+            cardEntregaHtml = f"""<div class="main">
+                    <div class="card">
+                        <div class="sprint">Sprint {str(entregaProj[i][0])}</div>
+                        <div class="entrega">Entrega: {entregaProj[i][1]}</div>
+                        <div class="status">Status: {entregaProj[i][3]}</div>
+                    </div>
+                </div>"""
+            
+            cardEntregaCss = """.main{
+                    display: flex;
+                    align-items: center;
+                }
+
+                .card{
+                    max-width: 100%;
+                    min-width: 100%;
+                }
+
+                .card:hover{
+                    transform: scale(1.03);
+                }
+
+                .sprint{
+                    font-size: 18px;
+                    font-weight: bold;
+                }
+
+                .entrega{
+                    margin-top: 10px;
+                    font-size: 16px;
+                }
+
+                .status{
+                    margin-top: 10px;
+                    font-size: 16px;
+                }"""
+            
+            with st.expander(f"Sprint {str(entregaProj[i][0])} | {entregaProj[i][1]}"):
+                st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
+                st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
