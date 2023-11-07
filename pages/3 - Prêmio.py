@@ -50,7 +50,7 @@ def premios_user_bd(matricula):
         ) AS NAME_EMPRESA,
         (
             SELECT 
-                number_impresa
+                number_empresa
             FROM 
                 projeu_empresas AS PEM 
             WHERE id_empresa = PU.empresa_fgkey
