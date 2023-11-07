@@ -273,13 +273,12 @@ def cardGRANDE(title, valor):
     }
 
     .cardG {
-        padding: 2.3rem;
+        padding: 1.7rem;
         background-color: transparent;
         flex: 1;
         border-radius: 20px;
-        box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.1);
         text-align: center;
-        border-bottom: 2px solid #000;
+        border-bottom: 2px solid DarkGray;
     }
 
     .Allcolumms {
@@ -407,3 +406,493 @@ def cardMyProject(nome_user, dados_user):
 
     st.write(f'<style>{css}</style>', unsafe_allow_html=True)
     st.write(html, unsafe_allow_html=True)
+
+
+class PlotCanvas:
+    def __init__(self, projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, especialistas, squads, entregas, investimentos):
+        self.projeto = projetos
+        self.mvp = mvps
+        self.prodProjeto = prodProjetos
+        self.prodMvp = prodMvps
+        self.resultado = resultados
+        self.metrica = metricas
+        self.gestores = gestores
+        self.especialistas = especialistas
+        self.squads = squads
+        self.entregas = entregas
+        self.investimentos = investimentos
+
+    def CreateHTML(self):
+        metricaCode = ""
+        for i in range(len(self.metrica)):
+            metricaCode += f"""<tr class="tdata7">
+                    <td>{self.metrica[i]}</td>
+                </tr>"""
+
+        resultadoCode = ""
+        for i in range(len(self.resultado)):
+            resultadoCode += f"""<tr class="tdata6">
+                    <td>{self.resultado[i]}</td>
+                </tr>"""
+
+        projetoCode = ""
+        for i in range(len(self.projeto)):
+            projetoCode += f"""<tr class="tdata1">
+                    <td>{self.projeto[i]}</td>
+                </tr>"""
+            
+        prodProjetoCode = ""
+        for i in range(len(self.prodProjeto)):
+            prodProjetoCode += f"""<tr class="tdata1">
+                                <td>{self.prodProjeto[i]}
+                            </tr>"""
+
+        mvpCode = ""
+        for i in range(len(self.mvp)):
+            mvpCode += f"""<tr class="tdata2">
+                    <td>{self.mvp[i]}</td>
+                </tr>"""
+            
+        prodMvpCode = ""
+        for i in range(len(self.prodMvp)):
+            prodMvpCode += f"""<tr class="tdata2">
+                        <td>{self.prodMvp[i]}</td>
+                    </tr>"""
+
+        htmlRow = f"""<div class="flex-row">
+                <div class="box">
+                    <div class="box1">
+                        <table class="table1">
+                            <tr class="thead1">
+                                <th>Projeto<img src="https://cdn-icons-png.flaticon.com/128/10484/10484735.png" alt="Icone da tabela Projetos" class="table-icon"></th>
+                            </tr>
+                            <div>{projetoCode}</div>
+                            <tr class="thead1-proj">
+                                <th>Produto do Projeto</th>
+                            </tr>
+                            <div>{prodProjetoCode}</div>
+                        </table>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="box2">
+                        <table class="table2">
+                            <tr class="thead2">
+                                <th>MVP<img src="https://cdn-icons-png.flaticon.com/128/9238/9238294.png" alt="Icone da tabela MVPs" class="table-icon"></th>
+                            </tr>
+                            <div>{mvpCode}</div>
+                            <tr class="thead2-mvp">
+                                <th>Produto do MVP</th>
+                            </tr>
+                            <div>{prodMvpCode}</div>
+                        </table>
+                    </div>
+                </div>
+                <div class="flex-column">
+                    <div class="box">
+                        <div class="box6">
+                            <table class="table6">
+                                <tr class="thead7">
+                                    <th>Métricas<img src="https://cdn-icons-png.flaticon.com/128/7931/7931125.png" alt="Icone da tabela Métricas" class="table-icon"></th>
+                                </tr>
+                                <div>{metricaCode}</div>
+                                <tr class="thead6">
+                                    <th>Resultado esperado<img src="https://cdn-icons-png.flaticon.com/128/9797/9797853.png" alt="Icone da tabela Resultado esperado" class="table-icon"></th>
+                                </tr>
+                                <div>{resultadoCode}</div>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>"""
+        
+        return htmlRow
+
+
+    def tableEqp(self):
+        gestor = self.gestores
+        especialista = self.especialistas
+        squad = self.squads
+
+        gestorCode = ""
+        for i in range(len(gestor)):
+            gestorCode += f"""<tr class="tdata4">
+                    <td>{gestor[i]}</td>
+                </tr>"""
+
+        especialistaCode = ""
+        for i in range(len(especialista)):
+            especialistaCode += f"""<tr class="tdata4">
+                    <td>{especialista[i]}</td>
+                </tr>"""
+
+        squadCode = ""
+        for i in range(len(squad)):
+            squadCode += f"""<tr class="tdata4">
+                    <td>{squad[i]}</td>
+                </tr>"""
+
+        htmlEqp = f"""
+            <div class="box">
+                <div class="box4">
+                    <table class="table4">
+                        <tr class="thead4">
+                            <th>Equipe<img src="https://cdn-icons-png.flaticon.com/128/5069/5069162.png" alt="Icone da tabela Equipe" class="table-icon"></th>
+                        </tr>
+                        <tr class="thead4-eqp">
+                            <th><img src="https://cdn-icons-png.flaticon.com/128/3916/3916615.png" alt="Ícone do gestor para a tabela de Equipe" class="table-icon"> Gestor</th>
+                        </tr>
+                        <div>{gestorCode}</div>
+                        <tr class="thead4-eqp">
+                            <th><img src="https://cdn-icons-png.flaticon.com/128/9795/9795619.png" alt="Ícone do especialista para a tabela de Equipe" class="table-icon"> Especialista</th>
+                        </tr>
+                        <div>{especialistaCode}</div>
+                        <tr class="thead4-eqp">
+                            <th><img src="https://cdn-icons-png.flaticon.com/128/9856/9856655.png" alt="Ícone do squad para a tabela de Equipe" class="table-icon"> Squad</th>
+                        </tr>
+                        <div>{squadCode}</div>
+                    </table>
+                </div>
+            </div>
+        """
+        return htmlEqp
+
+
+    def tableUnic(self):
+        entrega = self.entregas
+
+        entregaCode = ""
+        for i in range(len(entrega)):
+            entregaCode += f"""<tr class="tdata5">
+                    <td>{entrega[i]}</td>
+                </tr>"""
+
+        htmlUnic = f"""
+            <div class="box">
+                <div class="box5">
+                    <table class="table5">
+                        <tr class="thead5">
+                            <th>Principais entregas<img src="https://cdn-icons-png.flaticon.com/128/10801/10801807.png" alt="Icone da tabela Principais entregas" class="table-icon"></th>
+                        </tr>
+                        <div>{entregaCode}</div>
+                    </table>
+                </div>
+            </div>
+        """
+        return htmlUnic
+
+
+    def tableCol(self):
+        investimento = self.investimentos
+
+        investimentoCode = ""
+        for i in range(len(investimento)):
+            investimentoCode += f"""<tr class="tdata3">
+                    <td>R${investimento[i]}</td>
+                </tr>"""
+
+        htmlCol1 = f"""<div class="box">
+                <div class="box3">
+                    <table class="table3">
+                        <tr class="thead3">
+                            <th>Investimento<img src="https://cdn-icons-png.flaticon.com/128/7928/7928255.png" alt="Icone da tabela Investimentos" class="table-icon"></th>
+                        </tr>
+                        <div>{investimentoCode}</div>
+                    </table>
+                </div>
+            </div>
+            </div>"""
+        return htmlCol1
+
+    @staticmethod
+    def tableGeral(htmlRow, htmlEqp, htmlUnic, htmlCol1):
+        dadosRow = htmlRow #CreateHTML
+        dadosEqp = htmlEqp #tableEqp()
+        dadosUnic = htmlUnic #tableUnic()
+        dadosCol = htmlCol1 #tableCol()
+
+        htmlGeral = f"""
+            <div class="flex-container">
+                <div>{dadosRow}</div>
+                <div class="flex-row">
+                    <div>{dadosEqp}</div>
+                    <div>{dadosUnic}</div>
+                    <div>{dadosCol}</div>
+                </div>
+            </div>
+        """
+        return htmlGeral
+
+    @staticmethod
+    def cssStyle():
+        canvaStyle = """
+        body{
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+            }
+            
+            .box{
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+            }
+
+            .box1,
+            .box2,
+            .box3,
+            .box4,
+            .box5,
+            .box6,
+            .box7{
+                width: 100%;
+                height: auto;
+                max-width: 400px;
+                //min-height: 200px;
+                max-height: 180px;
+                margin: 5px;
+                overflow: auto;
+                overflow-x: hidden;
+                scrollbar-width: thin;
+            }
+
+            .box1:hover,
+            .box2:hover,
+            .box3:hover,
+            .box4:hover,
+            .box5:hover,
+            .box6:hover,
+            .box7:hover{
+                transform: scale(0.98);
+                border-radius: 20px;
+            }
+
+            .box1:hover{
+                box-shadow: 0px 0px 25px rgba(74, 172, 252, 1);
+            }
+
+            .box2:hover{
+                box-shadow: 0px 0px 25px rgba(255, 161, 189, 1);
+            }
+
+            .box3:hover{
+                box-shadow: 0px 0px 25px rgba(255, 115, 84, 1);
+            }
+
+            .box4:hover{
+                box-shadow: 0px 0px 25px rgba(73, 197, 57, 1);
+            }
+
+            .box5:hover{
+                box-shadow: 0px 0px 25px rgba(141, 52, 135, 1);
+            }
+
+            .box6:hover{
+                box-shadow: 0px 0px 25px rgba(255, 187, 78, 1);
+            }
+
+            .box7:hover{
+                box-shadow: 0px 0px 25px rgba(255, 255, 68, 1);
+            }
+
+            .table1,
+            .table2,
+            .table3,
+            .table4,
+            .table5,
+            .table6,
+            .table7{
+                width: 400px;
+                border-collapse: collapse;
+                border-radius: 10px;
+                overflow: hidden; 
+                min-height: 180px;
+                max-height: 180px;
+                border-collapse: collapse;
+            }
+
+            .thead1{
+                background-color: #4aacfc;
+            }
+
+            .thead2{
+                background-color: #ffa1bd;
+            }
+
+            .thead3{
+                background-color: #ff7354;
+            }
+
+            .thead4{
+                background-color: #49c539;
+            }
+
+            .thead5{
+                background-color: #8d348793;
+            }
+
+            .thead6{
+                background-color: #ffff76;
+            }
+
+            .thead7{
+                background-color: #ffff44;
+            }
+
+            .thead4-eqp,
+            .thead1-proj,
+            .thead2-mvp{
+                align-items: center;
+                border-bottom: 1px solid #1eff00;
+            }
+
+            .thead4-eqp{
+                background-color: #99e38f;
+            }
+
+            .thead1-proj{
+                background-color: #aad6fa;
+            }
+
+            .thead2-mvp{
+                background-color: #ffbafc;
+            }
+
+            .thead1,
+            .thead2,
+            .thead3,
+            .thead4,
+            .thead5,
+            .thead6,
+            .thead7{
+                min-height: 50px;
+                max-height: 50px;
+            }
+
+            .thead1 th,
+            .thead2 th,
+            .thead3 th,
+            .thead4 th,
+            .thead5 th,
+            .thead6 th,
+            .thead7 th{
+                text-align: center;
+                position: sticky;
+                top: 0;
+                min-height: 50px;
+                max-height: 50px;
+            }
+
+            .thead4-eqp,
+            .thead1-proj,
+            .thead2-mvp{
+                text-align: center;
+            }
+
+            .thead1 img,
+            .thead2 img,
+            .thead3 img,
+            .thead4 img,
+            .thead5 img,
+            .thead6 img,
+            .thead7 img,
+            .thead4-eqp img{
+                vertical-align: middle;
+                margin-left: 10px;
+                width: 20px;
+                height: auto;
+            }
+
+            .tdata1 td{
+                border-top: 1px solid #008cff;
+                background-color: #c8e6ff;
+            }
+
+            .tdata2 td{
+                border-top: 1px solid #ffb7c9;
+                background-color: #ffd8fd;
+            }
+
+            .tdata3 td{
+                border-top: 1px solid #ff2600;
+                background-color: #ffe1d7;
+            }
+
+            .tdata4 td{
+                background-color: #cdffc6;
+            }
+
+            .tdata5 td{
+                border-top: 1px solid #96008c93;
+                background-color: #e2cee193;
+            }
+
+            .tdata6 td{
+                border-top: 1px solid #b3b301;
+                background-color: #ffffc3;
+            }
+
+            .tdata7 td{
+                border-top: 1px solid #b3b301;
+                background-color: #ffffc3;
+            }
+
+            .flex-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .flex-row {
+                display: flex;
+                justify-content: center;
+                height: auto;
+            }
+
+            .flex-column {
+                flex-direction: column;
+                height: auto;
+                max-height: 200px;
+                min-width: 400px;
+                top: 0;
+            }
+            
+            .box1::-webkit-scrollbar,
+            .box2::-webkit-scrollbar,
+            .box3::-webkit-scrollbar,
+            .box4::-webkit-scrollbar,
+            .box5::-webkit-scrollbar,
+            .box6::-webkit-scrollbar,
+            .box7::-webkit-scrollbar{
+                width: 6px;
+                border-radius: 20px;
+            }
+            
+            .box1::-webkit-scrollbar-track,
+            .box2::-webkit-scrollbar-track,
+            .box3::-webkit-scrollbar-track,
+            .box4::-webkit-scrollbar-track,
+            .box5::-webkit-scrollbar-track,
+            .box6::-webkit-scrollbar-track,
+            .box7::-webkit-scrollbar-track{
+                //background: #a8a8ff;
+                border-radius: 20px;
+            }
+            
+            .box1::-webkit-scrollbar-thumb,
+            .box2::-webkit-scrollbar-thumb,
+            .box3::-webkit-scrollbar-thumb,
+            .box4::-webkit-scrollbar-thumb,
+            .box5::-webkit-scrollbar-thumb,
+            .box6::-webkit-scrollbar-thumb,
+            .box7::-webkit-scrollbar-thumb{
+                //background-color: #00004d;
+                border-radius: 20px;
+                //border: 3px solid #a8a8ff;
+                border: 1px solid;
+            }"""
+        
+        return canvaStyle

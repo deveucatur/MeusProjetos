@@ -1515,12 +1515,6 @@ def css_9box_home():
         font-color: black;
     }
 
-    p{
-        font-weight: bold;
-        font-size: 20px;
-        margin: 0 8px;
-    }
-
     img{
         max-width: 30px;
         max-height: 30px;
@@ -1722,3 +1716,266 @@ def css_9box_home():
     }"""
 
     return ninebox_style
+
+
+
+import mysql.connector
+
+conexao = mysql.connector.connect(
+    passwd='nineboxeucatur',
+    port=3306,
+    user='ninebox',
+    host='nineboxeucatur.c7rugjkck183.sa-east-1.rds.amazonaws.com',
+    database='projeu'
+)
+mycursor = conexao.cursor()
+
+cmd_Pbase = ''' 
+SELECT 
+	PTP.type_proj,
+    PCP.nome_parm,
+    valor_base
+FROM projeu_premio_base
+JOIN projeu_compl_param PCP on PCP.id_compl_param = complx_param_fgkey
+JOIN projeu_type_proj PTP on PTP.id_type = typ_proj_fgkey;
+'''
+mycursor.execute(cmd_Pbase)
+premioBaseBD = mycursor.fetchall()
+
+
+cmd_Psprint = '''
+SELECT 
+	typ_proj_fgkey,
+    typ_event,
+    CAST(porc AS DECIMAL(2, 2)) AS porc,
+    qntd_event,
+    PCP.nome_parm
+FROM projeu_param_premio
+JOIN projeu_compl_param PCP ON id_compl_param = complx_param_fgkey
+ORDER BY id_pp;'''
+mycursor.execute(cmd_Psprint)
+premioSprintBD = mycursor.fetchall()
+
+
+cmd_Pfuncao = '''
+SELECT 
+	PCF.tip_fun,
+    PCP.nome_parm,
+    PCF.porcentual
+FROM projeu_porc_func AS PCF
+JOIN projeu_compl_param PCP ON PCP.id_compl_param = complx_fgkey 
+ORDER BY PCF.tip_fun DESC;'''
+mycursor.execute(cmd_Pfuncao)
+premioFuncaoBD = mycursor.fetchall()
+mycursor.close()
+
+
+class CalculoPrêmio:
+    def __init__(self, name_proj, complexidProj, typProj):
+        self.premioSprint = None
+        self.number_sprint = None
+        self.name_proj = name_proj
+        self.complexidProj = complexidProj
+        self.typProj = typProj
+
+        mycursor2 = conexao.cursor()
+        mycursor2.execute(f"""
+                SELECT 
+                	PS.number_sprint,
+                	PE.nome_Entrega, 
+                    PU.Nome,
+                    PU.Matricula,
+                    PE.hra_necess,
+                    PE.compl_entrega,
+                    PE.stt_entrega
+                FROM 
+                	projeu_entregas AS PE
+                JOIN 
+                	projeu_users PU ON PU.id_user = PE.executor
+                JOIN 
+                	projeu_sprints PS ON PS.id_sprint = PE.id_sprint
+                WHERE 
+                	PE.id_sprint IN (
+                		SELECT 
+                			PS_sub.id_sprint AS ID_SPRINT
+                		FROM 
+                			projeu_sprints AS PS_sub
+                		JOIN 
+                			projeu_projetos PP 
+                			ON PP.id_proj = PS_sub.id_proj_fgkey
+                		WHERE PP.name_proj LIKE '%{self.name_proj}%'
+                	);""")
+        self.entregas_do_projeto = mycursor2.fetchall()
+
+        mycursor2.execute(f'''
+                SELECT 
+                    PPPD.id_pppd,
+                    PP.id_proj, 
+                    PP.name_proj,
+                    PPPD.valor_base AS VALOR_BASE,
+                    PPPD.porc_pre_mvp,
+                    PPPD.porc_mvp,
+                    PPPD.porc_pos_mvp,
+                    PPPD.porc_entrega,
+                    PPPD.porc_gestor,
+                    PPPD.porc_espec,
+                    PPPD.porc_squad,
+                    PCX.complxdd,
+                    PCX.nivel
+                FROM 
+                    projeu_premio_proj_diferent AS PPPD
+                JOIN
+                    projeu_projetos PP ON PP.id_proj = PPPD.id_proj_fgkey
+                JOIN 
+                    projeu_complexidade PCX ON PCX.id_compl = PPPD.complex_fgkey
+                WHERE PP.name_proj LIKE '%{self.name_proj}%';
+                ''')
+        self.proj_especial = mycursor2.fetchall()
+        mycursor2.close()
+
+
+    def param_especial_event(self, evento):
+        dic_aux = {'SPRINT PRÉ MVP': self.proj_especial[0][4], 
+                'SPRINT PÓS MVP': self.proj_especial[0][6], 
+                'ENTREGA FINAL': self.proj_especial[0][7], 
+                'MVP': self.proj_especial[0][5]}
+        
+        if evento in [str(x).strip() for x in list(dic_aux.keys())]:
+            retorno = dic_aux[evento]
+        else:
+            retorno = 'EVENTO ESPECIAL COM NOMENCLATURA INCORRETA.'
+        
+        return retorno
+
+
+    @staticmethod
+    def dificEntreg(dif):
+        dic_aux = {'Difícil': 3,
+                   'Médio': 2,
+                   'Fácil': 1}
+
+        return dic_aux[dif]
+
+    #PARÂMETROS DO CALCULO DE EVENTOS
+    def param_eventos(self, evento):
+        if evento in list(set([typEvent[1] for typEvent in premioSprintBD])):
+            if len(self.proj_especial) > 0:
+                premioSprint = {f'{nameEvent}':
+                                    {'Complexidade': [x[4] for x in premioSprintBD if x[1] == nameEvent],
+                                    'Porcentagem': [self.param_especial_event(evento) for x in range(len(premioSprintBD)) if premioSprintBD[x][1] == nameEvent],
+                                    'QuantidadeEventos': [x[3] for x in premioSprintBD if x[1] == nameEvent]}
+                    for nameEvent in list(set([typEvent[1] for typEvent in premioSprintBD]))}
+            else:
+                premioSprint = {f'{nameEvent}':
+                                    {'Complexidade': [x[4] for x in premioSprintBD if x[1] == nameEvent],
+                                    'Porcentagem': [x[2] for x in premioSprintBD if x[1] == nameEvent],
+                                    'QuantidadeEventos': [x[3] for x in premioSprintBD if x[1] == nameEvent]}
+                    for nameEvent in list(set([typEvent[1] for typEvent in premioSprintBD]))}
+
+            retorno = premioSprint[evento]
+        
+        else:
+            retorno = f'EVENTO INFORMADO NÃO EXISTENTE. EVENTOS DISPONÍVEIS {list(set([typEvent[1] for typEvent in premioSprintBD]))}'
+
+        return retorno
+
+    #PEGA O VALOR TOTAL DO PROJETO E DIVIDE ENTRE OS EVENTOS
+    def valorEvento(self):
+        if len(self.proj_especial) < 1:
+            valor_base = [x[2] for x in premioBaseBD if str(x[0]).strip().upper() == str(self.typProj).strip().upper()  # VALOR BASE DAQUELA COMPLEXIDADE
+                        and str(x[1]).strip().upper() == str(self.complexidProj).strip().upper()]
+        else:
+            valor_base = [round(float(self.proj_especial[0][3]), 2)] #VALOR BASE DAQUELE PROJETO EM ESPECIAL  # VALOR BASE DAQUELA COMPLEXIDADE
+
+        eventos = list(set([typEvent[1] for typEvent in premioSprintBD]))  # SPRINT PRÉ-MVP, MVP, PÓS-MVP, ENTREGA FINAL
+        AuxDDComplx = {}
+        for event in eventos:
+            auxParam = self.param_eventos(event)
+
+            idx_complx = list(auxParam['Complexidade']).index(self.complexidProj)
+
+            porct = list(auxParam['Porcentagem'])[idx_complx]  # PORCENTAGEM DO VALOR TOTAL DESTINADO PARA AQUELE EVENTO
+            qntdSprint = list(auxParam['QuantidadeEventos'])[
+                idx_complx]  # QUANTIDADE DE SPRINTS QUE AQUELE EVENTO VAI TER
+
+            valorEvent = round(((float(valor_base[0]) / 100) * (float(porct) * 100)), 2)  # VALOR TOTAL QUE O EVENTO VAI TER
+            valorPorSprint = valorEvent / qntdSprint  # VALOR PAGO POR SPRINT
+
+            AuxDDComplx[event] = {'ValorEvento': valorEvent,
+                                  'ValorPorSprint': valorPorSprint,
+                                  'Porcentagem': float(porct),
+                                  'QuantidadeSprints': qntdSprint}
+        return AuxDDComplx
+
+
+    def entreg_projeto(self):
+        return self.entregas_do_projeto
+
+    #FUNÇÃO PENSADA PARA CALCULAR A BONIFICAÇÃO DA SQUAD
+    # ---> RECEBE O VALOR QUE FOI SEPARADO PARA AQUELA SPRINT E DIVIDE ENTRE O SQUAD
+    def CalculaSquad(self, entregas, valor_sprint):
+        #EXEMPLO DE USO
+        # sprint = 1                     ---> [[LISTA DE ENTREGAS], VALOR DISTRIBUIDO PARA A SPRINT]
+        # exemplo_de_como_chamar = CalculaSquad([list(x) for x in entregasBD if x[0] == sprint], 1200)
+
+        if self.number_sprint in list(set([x[0] for x in entregas])):
+            entregas_sprint = entregas
+
+            # MATRICULA, NOME COLABORADOR
+            colbs = list(set([(x[3], x[2]) for x in entregas_sprint]))
+            hrs_normaliz = {colb[1]: sum([float(x[4] * self.dificEntreg(x[5])) for x in entregas_sprint if x[3] == colb[0]])
+                            for colb in colbs}
+            hrs_total = sum([hrs_normaliz[x] for x in hrs_normaliz.keys()])
+
+            valor_colab = {name_colab: {'BonificacaoSprint': valor_sprint * (hrs_normaliz[name_colab] / hrs_total),
+                                        'HorasNormalTotal': hrs_normaliz[name_colab],
+                                        'Entregas': {x[1]: {'Horas': x[4],
+                                                            'HorasNormalizadas': x[4] * self.dificEntreg(x[5]),
+                                                            'Bonificação': valor_sprint * (
+                                                                        (x[4] * self.dificEntreg(x[5])) / hrs_total),
+                                                            'Dificuldade': self.dificEntreg(x[5]),
+                                                            'Status': x[6]} for x in entregas_sprint if
+                                                     str(x[2]).strip().lower() == str(name_colab).strip().lower()}}
+                           for name_colab in hrs_normaliz.keys()}
+
+        else:
+            valor_colab = {'error': 'Sprint informada não possui dados'}
+
+        return valor_colab
+
+    def CalculaSprint(self, valorSprint, qntdEspecial, sprint):
+        if self.entregas_do_projeto != None:
+            self.number_sprint = sprint
+            
+            if len(self.proj_especial) > 0:
+                porcEquipe = [['GESTOR', f'{str(self.proj_especial[0][11]).strip()} {str(self.proj_especial[0][12]).strip()}', self.proj_especial[0][8]],
+                            ['ESPECIALISTA', f'{str(self.proj_especial[0][11]).strip()} {str(self.proj_especial[0][12]).strip()}', self.proj_especial[0][9]],
+                            ['SQUAD', f'{str(self.proj_especial[0][11]).strip()} {str(self.proj_especial[0][12]).strip()}', self.proj_especial[0][10]]]
+            else:
+                porcEquipe = [list(x) for x in premioFuncaoBD if x[1] == self.complexidProj]
+
+            if qntdEspecial == 0:
+                idx_time_fun = lambda equipe: list([str(x[0]).strip().upper() for x in porcEquipe]).index(
+                    f'{str(equipe).upper()}')
+
+                porcEquipe[idx_time_fun('SQUAD')][2] = porcEquipe[idx_time_fun('ESPECIALISTA')][2] + \
+                                                       porcEquipe[idx_time_fun('SQUAD')][2]
+                porcEquipe[idx_time_fun('ESPECIALISTA')][2] = 0.0
+
+            valoresEquipe = {}
+            valoresEquipe['GESTOR'] = valorSprint * float(
+                [x[2] for x in porcEquipe if str(x[0]).upper() == 'GESTOR'][0])
+
+            TotalEspecialist = valorSprint * float([x[2] for x in porcEquipe if str(x[0]).upper() == 'ESPECIALISTA'][0])
+            valoresEquipe['ESPECIALISTA'] = {'ValorTotal': TotalEspecialist,
+                                             'ValorPorEspecialist': (TotalEspecialist/qntdEspecial) if qntdEspecial > 0 else 0,
+                                             'QuantidadeEspecialista': qntdEspecial}
+
+            valoresEquipe['SQUAD'] = self.CalculaSquad([list(x) for x in self.entregas_do_projeto if x[0] == self.number_sprint],
+                                                  valorSprint * float(
+                                                      [x[2] for x in porcEquipe if str(x[0]).upper() == 'SQUAD'][0]))
+
+            retorno = valoresEquipe
+        else:
+            retorno = 'PRIMAIRAMENTE, É NECESSÁRIO CONSUMIR O BANCO DADOS PARA PEGAR AS ENTREGAS DO PROJETO'
+        return retorno
