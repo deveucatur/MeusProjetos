@@ -1324,15 +1324,13 @@ def css_9box():
     }
 
     .box-green::-webkit-scrollbar-track {
-        background: #C8E6C9;
         border-radius: 20px;
     }
 
 
     .box-green::-webkit-scrollbar-thumb {
-        background-color: #002100;
         border-radius: 20px;
-        border: 3px solid #C8E6C9;
+        border: 3px solid #000;
     }
 
     .box-orange::-webkit-scrollbar {
