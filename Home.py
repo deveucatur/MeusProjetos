@@ -233,6 +233,8 @@ elif authentication_status:
     perfilUsuario = [x[8] for x in dadosUser if str(x[1]).strip() == str(matriUser).strip()][0]
     font_TITLE('HOME', fonte_Projeto,"'Bebas Neue', sans-serif", 42, 'left')
 
+    matriUser = 9
+
     sqlEntregas = f"""SELECT id_sprint, nome_Entrega, executor, stt_entrega FROM projeu_entregas WHERE stt_entrega NOT LIKE '%Concluído%' AND executor = {matriUser};"""
     mycursor.execute(sqlEntregas)
     entregaProj = mycursor.fetchall()
