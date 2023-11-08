@@ -235,6 +235,7 @@ elif authentication_status:
     ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split(',') or matriUser == x[3]]
 
     fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
+    
     if len(ddPaging):
         font_TITLE('MEUS PROJETOS', fonte_Projeto,"'Bebas Neue', sans-serif", 49, 'center')
         with st.expander('Filtro Projetos', expanded=False):
