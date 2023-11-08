@@ -1638,7 +1638,7 @@ def css_9box_home():
     }
 
     .box-green2::-webkit-scrollbar {
-        width: 12px;
+        width: 8px;
         border-radius: 20px;
     }
 
