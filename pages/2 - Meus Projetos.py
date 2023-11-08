@@ -186,8 +186,6 @@ GROUP BY
 mycursor.execute(comand)
 ddPaging = mycursor.fetchall()
 
-st.write(ddPaging)
-
 mycursor.execute("""SELECT 
   p.nome_prog, 
   m.macroprocesso
