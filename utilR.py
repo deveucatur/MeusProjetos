@@ -1643,13 +1643,15 @@ def css_9box_home():
     }
 
     .box-green2::-webkit-scrollbar-track {
+        background: #848484;
         border-radius: 20px;
     }
 
 
     .box-green2::-webkit-scrollbar-thumb {
+        background-color: #454545;
         border-radius: 20px;
-        border: 3px solid #000;
+        border: 1px solid #000;
     }
 
     a,
