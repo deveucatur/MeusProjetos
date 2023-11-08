@@ -21,6 +21,7 @@ conexao = mysql.connector.connect(
 
 mycursor = conexao.cursor()
 
+
 def premios_user_bd(matricula):
     mycursor = conexao.cursor() 
     mycursor.execute(f"""
@@ -73,6 +74,7 @@ def premios_user_bd(matricula):
 
     return premiosbd
 
+
 def cardImg(image_url):
     st.markdown(
         f"""
@@ -116,6 +118,8 @@ def complexidade_name(number):
     return aux[number]
 
 
+fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
+font_TITLE('MEUS PRÊMIOS', fonte_Projeto,"'Bebas Neue', sans-serif", 49, 'center')
 meses = [
         "Janeiro",
         "Fevereiro",
@@ -183,10 +187,9 @@ elif authentication_status == None:
     with col2:
         st.warning('Insira seu Email e Senha')
 elif authentication_status:
+    with st.sidebar:
+        authenticator.logout('Logout', 'main')
 
-    fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
-    font_TITLE('MEUS PRÊMIOS', fonte_Projeto,"'Bebas Neue', sans-serif", 49, 'center')
-    
     matriUser = [x[1] for x in dadosUser if x[3] == username][0]
     premiosbd = premios_user_bd(matriUser)
     with st.expander('Filtro'):
