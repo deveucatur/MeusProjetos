@@ -1515,6 +1515,12 @@ def css_9box_home():
         font-color: black;
     }
 
+    p{
+        font-weight: bold;
+        font-size: 20px;
+        margin: 0 8px;
+    }
+
     img{
         max-width: 30px;
         max-height: 30px;
@@ -1882,6 +1888,7 @@ class CalculoPrêmio:
     #PEGA O VALOR TOTAL DO PROJETO E DIVIDE ENTRE OS EVENTOS
     def valorEvento(self):
         if len(self.proj_especial) < 1:
+
             valor_base = [x[2] for x in premioBaseBD if str(x[0]).strip().upper() == str(self.typProj).strip().upper()  # VALOR BASE DAQUELA COMPLEXIDADE
                         and str(x[1]).strip().upper() == str(self.complexidProj).strip().upper()]
         else:

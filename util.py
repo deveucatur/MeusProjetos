@@ -896,3 +896,716 @@ class PlotCanvas:
             }"""
         
         return canvaStyle
+
+
+import mysql.connector
+
+conexao = mysql.connector.connect(
+    passwd='nineboxeucatur',
+    port=3306,
+    user='ninebox',
+    host='nineboxeucatur.c7rugjkck183.sa-east-1.rds.amazonaws.com',
+    database='projeu'
+)
+mycursor = conexao.cursor()
+
+cmd_Pbase = ''' 
+SELECT 
+	PTP.type_proj,
+    PCP.nome_parm,
+    valor_base
+FROM projeu_premio_base
+JOIN projeu_compl_param PCP on PCP.id_compl_param = complx_param_fgkey
+JOIN projeu_type_proj PTP on PTP.id_type = typ_proj_fgkey;
+'''
+mycursor.execute(cmd_Pbase)
+premioBaseBD = mycursor.fetchall()
+
+
+cmd_Psprint = '''
+SELECT 
+	typ_proj_fgkey,
+    typ_event,
+    CAST(porc AS DECIMAL(2, 2)) AS porc,
+    qntd_event,
+    PCP.nome_parm
+FROM projeu_param_premio
+JOIN projeu_compl_param PCP ON id_compl_param = complx_param_fgkey
+ORDER BY id_pp;'''
+mycursor.execute(cmd_Psprint)
+premioSprintBD = mycursor.fetchall()
+
+
+cmd_Pfuncao = '''
+SELECT 
+	PCF.tip_fun,
+    PCP.nome_parm,
+    PCF.porcentual
+FROM projeu_porc_func AS PCF
+JOIN projeu_compl_param PCP ON PCP.id_compl_param = complx_fgkey 
+ORDER BY PCF.tip_fun DESC;'''
+mycursor.execute(cmd_Pfuncao)
+premioFuncaoBD = mycursor.fetchall()
+mycursor.close()
+
+
+
+class CalculoPrêmio:
+    def __init__(self, name_proj, complexidProj, typProj):
+        self.premioSprint = None
+        self.number_sprint = None
+        self.name_proj = name_proj
+        self.complexidProj = complexidProj
+        self.typProj = typProj
+
+        mycursor2 = conexao.cursor()
+        mycursor2.execute(f"""
+                SELECT 
+                    PS.number_sprint,
+                    PE.nome_Entrega, 
+                    PU.Nome,
+                    PU.Matricula,
+                    PE.hra_necess,
+                    PE.compl_entrega,
+                    PE.stt_entrega,
+                    (
+                       SELECT id_proj FROM projeu_projetos WHERE id_proj = PS.id_proj_fgkey
+                    ) AS ID_PROJ,
+                    (
+                       SELECT name_proj FROM projeu_projetos WHERE id_proj = PS.id_proj_fgkey
+                    ) AS NAME_PROJ,
+                    (
+                       SELECT check_proj FROM projeu_projetos WHERE id_proj = PS.id_proj_fgkey
+                    ) AS STATUS_PROJ,
+                    PS.status_sprint AS EVENTO_SPRINT
+                FROM 
+                    projeu_entregas AS PE
+                JOIN 
+                    projeu_users PU ON PU.id_user = PE.executor
+                JOIN 
+                    projeu_sprints PS ON PS.id_sprint = PE.id_sprint
+                WHERE 
+                    PE.id_sprint IN (
+                        SELECT 
+                            PS_sub.id_sprint AS ID_SPRINT
+                        FROM 
+                            projeu_sprints AS PS_sub
+                        JOIN 
+                            projeu_projetos PP 
+                            ON PP.id_proj = PS_sub.id_proj_fgkey
+                        WHERE PP.name_proj LIKE '%{self.name_proj}%');""")
+        self.entregas_do_projeto = mycursor2.fetchall()
+
+        mycursor2.execute(f'''
+                SELECT 
+                    PPPD.id_pppd,
+                    PP.id_proj, 
+                    PP.name_proj,
+                    PPPD.valor_base AS VALOR_BASE,
+                    PPPD.porc_pre_mvp,
+                    PPPD.porc_mvp,
+                    PPPD.porc_pos_mvp,
+                    PPPD.porc_entrega,
+                    PPPD.porc_gestor,
+                    PPPD.porc_espec,
+                    PPPD.porc_squad,
+                    PCX.complxdd,
+                    PCX.nivel
+                FROM 
+                    projeu_premio_proj_diferent AS PPPD
+                JOIN
+                    projeu_projetos PP ON PP.id_proj = PPPD.id_proj_fgkey
+                JOIN 
+                    projeu_complexidade PCX ON PCX.id_compl = PPPD.complex_fgkey
+                WHERE PP.name_proj LIKE '%{self.name_proj}%';
+                ''')
+        self.proj_especial = mycursor2.fetchall()
+        
+        mycursor2.execute(
+            '''SELECT 
+                sum(PPE.valor) AS VALOR_TOTAL
+            FROM 
+                projeu_sprints AS PS
+            JOIN
+                projeu_premio_entr PPE ON id_sprint_fgkey = PS.id_sprint
+            WHERE 
+                  PS.id_proj_fgkey IN (
+                    SELECT id_proj FROM projeu_projetos
+                        WHERE name_proj LIKE '%Estabelecer ciclo de otimização de produtividade através de tecnologias corporativas%'
+        );''')
+        self.valor_total = mycursor2.fetchall()
+        
+        mycursor2.close()
+
+
+    def param_especial_event(self, evento):
+        dic_aux = {'SPRINT PRÉ MVP': self.proj_especial[0][4], 
+                'SPRINT PÓS MVP': self.proj_especial[0][6], 
+                'ENTREGA FINAL': self.proj_especial[0][7], 
+                'MVP': self.proj_especial[0][5]}
+        
+        if evento in [str(x).strip() for x in list(dic_aux.keys())]:
+            retorno = dic_aux[evento]
+        else:
+            retorno = 'EVENTO ESPECIAL COM NOMENCLATURA INCORRETA.'
+        
+        return retorno
+
+
+    @staticmethod
+    def dificEntreg(dif):
+        dic_aux = {'Difícil': 3,
+                   'Médio': 2,
+                   'Fácil': 1}
+
+        return dic_aux[dif]
+
+    #PARÂMETROS DO CALCULO DE EVENTOS
+    def param_eventos(self, evento):
+        if evento in list(set([typEvent[1] for typEvent in premioSprintBD])):
+            if len(self.proj_especial) > 0:
+                premioSprint = {f'{nameEvent}':
+                                    {'Complexidade': [x[4] for x in premioSprintBD if x[1] == nameEvent],
+                                    'Porcentagem': [self.param_especial_event(evento) for x in range(len(premioSprintBD)) if premioSprintBD[x][1] == nameEvent],
+                                    'QuantidadeEventos': [x[3] for x in premioSprintBD if x[1] == nameEvent]}
+                    for nameEvent in list(set([typEvent[1] for typEvent in premioSprintBD]))}
+            else:
+                premioSprint = {f'{nameEvent}':
+                                    {'Complexidade': [x[4] for x in premioSprintBD if x[1] == nameEvent],
+                                    'Porcentagem': [x[2] for x in premioSprintBD if x[1] == nameEvent],
+                                    'QuantidadeEventos': [x[3] for x in premioSprintBD if x[1] == nameEvent]}
+                    for nameEvent in list(set([typEvent[1] for typEvent in premioSprintBD]))}
+
+            retorno = premioSprint[evento]
+        
+        else:
+            retorno = f'EVENTO INFORMADO NÃO EXISTENTE. EVENTOS DISPONÍVEIS {list(set([typEvent[1] for typEvent in premioSprintBD]))}'
+
+        return retorno
+    
+    
+    #PEGA O VALOR TOTAL DO PROJETO E DIVIDE ENTRE OS EVENTOS
+    def valorEvento(self):
+        if len(self.proj_especial) < 1:
+            valor_base = [x[2] for x in premioBaseBD if str(x[0]).strip().upper() == str(self.typProj).strip().upper()  # VALOR BASE DAQUELA COMPLEXIDADE
+                        and str(x[1]).strip().upper() == str(self.complexidProj).strip().upper()]
+        else:
+            valor_base = [round(float(self.proj_especial[0][3]), 2)] #VALOR BASE DAQUELE PROJETO EM ESPECIAL  # VALOR BASE DAQUELA COMPLEXIDADE
+
+        eventos = list(set([typEvent[1] for typEvent in premioSprintBD]))  # SPRINT PRÉ-MVP, MVP, PÓS-MVP, ENTREGA FINAL
+        AuxDDComplx = {}
+        for event in eventos:
+            auxParam = self.param_eventos(event)
+
+            idx_complx = list(auxParam['Complexidade']).index(self.complexidProj)
+
+            porct = list(auxParam['Porcentagem'])[idx_complx]  # PORCENTAGEM DO VALOR TOTAL DESTINADO PARA AQUELE EVENTO
+            qntdSprint = list(auxParam['QuantidadeEventos'])[
+                idx_complx]  # QUANTIDADE DE SPRINTS QUE AQUELE EVENTO VAI TER
+
+            valorEvent = round(((float(valor_base[0]) / 100) * (float(porct) * 100)), 2)  # VALOR TOTAL QUE O EVENTO VAI TER
+            valorPorSprint = valorEvent / qntdSprint  # VALOR PAGO POR SPRINT
+
+            AuxDDComplx[event] = {'ValorEvento': valorEvent,
+                                  'ValorPorSprint': valorPorSprint,
+                                  'Porcentagem': float(porct),
+                                  'QuantidadeSprints': qntdSprint}
+        return AuxDDComplx
+
+    #FUNÇÃO PARA CALCULAR O VALOR QUE FALTA CASO O PROJETO SEJA FINALIZADO ANTES DO PERÍODO PRÉVIO 
+    def valor_restante(self):
+        status = list(set([x[9] for x in self.entregas_do_projeto]))[0]
+        if 'PÓS-MVP' in list(set([str(x[10]).strip() for x in self.entregas_do_projeto])) and status == 1:
+            sprints_aux = list(set([(x[0],x[7]) for x in self.entregas_do_projeto]))
+
+            eventos = list(set([typEvent[1] for typEvent in premioSprintBD]))
+
+            aux_sum = []
+
+            valores_base_por_event = self.valorEvento()
+            for event in eventos:
+                aux_sum.append(valores_base_por_event[str(event).strip().upper()]['ValorEvento'])#VOU PEGAR O OBJETO VALOR EVENTO QUE NOS FORNECE A VALOR TOTAL DIVIDIDO POR SPRINT
+
+            dif_valor = sum(aux_sum) - self.valor_total #PEGANDO O VALOR TOTAL QUE JÁ FOI PAGO NAS ENTREGAS
+
+            retorno = dif_valor
+        else:
+            retorno = 'PREMEIRAMENTE, É NECESSÁRIO QUE O EVENTO SEJA NO MÍNIMO PÓS MVP'
+
+        return retorno
+
+    
+    def entreg_projeto(self):
+        return self.entregas_do_projeto
+
+    #FUNÇÃO PENSADA PARA CALCULAR A BONIFICAÇÃO DA SQUAD
+    # ---> RECEBE O VALOR QUE FOI SEPARADO PARA AQUELA SPRINT E DIVIDE ENTRE O SQUAD
+    def CalculaSquad(self, entregas, valor_sprint):
+        #EXEMPLO DE USO
+        # sprint = 1                     ---> [[LISTA DE ENTREGAS], VALOR DISTRIBUIDO PARA A SPRINT]
+        # exemplo_de_como_chamar = CalculaSquad([list(x) for x in entregasBD if x[0] == sprint], 1200)
+        print(list(set([x[0] for x in entregas if int(x[0]) in self.number_sprint])))
+        
+        if len(list(set([x[0] for x in entregas if int(x[0]) in [int(x) for x in self.number_sprint]]))) > 0:
+            entregas_sprint = entregas
+
+            # MATRICULA, NOME COLABORADOR
+            colbs = list(set([(x[3], x[2]) for x in entregas_sprint]))
+            hrs_normaliz = {colb[1]: sum([float(x[4] * self.dificEntreg(x[5])) for x in entregas_sprint if x[3] == colb[0]])
+                            for colb in colbs}
+            hrs_total = sum([hrs_normaliz[x] for x in hrs_normaliz.keys()])
+
+            valor_colab = {name_colab: {'BonificacaoSprint': valor_sprint * (hrs_normaliz[name_colab] / hrs_total),
+                                        'HorasNormalTotal': hrs_normaliz[name_colab],
+                                        'Entregas': {x[1]: {'Horas': x[4],
+                                                            'HorasNormalizadas': x[4] * self.dificEntreg(x[5]),
+                                                            'Bonificação': valor_sprint * (
+                                                                        (x[4] * self.dificEntreg(x[5])) / hrs_total),
+                                                            'Dificuldade': self.dificEntreg(x[5]),
+                                                            'Status': x[6]} for x in entregas_sprint if
+                                                     str(x[2]).strip().lower() == str(name_colab).strip().lower()}}
+                           for name_colab in hrs_normaliz.keys()}
+
+        else:
+            valor_colab = {'error': 'Sprint informada não possui dados'}
+
+        return valor_colab
+
+    def CalculaSprint(self, valorSprint, qntdEspecial, sprint):
+        status = list(set([x[9] for x in self.entregas_do_projeto]))[0]
+        if self.entregas_do_projeto != None:
+            self.number_sprint = sprint
+            
+            #IDÊNTIFICANDO O VALOR RESTANTE PARA CASO O PROJETO JÁ TENHA SIDO FINALIZADO ANTES DO PRAZO
+            if str(status).strip() == str(1) and 'PÓS-MVP' in list(set([str(x[10]).strip() for x in self.entregas_do_projeto])):
+                valor_restante = self.valor_restante()
+                valorSprint += valor_restante
+            else:
+                print('PROJETO AINDA NÃO FINALIZADO.')
+            
+            if len(self.proj_especial) > 0:
+                porcEquipe = [['GESTOR', f'{str(self.proj_especial[0][11]).strip()} {str(self.proj_especial[0][12]).strip()}', self.proj_especial[0][8]],
+                            ['ESPECIALISTA', f'{str(self.proj_especial[0][11]).strip()} {str(self.proj_especial[0][12]).strip()}', self.proj_especial[0][9]],
+                            ['SQUAD', f'{str(self.proj_especial[0][11]).strip()} {str(self.proj_especial[0][12]).strip()}', self.proj_especial[0][10]]]
+            else:
+                porcEquipe = [list(x) for x in premioFuncaoBD if x[1] == self.complexidProj]
+
+            if qntdEspecial == 0:
+                idx_time_fun = lambda equipe: list([str(x[0]).strip().upper() for x in porcEquipe]).index(
+                    f'{str(equipe).upper()}')
+
+                porcEquipe[idx_time_fun('SQUAD')][2] = porcEquipe[idx_time_fun('ESPECIALISTA')][2] + \
+                                                       porcEquipe[idx_time_fun('SQUAD')][2]
+                porcEquipe[idx_time_fun('ESPECIALISTA')][2] = 0.0
+
+            valoresEquipe = {}
+            valoresEquipe['GESTOR'] = valorSprint * float(
+                [x[2] for x in porcEquipe if str(x[0]).upper() == 'GESTOR'][0])
+
+            TotalEspecialist = valorSprint * float([x[2] for x in porcEquipe if str(x[0]).upper() == 'ESPECIALISTA'][0])
+            valoresEquipe['ESPECIALISTA'] = {'ValorTotal': TotalEspecialist,
+                                             'ValorPorEspecialist': (TotalEspecialist/qntdEspecial) if qntdEspecial > 0 else 0,
+                                             'QuantidadeEspecialista': qntdEspecial}
+
+            valoresEquipe['SQUAD'] = self.CalculaSquad([list(x) for x in self.entregas_do_projeto if x[0] in self.number_sprint],
+                                                  valorSprint * float(
+                                                      [x[2] for x in porcEquipe if str(x[0]).upper() == 'SQUAD'][0]))
+
+            retorno = valoresEquipe
+        else:
+            retorno = 'PRIMAIRAMENTE, É NECESSÁRIO CONSUMIR O BANCO DADOS PARA PEGAR AS ENTREGAS DO PROJETO'
+        return retorno
+
+
+######################## FUNÇÕES PARA PLOTAR CAIXINHA DO 9BOX ########################
+def ninebox(quadrante, nineboxDatasUnidadesAux, dadosNineboxUni, nome_quadrante):
+        #INTEIRO // DADOS TRATADOS COM HTML // LISTA DE UNIDADES NO LISTCELLNINETODOS
+    
+    style = ["yellow", "green", "blue"]
+    
+    dados_html = nineboxDatasUnidadesAux #DADOS TRATADOS DENTRO DO HTML
+    qtdUnidades = dadosNineboxUni[1] #LISTCELLNINETODOS --> INFORMAÇÕES DAS UNIDADES EM UMA LISTA
+    
+    totalUnidades = sum([len(x) for x in qtdUnidades])
+
+    quadrante = quadrante - 1
+    boxTable = f"""<div class="box">
+                        <div class="box-{style[quadrante]}">
+                            <div class="header-{style[quadrante]}">
+                                <div class="title-{style[quadrante]}">{nome_quadrante}</div>
+                                <div class="data-{style[quadrante]}">{len(qtdUnidades[quadrante])}</div>
+                                <div class="datap-{style[quadrante]}">{round((len(qtdUnidades[quadrante]*100)/totalUnidades), 2)}%</div>
+                            </div>
+                            <div class="data-box">
+                                <div>{dados_html[quadrante]}</div>
+                            </div>
+                        </div>
+                    </div>"""
+    
+    return boxTable
+
+def nineboxDatasUnidades(dadosNineboxUni):
+                        #LISTA DE UNIDADES NO LISTCELLNINETODOS
+    qtdUnidades = dadosNineboxUni[1] 
+    style = ["yellow", "green", "blue"]
+    txtHtml = []
+    for i in range(len(qtdUnidades)):
+        txtAux = ""
+
+        if len(qtdUnidades[i]) > 0:
+            for j in range(len(qtdUnidades[i])):
+                dados_ninebox = f"""<table class="tb">
+                        <tr class="tb-person-{style[i]}">
+                            <td>{qtdUnidades[i][j]}</td>
+                        </tr>
+                    </table>"""
+                
+                txtAux += dados_ninebox
+        txtHtml.append(txtAux)
+
+    return txtHtml
+
+def css_9box():
+    ninebox_style = """
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
+    *{
+        margin: 0;
+        padding: 0;
+    }
+
+    main{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .box{
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .box-blue,
+    .box-yellow,
+    .box-green{
+        margin: 10px 0px;
+        border-radius: 8px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-height: 200px;
+        min-height: 200px;
+        overflow: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        padding-right: 10px;
+        z-index: 2;
+
+    }
+
+    .box-yellow:hover,
+    .box-green:hover,
+    .box-blue:hover{
+        transform: scale(1.05);
+    }
+
+
+    .box-blue {
+        background-color: #FFEBEE;
+    }
+
+    .box-yellow {
+        background-color: #E0F7FA;
+    }
+
+    .box-green {
+        background-color: #E0F2F1;
+    }
+
+    .header-blue,
+    .header-yellow,
+    .header-green{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        width: 100%;
+        height: 60px;
+    }
+
+    .header-blue {
+        background-color: #FFEBEE;
+    }
+
+    .header-yellow {
+        background-color: #E0F7FA;
+    }
+
+    .header-green{
+        background-color: #E0F2F1;
+    }
+
+
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');
+    .title-blue,
+    .title-yellow,
+    .title-green{
+        font-size: 18px;
+        text-align: left;
+        margin: 0 5px;
+        width: auto;
+        height: 15px;
+        padding-left: 5px;
+        flex: 1;
+        color: #374151;
+       }
+
+    .data-blue,
+    .data-yellow,
+    .data-green{
+        font-size: 14px;
+        font-weight: bold;
+        color: #000;
+        text-align:center;
+        margin: 5px 0px;
+        border-radius: 20%;
+        width: 30px;
+        height: auto;
+        padding: 5px;
+    }
+
+    .data-blue {
+        background-color: #F8BBD0; 
+        color: #00004d;
+    }
+
+    .data-yellow {
+        background-color: #BBDEFB; 
+        color: #384200;
+    }
+
+    .data-green{
+        background-color: #C8E6C9; 
+        color: #002100;
+    }
+
+    .datap-blue,
+    .datap-yellow,
+    .datap-green{
+        font-size: 14px;
+        font-weight: bold;
+        color: #000;
+        text-align:center;
+        margin: 5px 10px;
+        border-radius: 20%;
+        width: auto;
+        height: auto;
+        padding: 5px;
+    }
+
+    .datap-blue {
+        background-color: #F8BBD0; 
+        color: #00004d;
+    }
+
+    .datap-yellow {
+        background-color: #BBDEFB; 
+        color: #384200;
+    }
+
+    .datap-green{
+        background-color: #C8E6C9; 
+        color: #002100;
+    }
+
+
+
+    .tb {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        margin: 5px;
+    }
+
+    .tb-person-blue td,
+    .tb-person-yellow td,
+    .tb-person-green td{
+        padding: 5px 5px;
+        border-radius: 5px;
+        color: #000;
+        font-size: 13px;
+    }
+
+    .st-emotion-cache-uvn0xz tr {
+        border-top: 0px
+    }
+    .tb-person-blue td {
+        background-color: #FFCDD2;
+    }
+
+    .tb-person-yellow td {
+        background-color: #BBDEFB;
+    }
+
+    .tb-person-green{
+        background-color: #C8E6C9;
+    }
+
+    .tb-person-blue:last-child td,
+    .tb-person-yellow:last-child td,
+    .tb-person-green:last-child td{
+        border: none;
+    }
+
+    .box-blue::-webkit-scrollbar {
+        width: 12px;
+        border-radius: 20px;
+    }
+
+    .box-blue::-webkit-scrollbar-track {
+        background: #FFCDD2;
+        border-radius: 20px;
+    }
+
+    .box-blue::-webkit-scrollbar-thumb {
+        background-color: #00004d;
+        border-radius: 20px;
+        border: 3px solid #FFCDD2;
+    }
+
+    .box-yellow::-webkit-scrollbar {
+        width: 12px;
+        border-radius: 20px;
+    }
+
+    .box-yellow::-webkit-scrollbar-track {
+        background: #BBDEFB;
+        border-radius: 20px;
+    }
+
+    .box-yellow::-webkit-scrollbar-thumb {
+        background-color: #384200;
+        border-radius: 20px;
+        border: 3px solid #BBDEFB;
+    }
+
+    .box-green::-webkit-scrollbar {
+        width: 12px;
+        border-radius: 20px;
+    }
+
+    .box-green::-webkit-scrollbar-track {
+        background: #C8E6C9;
+        border-radius: 20px;
+    }
+
+
+    .box-green::-webkit-scrollbar-thumb {
+        background-color: #002100;
+        border-radius: 20px;
+        border: 3px solid #C8E6C9;
+    }
+
+    .box-orange::-webkit-scrollbar {
+        width: 12px;
+        border-radius: 20px;
+    }
+
+    .box-orange::-webkit-scrollbar-track {
+        background: #f8cda9;
+        border-radius: 20px;
+    }
+
+    .box-orange::-webkit-scrollbar-thumb {
+        background-color: #492100;
+        border-radius: 20px;
+        border: 3px solid #f8cda9;
+    }
+
+    .box-red::-webkit-scrollbar {
+        width: 12px;
+        border-radius: 20px;
+    }
+
+    .box-red::-webkit-scrollbar-track {
+        background: #fcbcbc;
+        border-radius: 20px;
+    }
+
+    .box-red::-webkit-scrollbar-thumb {
+        background-color: #410000;
+        border-radius: 20px;
+        border: 3px solid #fcbcbc;
+    }
+
+    .tb-person-blue:hover td{
+        background-color: #92c2d3;
+        font-size: 13px;
+    }
+
+    .tb-person-green:hover td{
+        background-color: #c0ffa9;
+    }
+
+    .tb-person-yellow:hover td{
+        background-color: #BBDEFB;
+    }
+
+
+    @media(max-width: 1400px){
+        .header-blue,
+        .header-yellow,
+        .header-green{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            width: 100%;
+            height: auto;
+        }   
+    }
+    }
+
+    @media(max-width: 1000px){
+        .main{
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .line1,
+        .line2,
+        .line3{
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .box-blue,
+        .box-yellow,
+        .box-green{
+            width: 90%;
+            min-height: auto;
+            margin: 10px 5px;
+        }
+
+        .header-blue,
+        .header-yellow,
+        .header-green{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            width: 100%;
+            height: auto;
+        }
+    }"""
+
+    return ninebox_style
