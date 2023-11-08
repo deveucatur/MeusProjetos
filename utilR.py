@@ -1510,7 +1510,6 @@ def css_9box_home():
     p{
         font-weight: bold;
         font-size: 20px;
-        margin: 0 8px;
     }
 
     img{
