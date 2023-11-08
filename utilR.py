@@ -1649,7 +1649,7 @@ def css_9box_home():
 
 
     .box-green2::-webkit-scrollbar-thumb {
-        background-color: #454545;
+        background-color: #6c6c6c;
         border-radius: 20px;
         border: 1px solid #000;
     }
