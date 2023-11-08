@@ -1380,8 +1380,6 @@ def css_9box():
 
 
     @media(max-width: 1400px){
-        .header-blue,
-        .header-yellow,
         .header-green{
             display: flex;
             justify-content: space-between;
@@ -1410,16 +1408,12 @@ def css_9box():
             align-items: center;
         }
 
-        .box-blue,
-        .box-yellow,
         .box-green{
             width: 90%;
             min-height: auto;
             margin: 10px 5px;
         }
 
-        .header-blue,
-        .header-yellow,
         .header-green{
             display: flex;
             justify-content: space-between;
@@ -1649,15 +1643,13 @@ def css_9box_home():
     }
 
     .box-green2::-webkit-scrollbar-track {
-        background: #C8E6C9;
         border-radius: 20px;
     }
 
 
     .box-green2::-webkit-scrollbar-thumb {
-        background-color: #002100;
         border-radius: 20px;
-        border: 3px solid #C8E6C9;
+        border: 3px solid #000;
     }
 
     a,
