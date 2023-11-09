@@ -263,7 +263,8 @@ elif authentication_status:
                 project_filter = st.selectbox('Projetos', [x[1] for x in ddPaging if x[6] in program_filter])
                 
                 gestorProj = [x[3] for x in ddPaging if x[1] == project_filter][0]
-    
+
+                matriUser = 55760
                 dadosOrigin = [x for x in ddPaging if x[1] == project_filter]
                 cmd_entregas = f"""SELECT 
                                     (SELECT number_sprint FROM projeu_sprints WHERE id_sprint = projeu_entregas.id_sprint) AS NUMERO_SPRINT, 
@@ -342,36 +343,39 @@ elif authentication_status:
                     
                     with tab1:
                         col1, col2 = st.columns([3,1])
-                        #with col1:
-                        #    font_TITLE('ADICIONAR COLABORADORES À EQUIPE', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left')
                         with col2:
                             qntd_clb = st.number_input('Quantidade', min_value=0, step=1)
                         
                         for a in range(qntd_clb):
                             equipe_atual[f'{a}'] = ['', '', 'Executor']        
-                        
-                        col_equip1, col_equip2, col_equip3 = st.columns([0.3, 2, 1])
-                        with col_equip1:
-                            st.caption('Matricula')
-                        with col_equip2:
-                            st.caption('Colaboradores')
-                        with col_equip3:
-                            st.caption('Função')
 
-                        list_colbs = []
-                        equipe_list = [x for x in equipe_atual.values()]
-
-                        for colb_a in range(len(equipe_list)):
-                            with col_equip2:
-                                colb_name = st.selectbox('Colaboradores', [x[1] for x in users], list([x[1] for x in users]).index(equipe_list[colb_a][1]),label_visibility="collapsed", key=f'Nome Colab{colb_a}')        
+                        with st.form('FORMS ATUALIZAR EQUIPE'):
+                                
+                            col_equip1, col_equip2, col_equip3 = st.columns([0.3, 2, 1])
                             with col_equip1:
-                                colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0], label_visibility="collapsed", disabled=True, key=f'MatriculaColabs{colb_a}')
+                                st.caption('Matricula')
+                            with col_equip2:
+                                st.caption('Colaboradores')
                             with col_equip3:
-                                colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],list(['Especialista', 'Executor']).index(equipe_list[colb_a][2]), label_visibility="collapsed", key=f'funcaoColab{colb_a}')
-                            list_colbs.append([colab_matric, colb_funç])
-                        
-                        if matriUser == gestorProj:
-                            button_att_equipe = st.button('Atualizar', key='Atualizar Equipe WITH')
+                                st.caption('Função')
+
+                            list_colbs = []
+                            equipe_list = [x for x in equipe_atual.values()]
+
+                            for colb_a in range(len(equipe_list)):
+                                with col_equip2:
+                                    colb_name = st.selectbox('Colaboradores', [x[1] for x in users], list([x[1] for x in users]).index(equipe_list[colb_a][1]),label_visibility="collapsed", key=f'Nome Colab{colb_a}')        
+                                with col_equip1:
+                                    colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0], label_visibility="collapsed", disabled=True, key=f'MatriculaColabs{colb_a}')
+                                with col_equip3:
+                                    colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],list(['Especialista', 'Executor']).index(equipe_list[colb_a][2]), label_visibility="collapsed", key=f'funcaoColab{colb_a}')
+                                list_colbs.append([colab_matric, colb_funç])
+                            
+                            block_att = True
+                            if matriUser == gestorProj:
+                                 block_att = False
+
+                            button_att_equipe = st.form_submit_button('Atualizar', disabled=block_att)
                             if button_att_equipe:
                                 equipe_limp = [x for x in list_colbs if str(x[0]).strip() != '0']
                                 mycursor = conexao.cursor()
@@ -753,6 +757,7 @@ elif authentication_status:
             st.text(' ')
             st.text(' ')
             font_TITLE(f'AINDA NÃO HÁ PROJETOS VINCULADOS A VOCÊ!! ⏳', fonte_Projeto,"'Bebas Neue', sans-serif", 22, 'center')
+    
     with tabs2:
         if str(dados_user[0][8]).strip().upper() == 'A':
             fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');
@@ -790,7 +795,6 @@ elif authentication_status:
                 mvp_produt = st.text_input('Produto MVP')    
 
                 result_esperd = st.text_area('Resultado Esperado')
-
 
             ##### ADCIONANDO MÉTRICAS #####
             st.write('---')
