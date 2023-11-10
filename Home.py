@@ -233,9 +233,17 @@ elif authentication_status:
     perfilUsuario = [x[8] for x in dadosUser if str(x[1]).strip() == str(matriUser).strip()][0]
     font_TITLE('HOME', fonte_Projeto,"'Bebas Neue', sans-serif", 42, 'left')
 
-    matriUser = 9
-
-    sqlEntregas = f"""SELECT id_sprint, nome_Entrega, executor, stt_entrega FROM projeu_entregas WHERE stt_entrega NOT LIKE '%Concluído%' AND executor = {matriUser};"""
+    sqlEntregas = f"""SELECT 
+            projeu_entregas.id_sprint, 
+            projeu_entregas.nome_Entrega, 
+            projeu_entregas.executor, 
+            projeu_entregas.stt_entrega,
+            projeu_sprints.number_sprint,
+            projeu_projetos.name_proj
+        FROM projeu_entregas
+        JOIN projeu_sprints ON projeu_entregas.id_sprint = projeu_sprints.id_sprint
+        JOIN projeu_projetos ON projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
+        WHERE projeu_entregas.stt_entrega NOT LIKE '%Concluído%' AND projeu_entregas.executor = {matriUser};"""
     mycursor.execute(sqlEntregas)
     entregaProj = mycursor.fetchall()
     mycursor.close()
@@ -521,7 +529,7 @@ elif authentication_status:
         for i in range(len(entregaProj)):
             cardEntregaHtml = f"""<div class="main">
                     <div class="card">
-                        <div class="sprint">Sprint {str(entregaProj[i][0])}</div>
+                        <div class="sprint">Sprint {str(entregaProj[i][4])}</div>
                         <div class="entrega">Entrega: {entregaProj[i][1]}</div>
                         <div class="status">Status: {entregaProj[i][3]}</div>
                     </div>
@@ -556,6 +564,6 @@ elif authentication_status:
                     font-size: 16px;
                 }"""
             
-            with st.expander(f"Sprint {str(entregaProj[i][0])} | {entregaProj[i][1]}"):
+            with st.expander(f"{str(entregaProj[i][5])} || {entregaProj[i][1]}"):
                 st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
                 st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
