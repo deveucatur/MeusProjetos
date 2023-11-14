@@ -283,10 +283,11 @@ elif authentication_status:
         st.write(f'<style>{ninebox_style}</style>', unsafe_allow_html=True)
         st.write(f'<div>{html1}</div>', unsafe_allow_html=True) 
         
-        links = ["https://9box.eucatur.com.br/", "https://web.skype.com/", "https://chat.openai.com/"]
+        links = ["https://drive.google.com/file/d/1HitZgZkpMxlpj6_hDVlnTdg8ja_uuZYJ/view?usp=sharing", "https://drive.google.com/file/d/1TL-H33TrjgwdBM_eUD8gA9udqNNkkYrw/view?usp=sharing", "https://drive.google.com/file/d/1Wiz1EoiHNrZw4exVUdNVaWlN7AXH_Q3x/view?usp=sharing", "https://drive.google.com/file/d/1IjKIIIfFqZcFSKddc3ZWFnxrwdmlZznS/view?usp=sharing"]
         img_doc = 'https://cdn-icons-png.flaticon.com/128/6802/6802306.png'
+        matApoio = [[], [['Manual do gestor de projeto', 'Práticas de idealização, Planejamento, Implantação e Avaliação de Projetos', 'Política - Gerenciamento do portfólio de projetos', 'Produto MVP-Final']]]
 
-        html1 = ninebox_home(0, nineboxDatasUnidades_home(ddbox, links), ddbox, 'Material de Apoio', links, img_doc)
+        html1 = ninebox_home(0, nineboxDatasUnidades_home(matApoio, links), matApoio, 'Material de Apoio', links, img_doc)
         ninebox_style = css_9box_home()
         st.write(f'<style>{ninebox_style}</style>', unsafe_allow_html=True)
         st.write(f'<div>{html1}</div>', unsafe_allow_html=True) 
