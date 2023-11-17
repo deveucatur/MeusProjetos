@@ -1,4 +1,10 @@
 from PIL import Image
+from datetime import date, timedelta
+
+dataAtual = date.today()
+dataFutura = dataAtual + timedelta(days=3)
+dataFormatada = dataFutura.strftime("%d/%m/%Y")
+
 
 def complexidade_name(number):
     aux = {1: 'Fácil',
@@ -149,6 +155,31 @@ def escopoGeral(nome_colab, list_valores, txt_temporario, name_arquivo):
                 hr{{
                     margin: 5px 20px;
                 }}
+
+                .atencao{{
+                    text-align: center;
+                    padding: 20px;
+                    border-radius: 8px;
+                }}
+
+                .atencao p{{
+                    margin: 0;
+                    font-weight: bold;
+                    font-size: 1.2em;
+                }}
+
+                .aviso{{
+                    margin-top: 15px;
+                    background-color: #ffe6e6;
+                    border: 1px solid #ff9999;
+                    padding: 10px;
+                    border-radius: 8px;
+                }}
+
+                .aviso p{{
+                    margin: 0;
+                    color: #cc0000;
+                }}
             </style>
         </head>
         <body>
@@ -165,6 +196,12 @@ def escopoGeral(nome_colab, list_valores, txt_temporario, name_arquivo):
             <div class="relatorio">{tabela}</div>
             <div class="total">
                 <h3>Valor total: R${sum_total}</h3>
+            </div>
+            <div class="atencao">
+                <p>⚠️ Atenção!</p>
+                <div class="aviso">
+                    <p>Emitir nota fiscal até {dataFormatada} e enviar para o DP responsável</p>
+                </div>
             </div>
         </body>"""
     
