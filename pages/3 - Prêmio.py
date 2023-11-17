@@ -10,7 +10,8 @@ icone = Image.open('imagens/icone.png')
 st.set_page_config(
     page_title="Meus Prêmio",
     page_icon=icone,
-    layout="wide")
+    layout="wide",
+    initial_sidebar_state='collapsed')
 
 conexao = mysql.connector.connect(
     passwd='nineboxeucatur',
