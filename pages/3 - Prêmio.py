@@ -4,6 +4,7 @@ from PIL import Image
 import mysql.connector
 from datetime import datetime, timedelta
 import streamlit_authenticator as stauth
+from utilR import menuProjeuHtml, menuProjeuCss
 
 icone = Image.open('imagens/icone.png')
 st.set_page_config(
@@ -157,6 +158,11 @@ mycursor.close()
 names = [x[2] for x in dadosUser]
 usernames = [x[3] for x in dadosUser]
 hashed_passwords = [x[7] for x in dadosUser]
+
+menuHtml = menuProjeuHtml()
+menuCss = menuProjeuCss()
+st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
+st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
 
 def convert_to_dict(names, usernames, passwords):
     credentials = {"usernames": {}}
