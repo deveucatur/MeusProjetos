@@ -1,9 +1,10 @@
 import streamlit as st
 from PIL import Image
-from utilR import menuGeral, font_TITLE, PlotCanvas, ninebox_home, css_9box_home, nineboxDatasUnidades_home
+from utilR import font_TITLE, ninebox_home, css_9box_home, nineboxDatasUnidades_home
 from time import sleep
 import mysql.connector 
 import streamlit_authenticator as stauth
+from utilR import menuProjeuHtml, menuProjeuCss
 
 st.set_page_config(layout="wide")
 
@@ -142,7 +143,6 @@ sqlProjetoGover = f"""SELECT p.name_proj, p.id_proj FROM projeu_projetos p JOIN 
 mycursor.execute(sqlProjetoGover)
 projetoNomeGover = mycursor.fetchall()
 
-
 sqlCanva = f"""SELECT 
 	id_proj, 
 	name_proj, 
@@ -231,6 +231,13 @@ elif authentication_status:
 
     matriUser = [x[1] for x in dadosUser if x[3] == username][0]
     perfilUsuario = [x[8] for x in dadosUser if str(x[1]).strip() == str(matriUser).strip()][0]
+    user = [x[2] for x in dadosUser if x[3] == username][0]
+
+    menuHtml = menuProjeuHtml()
+    menuCss = menuProjeuCss()
+    st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
+    st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
+
     font_TITLE('HOME', fonte_Projeto,"'Bebas Neue', sans-serif", 42, 'left')
 
     sqlEntregas = f"""SELECT 
@@ -255,6 +262,7 @@ elif authentication_status:
         link = "https://9box.eucatur.com.br/Dashboard_Administrativo"
         image_url=  "https://cdn-icons-png.flaticon.com/128/3803/3803936.png"
         botao1(nomeBotão,link,image_url)
+
     with col2:
         st.write("")
         nomeBotão = "MEUS PROJETOS"
