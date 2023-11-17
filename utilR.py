@@ -1999,8 +1999,8 @@ def menuProjeuHtml():
                     <div class="icone">
                         <button type="button"><img src="https://cdn-icons-png.flaticon.com/128/2400/2400721.png" alt="ícone de configurações para alteração do módulo de uso"></button>
                         <div class="modulo">
-                            <a href="https://meusprojetos-mpjj.streamlit.app/" target="_self"><button type="button">Módulo de Execução</button></a>
-                            <a href="https://meusprojetos-mpjj-mg.streamlit.app/" target="_self"><button type="button">Módulo de Gestão</button></a>
+                            <a href="https://meusprojetos-mpjj.streamlit.app/"><button type="button">Módulo de Execução</button></a>
+                            <a href="https://meusprojetos-mpjj-mg.streamlit.app/"><button type="button">Módulo de Gestão</button></a>
                         </div>
                     </div>
                 </div>
