@@ -2125,6 +2125,29 @@ def menuProjeuCss():
 
         .logo:hover{{
             text-decoration: underline;
+        }}
+        
+        @media screen and (max-width: 650px){{
+            .menu{{
+                flex-direction: column;
+                height: auto;
+            }}
+
+            .botoes{{
+                margin-top: 10px;
+            }}
+
+            button{{
+                margin: 5px 0;
+            }}
+
+            .icone{{
+                margin-top: 10px;
+            }}
+
+            .modulo{{
+                right: -20px;
+            }}
         }}"""
     
     return styleMenuProjeu
