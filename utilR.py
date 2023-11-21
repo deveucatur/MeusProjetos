@@ -2019,13 +2019,18 @@ def menuProjeuCss():
 
         .menu{{
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            background-color: #F5F4F4;
-            color: #F5F4F4;
+            background-color: #fff;
+            color: #fff;
             padding: 10px 20px;
             width: 100%;
             height: 60px;
+        }}
+
+        .logo,
+        .botoes,
+        icone{{
+            margin-right: auto;
         }}
 
         .logo img,
@@ -2034,7 +2039,8 @@ def menuProjeuCss():
             min-height: 40px;
             font-family: 'Chakra Petch', sans-serif;
             font-weight: bold;
-            font-size: 40px
+            font-size: 40px;
+            margin: 0;
         }}
 
         .botoes button{{
@@ -2046,17 +2052,22 @@ def menuProjeuCss():
             color: #fff;
             cursor: pointer;
             font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }}
 
-        .icone img,
+        .icone img{{
+            width: 35px;
+            height: 35px;
+        }}
+
         .icone button{{
             background-color: #3b635a;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
             margin-right: 100px;
             cursor: pointer;
             border: none;
+            width: 40px;
+            height: 40px;
         }}
 
         .modulo{{
@@ -2071,6 +2082,7 @@ def menuProjeuCss():
             border-radius: 8px;
             padding: 10px;
             margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }}
 
         .modulo button{{
