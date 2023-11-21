@@ -15,7 +15,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state='collapsed')
 
-
 #CONEXÃO COM O BANCO DE DADOS AWS
 conexao = mysql.connector.connect(
     passwd='nineboxeucatur',
