@@ -2014,22 +2014,25 @@ def menuProjeuCss():
             position: fixed;
             top: 0;
             z-index: 999990;
-            width: 100%;
+            left: 50px;
+            right: 50px;
         }}
 
         .menu{{
             display: flex;
+            position: absolute;
             align-items: center;
-            background-color: #fff;
+            background: linear-gradient(to bottom, #9fdafc, #bae6ff, #dbf2fe);
             color: #fff;
             padding: 10px 20px;
             width: 100%;
             height: 60px;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
         }}
 
         .logo,
-        .botoes,
-        icone{{
+        .botoes{{
             margin-right: auto;
         }}
 
@@ -2037,22 +2040,29 @@ def menuProjeuCss():
         .logo h3{{
             min-width: 40px;
             min-height: 40px;
-            font-family: 'Chakra Petch', sans-serif;
-            font-weight: bold;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
             font-size: 40px;
             margin: 0;
         }}
 
         .botoes button{{
             margin-right: 10px;
-            padding: 10px 12px;
+            padding: 0px 10px;
             border: none;
-            border-radius: 5px;
-            background-color: #3b635a;
-            color: #fff;
+            background-color: transparent;
+            color: #000;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 16px;
+            transition: border-color 0.5s ease;
+        }}
+
+        .nome p{{
+            margin-right: 50px;
+            color: #000;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 12px;
         }}
 
         .icone img{{
@@ -2061,9 +2071,8 @@ def menuProjeuCss():
         }}
 
         .icone button{{
-            background-color: #3b635a;
+            background-color: #9fdafc;
             border-radius: 50%;
-            margin-right: 100px;
             cursor: pointer;
             border: none;
             width: 40px;
@@ -2074,12 +2083,12 @@ def menuProjeuCss():
             display: none;
             position: absolute;
             top: auto;
-            right: 100px;
+            right: 0;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: #3b635a;
+            background-color: #9fdafc;
             height: auto;
             width: 175px;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 10px;
             margin-top: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -2096,7 +2105,7 @@ def menuProjeuCss():
             position: absolute;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-bottom: 20px solid #3b635a;
+            border-bottom: 20px solid #9fdafc;
             top: -15px;
             right: 25px
         }}
@@ -2114,13 +2123,18 @@ def menuProjeuCss():
             border: none;
             cursor: pointer;
             font-weight: bold;
-            color: #fff;
+            color: #000;
             margin-bottom: 5px;
         }}
 
-        .botoes button:hover,
+        .botoes button:hover{{
+            border: none;
+            border-bottom: 2px solid #9fdafc;
+            cursor: pointer;
+        }}
+
         .modulo button:hover{{
-            background-color: #466e67;
+            background-color: #91c1dd;
         }}
 
         .logo:hover{{
@@ -2149,5 +2163,4 @@ def menuProjeuCss():
                 right: -20px;
             }}
         }}"""
-    
     return styleMenuProjeu
