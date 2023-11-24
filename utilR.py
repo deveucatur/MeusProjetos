@@ -1979,11 +1979,11 @@ class CalculoPrêmio:
         return retorno
     
 
-def menuProjeuHtml():
+def menuProjeuHtml(nome):
     menuProjeu = f"""<head>
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
         </head>
         <body>
             <div class="fixed">
@@ -1996,6 +1996,7 @@ def menuProjeuHtml():
                         <a href="https://meusprojetos-mpjj.streamlit.app/Meus_Projetos" target="_self"><button type="button" id="projetos">Projetos</button></a>
                         <a href="https://meusprojetos-mpjj.streamlit.app/Pr%C3%AAmio" target="_self"><button type="button" id="premio">Prêmio</button></a>
                     </div>
+                    <div class="nome"><p>{nome}</p></div>
                     <div class="icone">
                         <button type="button"><img src="https://cdn-icons-png.flaticon.com/128/5261/5261124.png" alt="ícone de configurações para alteração do módulo de uso"></button>
                         <div class="modulo">
@@ -2006,7 +2007,6 @@ def menuProjeuHtml():
                 </div>
             </div>
         </body>"""
-
     return menuProjeu
 
 def menuProjeuCss():
