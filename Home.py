@@ -285,14 +285,14 @@ elif authentication_status:
 
     col1, col2 = st.columns([1, 1.7])
     with col1:    
-        ddbox = [[], [['Projeto para teste', 'Projeto Teste 2', 'teste teste projeto 123']]]
-        links = [None, None, None]
-        img_doc = '''https://cdn-icons-png.flaticon.com/128/2665/2665632.png'''
+        # ddbox = [[], [['Projeto para teste', 'Projeto Teste 2', 'teste teste projeto 123']]]
+        # links = [None, None, None]
+        # img_doc = '''https://cdn-icons-png.flaticon.com/128/2665/2665632.png'''
         
-        html1 = ninebox_home(0, nineboxDatasUnidades_home(ddbox, links), ddbox, 'Ranking de Projetos', links, img_doc)
-        ninebox_style = css_9box_home()
-        st.write(f'<style>{ninebox_style}</style>', unsafe_allow_html=True)
-        st.write(f'<div>{html1}</div>', unsafe_allow_html=True) 
+        # html1 = ninebox_home(0, nineboxDatasUnidades_home(ddbox, links), ddbox, 'Ranking de Projetos', links, img_doc)
+        # ninebox_style = css_9box_home()
+        # st.write(f'<style>{ninebox_style}</style>', unsafe_allow_html=True)
+        # st.write(f'<div>{html1}</div>', unsafe_allow_html=True) 
         
         links = ["https://drive.google.com/file/d/1HitZgZkpMxlpj6_hDVlnTdg8ja_uuZYJ/view?usp=sharing", "https://drive.google.com/file/d/1TL-H33TrjgwdBM_eUD8gA9udqNNkkYrw/view?usp=sharing", "https://drive.google.com/file/d/1Wiz1EoiHNrZw4exVUdNVaWlN7AXH_Q3x/view?usp=sharing", "https://drive.google.com/file/d/1IjKIIIfFqZcFSKddc3ZWFnxrwdmlZznS/view?usp=sharing"]
         img_doc = 'https://cdn-icons-png.flaticon.com/128/6802/6802306.png'
