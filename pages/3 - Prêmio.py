@@ -159,14 +159,7 @@ mycursor.close()
 names = [x[2] for x in dadosUser]
 usernames = [x[3] for x in dadosUser]
 hashed_passwords = [x[7] for x in dadosUser]
-user = [x[2] for x in dadosUser if x[3] == usernames][0]
 
-primeiroNome = user.split()[0]
-
-menuHtml = menuProjeuHtml(primeiroNome)
-menuCss = menuProjeuCss()
-st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
-st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
 
 def convert_to_dict(names, usernames, passwords):
     credentials = {"usernames": {}}
@@ -193,6 +186,15 @@ elif authentication_status == None:
     with col2:
         st.warning('Insira seu Email e Senha')
 elif authentication_status:
+
+    user = [x[2] for x in dadosUser if x[3] == username][0]
+
+    primeiroNome = user.split()[0]
+
+    menuHtml = menuProjeuHtml(primeiroNome)
+    menuCss = menuProjeuCss()
+    st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
+    st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
 
     fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
     font_TITLE('MEUS PRÊMIOS', fonte_Projeto,"'Bebas Neue', sans-serif", 49, 'center')
