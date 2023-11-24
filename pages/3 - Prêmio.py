@@ -159,8 +159,11 @@ mycursor.close()
 names = [x[2] for x in dadosUser]
 usernames = [x[3] for x in dadosUser]
 hashed_passwords = [x[7] for x in dadosUser]
+user = [x[2] for x in dadosUser if x[3] == usernames][0]
 
-menuHtml = menuProjeuHtml()
+primeiroNome = user.split()[0]
+
+menuHtml = menuProjeuHtml(primeiroNome)
 menuCss = menuProjeuCss()
 st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
 st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
