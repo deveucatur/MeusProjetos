@@ -249,6 +249,7 @@ elif authentication_status:
     matriUser = [x[1] for x in dadosUser if x[3] == username][0]
     ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split(',') or matriUser == x[3]]
     dados_user = [x for x in usersBD if str(x[1]).strip() == str(matriUser).strip()]
+    user = [x[2] for x in dadosUser if x[3] == username][0]
 
     primeiroNome = user.split()[0]
 
