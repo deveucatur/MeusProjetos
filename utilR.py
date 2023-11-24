@@ -1660,7 +1660,7 @@ def css_9box_home():
     }
 
     .tb-person-green2:hover td{
-        background-color: #c0ffa9;
+        background: linear-gradient(to bottom, #9fdafc, #bae6ff, #dbf2fe);
         width: 100%;
     }
 
