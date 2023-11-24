@@ -101,13 +101,13 @@ def botao1(nomeBotao, link, image_path):
             text-align: center;
             font-size: 15px;
             border-radius: 10px;
-            transition: background-color 0.6s ease;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             max-width: 100%;
             border-radius: 20px;
+            transition: background-color 0.5s ease;
         }}
         .botao-estiloso:hover {{
-            background-color: #c0ffa9;
+            background: linear-gradient(to bottom, #9fdafc, #bae6ff, #dbf2fe);
             border-radius: 20px;
         }}
         .botao-imagem {{
