@@ -284,7 +284,8 @@ elif authentication_status:
 
 
     col1, col2 = st.columns([1, 1.7])
-    with col1:    
+    with col1:
+        # TABELA DE RANKING DE PROJETOS - COMENTADO POR FALTA DE DADOS NO MOMENTO
         # ddbox = [[], [['Projeto para teste', 'Projeto Teste 2', 'teste teste projeto 123']]]
         # links = [None, None, None]
         # img_doc = '''https://cdn-icons-png.flaticon.com/128/2665/2665632.png'''
