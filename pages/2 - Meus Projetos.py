@@ -250,7 +250,9 @@ elif authentication_status:
     ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split(',') or matriUser == x[3]]
     dados_user = [x for x in usersBD if str(x[1]).strip() == str(matriUser).strip()]
 
-    menuHtml = menuProjeuHtml()
+    primeiroNome = user.split()[0]
+
+    menuHtml = menuProjeuHtml(primeiroNome)
     menuCss = menuProjeuCss()
     st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
     st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
