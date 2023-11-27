@@ -262,21 +262,21 @@ elif authentication_status:
     with col1:
         st.write("")
         nomeBotão = "CADASTRO DE PROJETOS"
-        link = "https://9box.eucatur.com.br/Dashboard_Administrativo"
+        link = "https://meusprojetos-mpjj.streamlit.app/Meus_Projetos"
         image_url=  "https://cdn-icons-png.flaticon.com/128/3803/3803936.png"
         botao1(nomeBotão,link,image_url)
 
     with col2:
         st.write("")
         nomeBotão = "MEUS PROJETOS"
-        link = 'https://9box.eucatur.com.br/Dashboard_Administrativo'
+        link = "https://meusprojetos-mpjj.streamlit.app/Meus_Projetos"
         image_url=  "https://cdn-icons-png.flaticon.com/128/64/64572.png"
         botao1(nomeBotão,link,image_url)
 
     with col3:    
         st.write("")
         nomeBotão = 'PRÊMIO'
-        link = 'https://9box.eucatur.com.br/PDI'
+        link = "https://meusprojetos-mpjj.streamlit.app/Pr%C3%AAmio"
         image_url="https://cdn-icons-png.flaticon.com/128/4798/4798118.png"
         botao1(nomeBotão,link,image_url)
 
