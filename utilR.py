@@ -1992,9 +1992,9 @@ def menuProjeuHtml(nome):
                         <h3>PROJEU</h3>
                     </div>
                     <div class="botoes">
-                        <a href="https://meusprojetos-mpjj.streamlit.app/" target="_self"><button type="button" id="home">Home</button></a>
+                        <!-- <a href="https://meusprojetos-mpjj.streamlit.app/" target="_self"><button type="button" id="home">Home</button></a>
                         <a href="https://meusprojetos-mpjj.streamlit.app/Meus_Projetos" target="_self"><button type="button" id="projetos">Projetos</button></a>
-                        <a href="https://meusprojetos-mpjj.streamlit.app/Pr%C3%AAmio" target="_self"><button type="button" id="premio">Prêmio</button></a>
+                        <a href="https://meusprojetos-mpjj.streamlit.app/Pr%C3%AAmio" target="_self"><button type="button" id="premio">Prêmio</button></a> -->
                     </div>
                     <div class="nome"><p>{nome}</p></div>
                     <div class="icone">
