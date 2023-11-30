@@ -651,6 +651,7 @@ elif authentication_status:
                                                         mycursor = conexao.cursor()
 
                                                         for list_atual in listDadosAux:
+                                                            list_atual[0] = list_atual[0].replace('"', "'")
                                                             if list_atual[5] != None: #SE A ENTREGA DA "list_atual" JÁ ESTIVER DENTRO DO BANCO DE DADOS SOMENTE VAI ATUALIZAR AS INFORMAÇÕES SOBRE A ENTREGA
                                                                 columnsUP = ['nome_Entrega', 'executor', 'hra_necess', 'stt_entrega', 'compl_entrega']
 
@@ -688,35 +689,31 @@ elif authentication_status:
                                                         # st.write(listDadosAux)
 
                                                 else:
-                                                    mycursor = conexao.cursor()
                                                     button_inic_entreg = st.form_submit_button('Enviar')
                                                     if button_inic_entreg:
-                                                        for list_atual in listDadosAux:
-                                                            for i in range(len(EntregasBD)):
-                                                                if list_atual[0] in EntregasBD[i][1]:
-                                                                    st.toast(f"O nome de entrega {list_atual[0]} já existe.", icon='❌')
-                                                                else:
-                                                                    tables = ['projeu_entregas', 'projeu_entregas_planejamento']
+                                                        mycursor = conexao.cursor()
+                                                        tables = ['projeu_entregas', 'projeu_entregas_planejamento']
 
-                                                                    for table_name in tables:
-                                                                        for list_atual in listDadosAux:
-                                                                            cmd_insert = f'''
-                                                                                INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
-                                                                                    values((SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {spEntregas[0][0]}  
-                                                                                        AND id_proj_fgkey = 
-                                                                                            (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{dadosOrigin[0][1]}') LIMIT 1),
-                                                                                            "{limp_entrg(list_atual[0])}", 
-                                                                                            (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
-                                                                                            {list_atual[2]},
-                                                                                            "{list_atual[3]}",
-                                                                                            "{list_atual[4]}");'''
+                                                        for table_name in tables:
+                                                            for list_atual in listDadosAux:
+                                                                list_atual[0] = list_atual[0].replace('"', "'")
+                                                                cmd_insert = f'''
+                                                                    INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
+                                                                        values((SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {spEntregas[0][0]}  
+                                                                            AND id_proj_fgkey = 
+                                                                                (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{dadosOrigin[0][1]}') LIMIT 1),
+                                                                                "{limp_entrg(list_atual[0])}", 
+                                                                                (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
+                                                                                {list_atual[2]},
+                                                                                "{list_atual[3]}",
+                                                                                "{list_atual[4]}");'''
 
-                                                                            mycursor.execute(cmd_insert)
-                                                                            conexao.commit()
-                                                                    st.toast('Entregas Enviadas!', icon='✅')
-                                                                    mycursor.close()
-                                                                    sleep(1)
-                                                                    st.rerun()
+                                                                mycursor.execute(cmd_insert)
+                                                                conexao.commit()
+                                                        st.toast('Entregas Enviadas!', icon='✅')
+                                                        mycursor.close()
+                                                        sleep(1)
+                                                        st.rerun()
                                                     
                                     with tab2:
                                         font_TITLE('EXCLUIR', fonte_Projeto,"'Bebas Neue', sans-serif", 23, 'left')  
