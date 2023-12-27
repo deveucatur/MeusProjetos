@@ -4,14 +4,14 @@ from PIL import Image
 import mysql.connector
 from datetime import datetime, timedelta
 import streamlit_authenticator as stauth
+from dateutil.relativedelta import relativedelta
 from utilR import menuProjeuHtml, menuProjeuCss
 
 icone = Image.open('imagens/icone.png')
 st.set_page_config(
     page_title="Meus Prêmio",
     page_icon=icone,
-    layout="wide",
-    initial_sidebar_state='collapsed')
+    layout="wide")
 
 conexao = mysql.connector.connect(
     passwd='nineboxeucatur',
@@ -23,9 +23,10 @@ conexao = mysql.connector.connect(
 
 mycursor = conexao.cursor()
 
+
 def premios_user_bd(matricula):
-    mycursor = conexao.cursor() 
-    mycursor.execute(f"""
+    mycursor = conexao.cursor()
+    cmd = f"""
     SELECT 
         PS.id_sprint,
         PS.number_sprint,
@@ -69,11 +70,14 @@ def premios_user_bd(matricula):
         PPE.bonificado_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {str(matricula).strip()})
         AND
             PS.check_consolid = 1 OR PS.check_consolid IS NULL
-    GROUP BY PPE.id_premio;""")
+    GROUP BY PPE.id_premio;""" 
+    mycursor.execute(cmd)
+
     premiosbd = mycursor.fetchall()
     mycursor.close()
 
     return premiosbd
+
 
 def cardImg(image_url):
     st.markdown(
@@ -118,6 +122,8 @@ def complexidade_name(number):
     return aux[number]
 
 
+fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
+font_TITLE('MEUS PRÊMIOS', fonte_Projeto,"'Bebas Neue', sans-serif", 49, 'center')
 meses = [
         "Janeiro",
         "Fevereiro",
@@ -160,7 +166,6 @@ names = [x[2] for x in dadosUser]
 usernames = [x[3] for x in dadosUser]
 hashed_passwords = [x[7] for x in dadosUser]
 
-
 def convert_to_dict(names, usernames, passwords):
     credentials = {"usernames": {}}
     for name, username, password in zip(names, usernames, passwords):
@@ -186,6 +191,8 @@ elif authentication_status == None:
     with col2:
         st.warning('Insira seu Email e Senha')
 elif authentication_status:
+    with st.sidebar:
+        authenticator.logout('Logout', 'main')
 
     user = [x[2] for x in dadosUser if x[3] == username][0]
 
@@ -195,9 +202,6 @@ elif authentication_status:
     menuCss = menuProjeuCss()
     st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
     st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
-
-    fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
-    font_TITLE('MEUS PRÊMIOS', fonte_Projeto,"'Bebas Neue', sans-serif", 49, 'center')
     
     matriUser = [x[1] for x in dadosUser if x[3] == username][0]
     premiosbd = premios_user_bd(matriUser)
@@ -211,10 +215,12 @@ elif authentication_status:
             user_project = [user_project]
 
         mes_atual = datetime.now()
-        mes_project = st.selectbox('Período', meses, mes_atual.month)
+
+        mes_project = st.selectbox('Período', meses, (mes_atual.month)-1)
         
-        data_final = datetime(mes_atual.year, meses_by_number(mes_project), 25)                    
-        data_inicial = datetime(int(mes_atual.year), meses_by_number(mes_project)-1, 26)
+        #PEGANDO O RANGE DE DATAS
+        data_final = datetime(mes_atual.year, meses_by_number(mes_project), 25) 
+        data_inicial = (data_final - relativedelta(months=1)) + timedelta(days=1)
         
         range_datas = []
         data_atual = data_inicial
@@ -222,6 +228,7 @@ elif authentication_status:
             range_datas.append(data_atual)
             data_atual += timedelta(days=1)    
 
+                                             #PEGANDO SOMENTE AS ENTREGAS DAQUELE PROJETO                                         #SOMENTE AS ENTREGAS QUE FINALIZAM DENTRO NO RANGE DE DATAS
         premiosuser = [x for x in premiosbd if str(x[4]).strip().lower() in [str(x).strip().lower() for x in list(user_project)] and datetime.strptime(str(x[3]), "%Y-%m-%d") in range_datas] 
 
     if len(premiosuser) > 0:
