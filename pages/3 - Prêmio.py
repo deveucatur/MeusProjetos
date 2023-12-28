@@ -56,7 +56,8 @@ def premios_user_bd(matricula):
             FROM 
                 projeu_empresas AS PEM 
             WHERE id_empresa = PU.empresa_fgkey
-        ) AS NUMBER_EMPRESA
+        ) AS NUMBER_EMPRESA,
+        PS.status_sprint
     FROM projeu_premio_entr AS PPE
     LEFT JOIN 
         projeu_sprints PS ON PS.id_sprint = PPE.id_sprint_fgkey
@@ -289,7 +290,7 @@ elif authentication_status:
 
                 for name_entrg in tarefas_do_project:
                     with col1:
-                        st.text_input('Atividade', name_entrg[5] if name_entrg[5] != '' and name_entrg[5] != None else sigla_by_func(name_entrg[8]), key=f'atividade{name_proj} - {name_entrg}', label_visibility="collapsed")
+                        st.text_input('Atividade', name_entrg[5] if name_entrg[5] != '' and name_entrg[5] != None else f'{name_entrg[17]} - {sigla_by_func(name_entrg[8])}', key=f'atividade{name_proj} - {name_entrg}', label_visibility="collapsed")
                     with col2:
                         st.text_input('Sprint', name_entrg[1], key=f'sprint{name_proj} - {name_entrg}', label_visibility="collapsed")
                     with col3:
