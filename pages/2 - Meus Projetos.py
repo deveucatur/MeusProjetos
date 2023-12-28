@@ -340,13 +340,14 @@ elif authentication_status:
                 st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
 
                 st.text(' ')
+                
                 func_split = lambda x: x.split(",") if x is not None else [x]
                 #ESPAÇO PARA MANIPULAR OS COLABORADORES VINCULADOS À AQUELE PROJETO
                 with st.expander('Equipe do Projeto'):
                     matriculasEQUIP = func_split(dadosOrigin[0][23])
                     equipe_atual = {matriculasEQUIP[idx_mat]: [matriculasEQUIP[idx_mat], func_split(dadosOrigin[0][21])[idx_mat], func_split(dadosOrigin[0][22])[idx_mat],  func_split(dadosOrigin[0][20])[idx_mat]] for idx_mat in range(len(matriculasEQUIP)) if matriculasEQUIP[idx_mat] != str(dadosOrigin[0][3]).strip()}
 
-                    tab1, tab2 = st.tabs(['Adcionar', 'Excluir'])
+                    tab1, tab2 = st.tabs(['Adicionar', 'Excluir'])
                     
                     with tab1:
                         col1, col2 = st.columns([3,1])
@@ -448,7 +449,7 @@ elif authentication_status:
                 param_sprint = ['PRÉ MVP', 'MVP', 'PÓS MVP', 'ENTREGA FINAL']
 
                 font_TITLE('SPRINTS DO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
-                with st.expander('Adcionar Sprint'):
+                with st.expander('Adicionar Sprint'):
                     #FUNÇÃO PARA IDENTIFICAR SE A COLUNA DO BANCO DE DADOS ESTÁ VAZIA 
                     maior_idx = max([param_sprint.index(x)+1 if x != None else 0 for x in func_split(dadosOrigin[0][12])])
                     
@@ -476,7 +477,7 @@ elif authentication_status:
                     if matriUser == gestorProj:
                         colAdd, colExc = st.columns([1,7])
                         with colAdd:
-                            button_addSprint = st.button('Adcionar Sprint', disabled=disabledON)
+                            button_addSprint = st.button('Adicionar Sprint', disabled=disabledON)
                         with colExc:
                             button_exSprint = st.button('Excluir Sprint', disabled=disabledOF)
                         
@@ -582,7 +583,7 @@ elif authentication_status:
                                     with tab1:
                                         #FORMULÁRIO APRESENTANDO AS ENTREGAS
                                         col1, col2, col3 = st.columns([3,1,1])
-                                        qnt_att = st.number_input('Adcionar Atividade', min_value=0, step=1, key=f'add{idx_spr} - {idx_parm}')
+                                        qnt_att = st.number_input('Adcionar Entregas', min_value=0, step=1, key=f'add{idx_spr} - {idx_parm}')
                                         
                                         spEntregas.extend([[idx_spr, None, None, 0 , '---', '🟨 Backlog', None] for x in range(qnt_att)])
 
