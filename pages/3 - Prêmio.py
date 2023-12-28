@@ -157,7 +157,15 @@ def meses_by_number(mes):
         }
     return meses_do_ano[mes]
 
-comandUSERS = 'SELECT * FROM projeu_users;'
+
+def sigla_by_func(sigla):
+    func = {'G': 'Gestor',
+            'E': 'Especialista',
+            'EX': 'Executor'}
+    
+    return func[sigla]
+
+comandUSERS = "SELECT * FROM projeu_users WHERE perfil_proj in ('A', 'L', 'GV');"
 mycursor.execute(comandUSERS)
 dadosUser = mycursor.fetchall()
 mycursor.close()
@@ -194,99 +202,101 @@ elif authentication_status:
     with st.sidebar:
         authenticator.logout('Logout', 'main')
 
-    user = [x[2] for x in dadosUser if x[3] == username][0]
-
-    primeiroNome = user.split()[0]
+    dados_usuario = [x for x in dadosUser if x[3] == username][0]
+    primeiroNome = dados_usuario[2].split()[0]
 
     menuHtml = menuProjeuHtml(primeiroNome)
     menuCss = menuProjeuCss()
     st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
     st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
     
-    matriUser = [x[1] for x in dadosUser if x[3] == username][0]
-    premiosbd = premios_user_bd(matriUser)
-    with st.expander('Filtro'):
-        projetos = list(set([x[4] for x in premiosbd]))
-        projetos.append('TODOS')
-        user_project = st.selectbox('Projeto', projetos, projetos.index('TODOS'))
-        if user_project == 'TODOS':
-            user_project = [str(x).strip() for x in projetos if x != 'TODOS']
-        else:
-            user_project = [user_project]
+    if str(dados_usuario[9]).strip() not in ['219', '213', '1']:
+        matriUser = dados_usuario[1]
+        premiosbd = premios_user_bd(matriUser)
+        with st.expander('Filtro'):
+            projetos = list(set([x[4] for x in premiosbd]))
+            projetos.append('TODOS')
+            user_project = st.selectbox('Projeto', projetos, projetos.index('TODOS'))
+            if user_project == 'TODOS':
+                user_project = [str(x).strip() for x in projetos if x != 'TODOS']
+            else:
+                user_project = [user_project]
 
-        mes_atual = datetime.now()
+            mes_atual = datetime.now()
 
-        mes_project = st.selectbox('Período', meses, (mes_atual.month)-1)
-        
-        #PEGANDO O RANGE DE DATAS
-        data_final = datetime(mes_atual.year, meses_by_number(mes_project), 25) 
-        data_inicial = (data_final - relativedelta(months=1)) + timedelta(days=1)
-        
-        range_datas = []
-        data_atual = data_inicial
-        while data_atual <= data_final:
-            range_datas.append(data_atual)
-            data_atual += timedelta(days=1)    
-
-                                             #PEGANDO SOMENTE AS ENTREGAS DAQUELE PROJETO                                         #SOMENTE AS ENTREGAS QUE FINALIZAM DENTRO NO RANGE DE DATAS
-        premiosuser = [x for x in premiosbd if str(x[4]).strip().lower() in [str(x).strip().lower() for x in list(user_project)] and datetime.strptime(str(x[3]), "%Y-%m-%d") in range_datas] 
-
-    if len(premiosuser) > 0:
-        st.text(' ')
-        col1, col2 = st.columns([1, 3])
-
-        with col1:
-            font_TITLE('DESEMPENHO MENSAL', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
-
-            image_url=  r"https://th.bing.com/th/id/R.5bef3f83aa5b90c7913386dde6143553?rik=vpAUUjGY9Rl50w&riu=http%3a%2f%2finterpacificoltda.hostdataset.com%2fipexports%2fppa%2fimg%2fUsuario.png&ehk=7QiNoqM5sO%2fJhX8rNRTAoWxozQEWhPz8xCZ7L7evY9s%3d&risl=&pid=ImgRaw&r=0"
-            cardImg(image_url)
-            st.markdown(f'{premiosuser[0][7]}')
-
-        with col2:    
-            st.text(' ')
-            col1, col2, col3, col4, col5 = st.columns([0.6,1,1,1,1])
-            with col2:
-                font_TITLE('PROJETOS', fonte_Projeto,"'Bebas Neue', sans-serif", 32, 'center')
-                font_TITLE(f'{len(set([x[4] for x in premiosuser]))}', fonte_Projeto,"'Bebas Neue', sans-serif", 44, 'center')
-            with col3:
-                font_TITLE('ATIVIDADES', fonte_Projeto,"'Bebas Neue', sans-serif", 32, 'center')
-                font_TITLE(f'{len(premiosuser)}', fonte_Projeto,"'Bebas Neue', sans-serif", 44, 'center')
-            with col4:
-                font_TITLE('HORAS', fonte_Projeto,"'Bebas Neue', sans-serif", 32, 'center')
-                font_TITLE(f'{sum([x[9] if x[9] != None else 0 for x in premiosuser])}', fonte_Projeto,"'Bebas Neue', sans-serif", 44, 'center')
-            with col5:
-                font_TITLE('BONIFICAÇÃO', fonte_Projeto,"'Bebas Neue', sans-serif", 32, 'center')
-                font_TITLE(f'R${round(sum([x[12] for x in premiosuser]), 2)}', fonte_Projeto,"'Bebas Neue', sans-serif", 44, 'center')
-
-        st.text(' ')
-        st.text(' ')
-        st.text(' ')
-        st.divider()
-        font_TITLE('RELATÓRIO TAREFAS MENSAIS', fonte_Projeto,"'Bebas Neue', sans-serif", 45, 'left')
-        for name_proj in list(set([str(x[4]).strip() for x in premiosuser])):
-            tarefas_do_project = [x for x in premiosuser if str(x[4]).strip() == name_proj] 
-            font_TITLE(f'{name_proj}', fonte_Projeto,"'Bebas Neue', sans-serif", 22, 'left')
+            mes_project = st.selectbox('Período', meses, (mes_atual.month)-1)
             
-            col1, col2, col3, col4, col5 = st.columns([2,0.5,0.4,0.4,0.4])
-            with col1:
-                st.caption('Atividade')
-            with col2:
-                st.caption('Sprint')
-            with col3:
-                st.caption('Horas')
-            with col4:
-                st.caption('Compl.')
-            with col5:
-                st.caption('Valor')
+            #PEGANDO O RANGE DE DATAS
+            data_final = datetime(mes_atual.year, meses_by_number(mes_project), 25) 
+            data_inicial = (data_final - relativedelta(months=1)) + timedelta(days=1)
+            
+            range_datas = []
+            data_atual = data_inicial
+            while data_atual <= data_final:
+                range_datas.append(data_atual)
+                data_atual += timedelta(days=1)    
 
-            for name_entrg in tarefas_do_project:
-                with col1:
-                    st.text_input('Atividade', name_entrg[5] if name_entrg[5] != '' and name_entrg[5] != None else 'Gestor/Especialista', key=f'atividade{name_proj} - {name_entrg}', label_visibility="collapsed")
+                                                #PEGANDO SOMENTE AS ENTREGAS DAQUELE PROJETO                                         #SOMENTE AS ENTREGAS QUE FINALIZAM DENTRO NO RANGE DE DATAS
+            premiosuser = [x for x in premiosbd if str(x[4]).strip().lower() in [str(x).strip().lower() for x in list(user_project)] and datetime.strptime(str(x[3]), "%Y-%m-%d") in range_datas] 
+
+        if len(premiosuser) > 0:
+            st.text(' ')
+            col1, col2 = st.columns([1, 3])
+
+            with col1:
+                font_TITLE('DESEMPENHO MENSAL', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
+
+                image_url=  r"https://th.bing.com/th/id/R.5bef3f83aa5b90c7913386dde6143553?rik=vpAUUjGY9Rl50w&riu=http%3a%2f%2finterpacificoltda.hostdataset.com%2fipexports%2fppa%2fimg%2fUsuario.png&ehk=7QiNoqM5sO%2fJhX8rNRTAoWxozQEWhPz8xCZ7L7evY9s%3d&risl=&pid=ImgRaw&r=0"
+                cardImg(image_url)
+                st.markdown(f'{premiosuser[0][7]}')
+
+            with col2:    
+                st.text(' ')
+                col1, col2, col3, col4, col5 = st.columns([0.6,1,1,1,1])
                 with col2:
-                    st.text_input('Sprint', name_entrg[1], key=f'sprint{name_proj} - {name_entrg}', label_visibility="collapsed")
+                    font_TITLE('PROJETOS', fonte_Projeto,"'Bebas Neue', sans-serif", 32, 'center')
+                    font_TITLE(f'{len(set([x[4] for x in premiosuser]))}', fonte_Projeto,"'Bebas Neue', sans-serif", 44, 'center')
                 with col3:
-                    st.text_input('Horas', f'{name_entrg[9] if name_entrg[9] != None else 0} hrs', key=f'horas{name_proj} - {name_entrg}', label_visibility="collapsed")
+                    font_TITLE('ATIVIDADES', fonte_Projeto,"'Bebas Neue', sans-serif", 32, 'center')
+                    font_TITLE(f'{len(premiosuser)}', fonte_Projeto,"'Bebas Neue', sans-serif", 44, 'center')
                 with col4:
-                    st.text_input('Compl.', complexidade_name(name_entrg[11]) if name_entrg[11] != None else '', key=f'complex{name_proj} - {name_entrg}', label_visibility="collapsed")
+                    font_TITLE('HORAS', fonte_Projeto,"'Bebas Neue', sans-serif", 32, 'center')
+                    font_TITLE(f'{sum([x[9] if x[9] != None else 0 for x in premiosuser])}', fonte_Projeto,"'Bebas Neue', sans-serif", 44, 'center')
                 with col5:
-                    st.text_input('Valor', f'R$ {name_entrg[12]}', key=f'valor{name_proj} - {name_entrg}', label_visibility="collapsed")
+                    font_TITLE('BONIFICAÇÃO', fonte_Projeto,"'Bebas Neue', sans-serif", 32, 'center')
+                    font_TITLE(f'R${round(sum([x[12] for x in premiosuser]), 2)}', fonte_Projeto,"'Bebas Neue', sans-serif", 44, 'center')
+
+            st.text(' ')
+            st.text(' ')
+            st.text(' ')
+            st.divider()
+            font_TITLE('RELATÓRIO TAREFAS MENSAIS', fonte_Projeto,"'Bebas Neue', sans-serif", 45, 'left')
+            for name_proj in list(set([str(x[4]).strip() for x in premiosuser])):
+                tarefas_do_project = [x for x in premiosuser if str(x[4]).strip() == str(name_proj).strip()] 
+                font_TITLE(f'{name_proj}', fonte_Projeto,"'Bebas Neue', sans-serif", 22, 'left')
+                
+                col1, col2, col3, col4, col5 = st.columns([2,0.5,0.4,0.4,0.4])
+                with col1:
+                    st.caption('Atividade')
+                with col2:
+                    st.caption('Sprint')
+                with col3:
+                    st.caption('Horas')
+                with col4:
+                    st.caption('Compl.')
+                with col5:
+                    st.caption('Valor')
+
+                for name_entrg in tarefas_do_project:
+                    with col1:
+                        st.text_input('Atividade', name_entrg[5] if name_entrg[5] != '' and name_entrg[5] != None else sigla_by_func(name_entrg[8]), key=f'atividade{name_proj} - {name_entrg}', label_visibility="collapsed")
+                    with col2:
+                        st.text_input('Sprint', name_entrg[1], key=f'sprint{name_proj} - {name_entrg}', label_visibility="collapsed")
+                    with col3:
+                        st.text_input('Horas', f'{name_entrg[9] if name_entrg[9] != None else 0} hrs', key=f'horas{name_proj} - {name_entrg}', label_visibility="collapsed")
+                    with col4:
+                        st.text_input('Compl.', complexidade_name(name_entrg[11]) if name_entrg[11] != None else '', key=f'complex{name_proj} - {name_entrg}', label_visibility="collapsed")
+                    with col5:
+                        st.text_input('Valor', f'R$ {name_entrg[12]}', key=f'valor{name_proj} - {name_entrg}', label_visibility="collapsed")
+    else:
+        st.error('VISUALIZAÇÃO NÃO DISPONÍVEL.')
