@@ -169,7 +169,7 @@ def sigla_by_func(sigla):
     return func[sigla]
 
 
-comandUSERS = "SELECT * FROM projeu_users WHERE perfil_proj in ('A', 'L', 'GV');"
+comandUSERS = "SELECT * FROM projeu_users;"
 mycursor.execute(comandUSERS)
 dadosUser = mycursor.fetchall()
 mycursor.close()
