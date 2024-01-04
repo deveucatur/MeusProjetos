@@ -57,7 +57,8 @@ def premios_user_bd(matricula):
                 projeu_empresas AS PEM 
             WHERE id_empresa = PU.empresa_fgkey
         ) AS NUMBER_EMPRESA,
-        PS.status_sprint
+        PS.status_sprint,
+        PS.date_check_consolid
     FROM projeu_premio_entr AS PPE
     LEFT JOIN 
         projeu_sprints PS ON PS.id_sprint = PPE.id_sprint_fgkey
@@ -72,6 +73,7 @@ def premios_user_bd(matricula):
         AND
             PS.check_consolid = 1 OR PS.check_consolid IS NULL
     GROUP BY PPE.id_premio;""" 
+    
     mycursor.execute(cmd)
 
     premiosbd = mycursor.fetchall()
@@ -166,7 +168,8 @@ def sigla_by_func(sigla):
     
     return func[sigla]
 
-comandUSERS = "SELECT * FROM projeu_users WHERE perfil_proj in ('A', 'L', 'GV');"
+
+comandUSERS = "SELECT * FROM projeu_users;"
 mycursor.execute(comandUSERS)
 dadosUser = mycursor.fetchall()
 mycursor.close()
@@ -214,6 +217,7 @@ elif authentication_status:
     if str(dados_usuario[9]).strip() not in ['219', '213', '1']:
         matriUser = dados_usuario[1]
         premiosbd = premios_user_bd(matriUser)
+
         with st.expander('Filtro'):
             projetos = list(set([x[4] for x in premiosbd]))
             projetos.append('TODOS')
@@ -238,7 +242,7 @@ elif authentication_status:
                 data_atual += timedelta(days=1)    
 
                                                 #PEGANDO SOMENTE AS ENTREGAS DAQUELE PROJETO                                         #SOMENTE AS ENTREGAS QUE FINALIZAM DENTRO NO RANGE DE DATAS
-            premiosuser = [x for x in premiosbd if str(x[4]).strip().lower() in [str(x).strip().lower() for x in list(user_project)] and datetime.strptime(str(x[3]), "%Y-%m-%d") in range_datas] 
+            premiosuser = [x for x in premiosbd if str(x[4]).strip().lower() in [str(x).strip().lower() for x in list(user_project)] and datetime.strptime(str(x[18]), "%Y-%m-%d") in range_datas] 
 
         if len(premiosuser) > 0:
             st.text(' ')
@@ -288,16 +292,16 @@ elif authentication_status:
                 with col5:
                     st.caption('Valor')
 
-                for name_entrg in tarefas_do_project:
+                for idx_taref in range(len(tarefas_do_project)):
                     with col1:
-                        st.text_input('Atividade', name_entrg[5] if name_entrg[5] != '' and name_entrg[5] != None else f'{name_entrg[17]} - {sigla_by_func(name_entrg[8])}', key=f'atividade{name_proj} - {name_entrg}', label_visibility="collapsed")
+                        st.text_input('Atividade', tarefas_do_project[idx_taref][5] if tarefas_do_project[idx_taref][5] != '' and tarefas_do_project[idx_taref][5] != None else f'{tarefas_do_project[idx_taref][17]} - {sigla_by_func(tarefas_do_project[idx_taref][8])}', key=f'atividade{name_proj} - {idx_taref}', label_visibility="collapsed")
                     with col2:
-                        st.text_input('Sprint', name_entrg[1], key=f'sprint{name_proj} - {name_entrg}', label_visibility="collapsed")
+                        st.text_input('Sprint', tarefas_do_project[idx_taref][1], key=f'sprint{name_proj} - {idx_taref}', label_visibility="collapsed")
                     with col3:
-                        st.text_input('Horas', f'{name_entrg[9] if name_entrg[9] != None else 0} hrs', key=f'horas{name_proj} - {name_entrg}', label_visibility="collapsed")
+                        st.text_input('Horas', f'{tarefas_do_project[idx_taref][9] if tarefas_do_project[idx_taref][9] != None else 0} hrs', key=f'horas{name_proj} - {idx_taref}', label_visibility="collapsed")
                     with col4:
-                        st.text_input('Compl.', complexidade_name(name_entrg[11]) if name_entrg[11] != None else '', key=f'complex{name_proj} - {name_entrg}', label_visibility="collapsed")
+                        st.text_input('Compl.', complexidade_name(tarefas_do_project[idx_taref][11]) if tarefas_do_project[idx_taref][11] != None else '', key=f'complex{name_proj} - {idx_taref}', label_visibility="collapsed")
                     with col5:
-                        st.text_input('Valor', f'R$ {name_entrg[12]}', key=f'valor{name_proj} - {name_entrg}', label_visibility="collapsed")
+                        st.text_input('Valor', f'R$ {tarefas_do_project[idx_taref][12]}', key=f'valor{name_proj} - {idx_taref}', label_visibility="collapsed")
     else:
         st.error('VISUALIZAÇÃO NÃO DISPONÍVEL.')
