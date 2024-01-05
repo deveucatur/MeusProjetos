@@ -252,7 +252,7 @@ elif authentication_status:
         authenticator.logout('Logout', 'main')
 
     matriUser = [x[1] for x in dadosUser if x[3] == username][0]
-    ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split(',') or matriUser == x[3]]
+    ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split('~/>') or matriUser == x[3]]
     dados_user = [x for x in usersBD if str(x[1]).strip() == str(matriUser).strip()][0]
 
     primeiroNome = str(dados_user[2]).strip().split()[0]
@@ -311,8 +311,8 @@ elif authentication_status:
                 investimentos = [f"{dadosOrigin[0][8]}"] if f"{dadosOrigin[0][8]}" != "None" else " "
                 gestores = [f"{dadosOrigin[0][2]}"] if f"{dadosOrigin[0][2]}" != "None" else " "
                 
-                pessoas = str(dadosOrigin[0][21]).split(',') if dadosOrigin[0][21] != None else ''
-                funcao = str(dadosOrigin[0][22]).split(',') if dadosOrigin[0][22] != None else ''
+                pessoas = str(dadosOrigin[0][21]).split('~/>') if dadosOrigin[0][21] != None else ''
+                funcao = str(dadosOrigin[0][22]).split('~/>') if dadosOrigin[0][22] != None else ''
                 equipBD = [[pessoas[x], funcao[x]] for x in range(len(pessoas))]
 
                 resultados = []
@@ -323,13 +323,13 @@ elif authentication_status:
                         resultados = " "
                 
                 if dadosOrigin[0][32] != None:
-                    entregas = str(dadosOrigin[0][32]).split(',')
+                    entregas = str(dadosOrigin[0][32]).split('~/>')
                 else:
                     entregas = ' '
                 
-                metricas = str(dadosOrigin[0][33]).split(',') if dadosOrigin[0][33] != None and dadosOrigin[0][33] != '' else ' '
-                prodProjetos = str(dadosOrigin[0][10]).split(',') if dadosOrigin[0][10] != None else " "
-                prodMvps = str(dadosOrigin[0][25]).split(',') if dadosOrigin[0][25] != None else " "
+                metricas = str(dadosOrigin[0][33]).split('~/>') if dadosOrigin[0][33] != None and dadosOrigin[0][33] != '' else ' '
+                prodProjetos = str(dadosOrigin[0][10]).split('~/>') if dadosOrigin[0][10] != None else " "
+                prodMvps = str(dadosOrigin[0][25]).split('~/>') if dadosOrigin[0][25] != None else " "
 
                 canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos)
                 htmlRow = canvas.CreateHTML()
@@ -344,7 +344,7 @@ elif authentication_status:
                 st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
 
                 st.text(' ')
-                func_split = lambda x: x.split(",") if x is not None else [x]
+                func_split = lambda x: x.split("~/>") if x is not None else [x]
                 #ESPAÇO PARA MANIPULAR OS COLABORADORES VINCULADOS À AQUELE PROJETO
                 with st.expander('Equipe do Projeto'):
                     matriculasEQUIP = func_split(dadosOrigin[0][23])
