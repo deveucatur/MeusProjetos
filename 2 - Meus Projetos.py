@@ -25,6 +25,10 @@ conexao = mysql.connector.connect(
 )
 
 mycursor = conexao.cursor()
+
+setSession = "SET SESSION group_concat_max_len = 5000;"
+mycursor.execute(setSession)
+
 mycursor.execute("""SELECT Matricula, 
                  Nome FROM projeu_users;"""
 )
