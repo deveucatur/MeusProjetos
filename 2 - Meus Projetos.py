@@ -51,32 +51,32 @@ SELECT
     projeu_projetos.result_esperad as objetivo_projet,
     projeu_projetos.produto_entrega_final,
     (
-        SELECT GROUP_CONCAT(number_sprint) 
+        SELECT GROUP_CONCAT(number_sprint SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as number_sprint,
     (
-        SELECT GROUP_CONCAT(status_sprint) 
+        SELECT GROUP_CONCAT(status_sprint SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as status_sprint,
     (
-        SELECT GROUP_CONCAT(date_inic_sp) 
+        SELECT GROUP_CONCAT(date_inic_sp SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as inic_sprint,
     (
-        SELECT GROUP_CONCAT(date_fim_sp) 
+        SELECT GROUP_CONCAT(date_fim_sp SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as fim_sprint,
     (
-        SELECT GROUP_CONCAT(status_homolog) 
+        SELECT GROUP_CONCAT(status_homolog SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as status_homolog_sprint,
     (
-        SELECT GROUP_CONCAT(nome_Entrega) 
+        SELECT GROUP_CONCAT(nome_Entrega SEPARATOR '~/>') 
         FROM projeu_entregas 
         WHERE projeu_entregas.id_sprint IN (
             SELECT id_sprint 
@@ -85,7 +85,7 @@ SELECT
         )
     ) as entrega_name,
     (
-        SELECT GROUP_CONCAT(executor) 
+        SELECT GROUP_CONCAT(executor SEPARATOR '~/>') 
         FROM projeu_entregas 
         WHERE projeu_entregas.id_sprint IN (
             SELECT id_sprint 
@@ -94,7 +94,7 @@ SELECT
         )
     ) as executor_entrega,
     (
-        SELECT GROUP_CONCAT(hra_necess) 
+        SELECT GROUP_CONCAT(hra_necess SEPARATOR '~/>') 
         FROM projeu_entregas 
         WHERE projeu_entregas.id_sprint IN (
             SELECT id_sprint 
@@ -103,7 +103,7 @@ SELECT
         )
     ) as hrs_entrega,
     (
-        SELECT GROUP_CONCAT(compl_entrega) 
+        SELECT GROUP_CONCAT(compl_entrega SEPARATOR '~/>') 
         FROM projeu_entregas 
         WHERE projeu_entregas.id_sprint IN (
             SELECT id_sprint 
@@ -112,13 +112,13 @@ SELECT
         )
     ) as complex_entreg,
     (
-        SELECT GROUP_CONCAT(id_registro) 
+        SELECT GROUP_CONCAT(id_registro SEPARATOR '~/>') 
         FROM projeu_registroequipe 
         WHERE projeu_registroequipe.id_projeto = projeu_projetos.id_proj
         AND projeu_registroequipe.status_reg = 'A'
     ) as id_registro,
     (
-        SELECT GROUP_CONCAT(Nome) 
+        SELECT GROUP_CONCAT(Nome SEPARATOR '~/>') 
         FROM projeu_users 
         WHERE id_user IN (
             SELECT id_colab 
@@ -128,14 +128,14 @@ SELECT
         )
     ) as colaborador,
     (
-        SELECT GROUP_CONCAT(papel) 
+        SELECT GROUP_CONCAT(papel SEPARATOR '~/>') 
         FROM projeu_registroequipe 
         WHERE projeu_registroequipe.id_projeto = projeu_projetos.id_proj
         AND projeu_registroequipe.status_reg = 'A'
     ) as PAPEL,
     (
         SELECT 
-            GROUP_CONCAT(Matricula) AS MATRICULA_EQUIPE
+            GROUP_CONCAT(Matricula SEPARATOR '~/>') AS MATRICULA_EQUIPE
         FROM projeu_users AS PU
         INNER JOIN projeu_registroequipe AS PR ON PU.id_user = PR.id_colab 
         WHERE PR.id_projeto = projeu_projetos.id_proj
@@ -145,7 +145,7 @@ SELECT
     projeu_projetos.produto_mvp AS PRODUTO_MVP,
     projeu_projetos.prazo_entreg_final,
     (
-        SELECT GROUP_CONCAT(id_sprint) 
+        SELECT GROUP_CONCAT(id_sprint SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as id_sprint,
@@ -155,25 +155,25 @@ SELECT
     projeu_projetos.status_proj,
     (
 		SELECT 
-			GROUP_CONCAT(entreg) 
+			GROUP_CONCAT(entreg SEPARATOR '~/>') 
 		FROM projeu_princEntregas 
 		WHERE id_proj_fgkey = projeu_projetos.id_proj
 	) AS PRINCIPAIS_ENTREGAS,
     (
 		SELECT 
-			GROUP_CONCAT(name_metric) 
+			GROUP_CONCAT(name_metric SEPARATOR '~/>') 
 		FROM projeu_metricas 
 		WHERE id_prj_fgkey = projeu_projetos.id_proj
 	) AS METRICAS,
     (
 		SELECT 
-			GROUP_CONCAT(projeu_sprints.check_sprint) 
+			GROUP_CONCAT(projeu_sprints.check_sprint SEPARATOR '~/>') 
 		FROM projeu_sprints 
 		WHERE id_proj_fgkey = projeu_projetos.id_proj
 	) AS CHECK_SPRINT,
     (
 		SELECT 
-			GROUP_CONCAT(projeu_sprints.data_check) 
+			GROUP_CONCAT(projeu_sprints.data_check SEPARATOR '~/>') 
 		FROM projeu_sprints 
 		WHERE id_proj_fgkey = projeu_projetos.id_proj
 	) AS DATA_CHECK,
