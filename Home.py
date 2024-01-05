@@ -154,14 +154,14 @@ sqlCanva = f"""SELECT
     nome_mvp, produto_mvp, 
     (
 		SELECT 
-			GROUP_CONCAT(name_metric) 
+			GROUP_CONCAT(name_metric SEPARATOR '~/>') 
 		FROM projeu_metricas 
         WHERE id_prj_fgkey = projeu_projetos.id_proj
 	) AS metricas, 
     result_esperad, 
     (
         SELECT 
-            GROUP_CONCAT(Nome) 
+            GROUP_CONCAT(Nome SEPARATOR '~/>') 
         FROM projeu_users 
         WHERE id_user IN (
                             SELECT 
@@ -173,7 +173,7 @@ sqlCanva = f"""SELECT
     ) AS colaborador, 
     (
         SELECT 
-            GROUP_CONCAT(papel) 
+            GROUP_CONCAT(papel SEPARATOR '~/>') 
         FROM 
             projeu_registroequipe 
         WHERE 
@@ -181,7 +181,7 @@ sqlCanva = f"""SELECT
     ) AS papel, 
     (
         SELECT 
-            GROUP_CONCAT(entreg) 
+            GROUP_CONCAT(entreg SEPARATOR '~/>') 
         FROM 
             projeu_princEntregas 
         WHERE id_proj_fgkey = projeu_projetos.id_proj
@@ -336,9 +336,9 @@ elif authentication_status:
                     prodMvps = [canva[4]] if canva[4] != None else " "
                     resultados = [canva[6]] if canva[6] != None else " "
                     metricas = [canva[5]] if canva[5] != None else " "
-                    for i in range(len(canva[7].split(','))):
-                        colab = str(canva[7]).split(',')[i]
-                        funcao = str(canva[7]).split(',')[i]
+                    for i in range(len(canva[7].split('~/>'))):
+                        colab = str(canva[7]).split('~/>')[i]
+                        funcao = str(canva[7]).split('~/>')[i]
                         listaEquipe.append([colab, funcao])
 
                     for i in range(len(listaEquipe)):
@@ -361,7 +361,7 @@ elif authentication_status:
                     if len(squads) == 0:
                         squads = " "
 
-                    entregas = str(canva[9]).split(';') if ';' in str(canva[9]) else str(canva[9]).split(',')
+                    entregas = str(canva[9]).split(';') if ';' in str(canva[9]) else str(canva[9]).split('~/>')
                     investimentos = [canva[10]] if canva[10] != None else " "
 
                     col1, col2, col3 = st.columns([1,1,0.6])
@@ -451,9 +451,9 @@ elif authentication_status:
                     prodMvps = [canva[4]] if canva[4] != None else " "
                     resultados = [canva[6]] if canva[6] != None else " "
                     metricas = [canva[5]] if canva[5] != None else " "
-                    for i in range(len(canva[7].split(','))):
-                        colab = str(canva[7]).split(',')[i]
-                        funcao = str(canva[7]).split(',')[i]
+                    for i in range(len(canva[7].split('~/>'))):
+                        colab = str(canva[7]).split('~/>')[i]
+                        funcao = str(canva[7]).split('~/>')[i]
                         listaEquipe.append([colab, funcao])
 
                     for i in range(len(listaEquipe)):
@@ -476,7 +476,7 @@ elif authentication_status:
                     if len(squads) == 0:
                         squads = " "
 
-                    entregas = str(canva[9]).split(';') if ';' in str(canva[9]) else str(canva[9]).split(',')
+                    entregas = str(canva[9]).split(';') if ';' in str(canva[9]) else str(canva[9]).split('~/>')
                     investimentos = [canva[10]] if canva[10] != None else " "
 
                     col1, col2, col3 = st.columns([1,1,0.6])
