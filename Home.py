@@ -136,6 +136,9 @@ fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+N
 
 mycursor = conexao.cursor()
 
+setSession = "SET SESSION group_concat_max_len = 5000;"
+mycursor.execute(setSession)
+
 sqlProjetoLider = f"""SELECT p.name_proj, p.id_proj FROM projeu_projetos p JOIN projeu_complexidade c ON p.id_proj = c.proj_fgkey WHERE c.check_lider IS NULL OR c.check_lider = '' GROUP BY p.id_proj;"""
 mycursor.execute(sqlProjetoLider)
 projetoNomeLider = mycursor.fetchall()
