@@ -25,6 +25,10 @@ conexao = mysql.connector.connect(
 )
 
 mycursor = conexao.cursor()
+
+setSession = "SET SESSION group_concat_max_len = 5000;"
+mycursor.execute(setSession)
+
 mycursor.execute("""SELECT Matricula, 
                  Nome FROM projeu_users;"""
 )
@@ -47,32 +51,32 @@ SELECT
     projeu_projetos.result_esperad as objetivo_projet,
     projeu_projetos.produto_entrega_final,
     (
-        SELECT GROUP_CONCAT(number_sprint) 
+        SELECT GROUP_CONCAT(number_sprint SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as number_sprint,
     (
-        SELECT GROUP_CONCAT(status_sprint) 
+        SELECT GROUP_CONCAT(status_sprint SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as status_sprint,
     (
-        SELECT GROUP_CONCAT(date_inic_sp) 
+        SELECT GROUP_CONCAT(date_inic_sp SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as inic_sprint,
     (
-        SELECT GROUP_CONCAT(date_fim_sp) 
+        SELECT GROUP_CONCAT(date_fim_sp SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as fim_sprint,
     (
-        SELECT GROUP_CONCAT(status_homolog) 
+        SELECT GROUP_CONCAT(status_homolog SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as status_homolog_sprint,
     (
-        SELECT GROUP_CONCAT(nome_Entrega) 
+        SELECT GROUP_CONCAT(nome_Entrega SEPARATOR '~/>') 
         FROM projeu_entregas 
         WHERE projeu_entregas.id_sprint IN (
             SELECT id_sprint 
@@ -81,7 +85,7 @@ SELECT
         )
     ) as entrega_name,
     (
-        SELECT GROUP_CONCAT(executor) 
+        SELECT GROUP_CONCAT(executor SEPARATOR '~/>') 
         FROM projeu_entregas 
         WHERE projeu_entregas.id_sprint IN (
             SELECT id_sprint 
@@ -90,7 +94,7 @@ SELECT
         )
     ) as executor_entrega,
     (
-        SELECT GROUP_CONCAT(hra_necess) 
+        SELECT GROUP_CONCAT(hra_necess SEPARATOR '~/>') 
         FROM projeu_entregas 
         WHERE projeu_entregas.id_sprint IN (
             SELECT id_sprint 
@@ -99,7 +103,7 @@ SELECT
         )
     ) as hrs_entrega,
     (
-        SELECT GROUP_CONCAT(compl_entrega) 
+        SELECT GROUP_CONCAT(compl_entrega SEPARATOR '~/>') 
         FROM projeu_entregas 
         WHERE projeu_entregas.id_sprint IN (
             SELECT id_sprint 
@@ -108,13 +112,13 @@ SELECT
         )
     ) as complex_entreg,
     (
-        SELECT GROUP_CONCAT(id_registro) 
+        SELECT GROUP_CONCAT(id_registro SEPARATOR '~/>') 
         FROM projeu_registroequipe 
         WHERE projeu_registroequipe.id_projeto = projeu_projetos.id_proj
         AND projeu_registroequipe.status_reg = 'A'
     ) as id_registro,
     (
-        SELECT GROUP_CONCAT(Nome) 
+        SELECT GROUP_CONCAT(Nome SEPARATOR '~/>') 
         FROM projeu_users 
         WHERE id_user IN (
             SELECT id_colab 
@@ -124,14 +128,14 @@ SELECT
         )
     ) as colaborador,
     (
-        SELECT GROUP_CONCAT(papel) 
+        SELECT GROUP_CONCAT(papel SEPARATOR '~/>') 
         FROM projeu_registroequipe 
         WHERE projeu_registroequipe.id_projeto = projeu_projetos.id_proj
         AND projeu_registroequipe.status_reg = 'A'
     ) as PAPEL,
     (
         SELECT 
-            GROUP_CONCAT(Matricula) AS MATRICULA_EQUIPE
+            GROUP_CONCAT(Matricula SEPARATOR '~/>') AS MATRICULA_EQUIPE
         FROM projeu_users AS PU
         INNER JOIN projeu_registroequipe AS PR ON PU.id_user = PR.id_colab 
         WHERE PR.id_projeto = projeu_projetos.id_proj
@@ -141,7 +145,7 @@ SELECT
     projeu_projetos.produto_mvp AS PRODUTO_MVP,
     projeu_projetos.prazo_entreg_final,
     (
-        SELECT GROUP_CONCAT(id_sprint) 
+        SELECT GROUP_CONCAT(id_sprint SEPARATOR '~/>') 
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
     ) as id_sprint,
@@ -151,31 +155,55 @@ SELECT
     projeu_projetos.status_proj,
     (
 		SELECT 
-			GROUP_CONCAT(entreg) 
+			GROUP_CONCAT(entreg SEPARATOR '~/>') 
 		FROM projeu_princEntregas 
 		WHERE id_proj_fgkey = projeu_projetos.id_proj
 	) AS PRINCIPAIS_ENTREGAS,
     (
 		SELECT 
-			GROUP_CONCAT(name_metric) 
+			GROUP_CONCAT(name_metric SEPARATOR '~/>') 
 		FROM projeu_metricas 
 		WHERE id_prj_fgkey = projeu_projetos.id_proj
 	) AS METRICAS,
     (
 		SELECT 
-			GROUP_CONCAT(projeu_sprints.check_sprint) 
+			GROUP_CONCAT(projeu_sprints.check_sprint SEPARATOR '~/>') 
 		FROM projeu_sprints 
 		WHERE id_proj_fgkey = projeu_projetos.id_proj
 	) AS CHECK_SPRINT,
     (
 		SELECT 
-			GROUP_CONCAT(projeu_sprints.data_check) 
+			GROUP_CONCAT(projeu_sprints.data_check SEPARATOR '~/>') 
 		FROM projeu_sprints 
 		WHERE id_proj_fgkey = projeu_projetos.id_proj
 	) AS DATA_CHECK,
     PC.complxdd AS COMPLEXIDADE_PROJETO,
     PC.nivel AS NIVEL_COMPLEXIDADE,
-    projeu_projetos.check_proj
+    projeu_projetos.check_proj,
+    (
+		SELECT 
+			group_concat(PPE.id_princ SEPARATOR '~/>') 
+		FROM projeu_princEntregas AS PPE
+        WHERE PPE.id_proj_fgkey = projeu_projetos.id_proj
+	) AS ID_PRINCIPAIS_ENTREGAS,
+    (
+		SELECT 
+			group_concat(PPE.status_princp SEPARATOR '~/>') 
+		FROM projeu_princEntregas AS PPE
+        WHERE PPE.id_proj_fgkey = projeu_projetos.id_proj
+	) AS STATUS_PRINCIPAIS_ENTREGAS,
+    (
+		SELECT 
+			GROUP_CONCAT(id_metric SEPARATOR '~/>') 
+		FROM projeu_metricas 
+		WHERE id_prj_fgkey = projeu_projetos.id_proj
+	) AS ID_METRICAS,
+    (
+		SELECT 
+			GROUP_CONCAT(status_metric SEPARATOR '~/>') 
+		FROM projeu_metricas 
+		WHERE id_prj_fgkey = projeu_projetos.id_proj
+	) AS STATUS_METRICAS
 FROM 
     projeu_projetos
 JOIN 
@@ -248,7 +276,7 @@ elif authentication_status:
         authenticator.logout('Logout', 'main')
 
     matriUser = [x[1] for x in dadosUser if x[3] == username][0]
-    ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split(',') or matriUser == x[3]]
+    ddPaging = [x for x in ddPaging if str(matriUser) in str(x[23]).split('~/>') or matriUser == x[3]]
     dados_user = [x for x in usersBD if str(x[1]).strip() == str(matriUser).strip()][0]
 
     primeiroNome = str(dados_user[2]).strip().split()[0]
@@ -300,54 +328,196 @@ elif authentication_status:
                 EntregasBD = mycursor.fetchall()
                 mycursor.close()
 
-                ############CANVAS APRESENTANDO O PROJETO############
-                font_TITLE('Canvas', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
-                projetos = [dadosOrigin[0][1]] if dadosOrigin[0][1] != "None" else " "
-                mvps = [dadosOrigin[0][7]] if dadosOrigin[0][7] != "None" else " "  
-                investimentos = [f"{dadosOrigin[0][8]}"] if f"{dadosOrigin[0][8]}" != "None" else " "
-                gestores = [f"{dadosOrigin[0][2]}"] if f"{dadosOrigin[0][2]}" != "None" else " "
-                
-                pessoas = str(dadosOrigin[0][21]).split(',') if dadosOrigin[0][21] != None else ''
-                funcao = str(dadosOrigin[0][22]).split(',') if dadosOrigin[0][22] != None else ''
-                equipBD = [[pessoas[x], funcao[x]] for x in range(len(pessoas))]
+                tab1, tab2 = st.tabs(['Canvas', 'Editar'])
+                with tab1:
+                    font_TITLE(f'{dadosOrigin[0][1]}', fonte_Projeto,"'Bebas Neue', sans-serif", 31, 'center', '#228B22')
+                    ########CANVAS DO PROJETO SELECIONADO########
+                    projetos = [dadosOrigin[0][1]] if dadosOrigin[0][1] != "None" else " "
+                    mvps = [dadosOrigin[0][7]] if dadosOrigin[0][7] != "None" else " "  
+                    investimentos = [f"{dadosOrigin[0][8]}"] if f"{dadosOrigin[0][8]}" != "None" else " "
+                    gestores = [f"{dadosOrigin[0][2]}"] if f"{dadosOrigin[0][2]}" != "None" else " "
+                    
+                    pessoas = str(dadosOrigin[0][21]).split("~/>") if dadosOrigin[0][21] != None else ''
+                    funcao = str(dadosOrigin[0][22]).split("~/>") if dadosOrigin[0][22] != None else ''
+                    equipBD = [[pessoas[x], funcao[x]] for x in range(len(pessoas))]
 
-                resultados = []
-                for i in range(len(dadosOrigin)):
-                    if dadosOrigin[i][9] != None:
-                        resultados.append(f"{dadosOrigin[i][9]}")
+                    resultados = []
+                    for i in range(len(dadosOrigin)):
+                        if dadosOrigin[i][9] != None:
+                            resultados.append(f"{dadosOrigin[i][9]}")
+                        else:
+                            resultados = " "
+                    
+                    if dadosOrigin[0][32] != None:
+                        entregas = [str(dadosOrigin[0][32]).split("~/>")[x] for x in range(len(str(dadosOrigin[0][40]).split("~/>"))) if str(str(dadosOrigin[0][40]).split("~/>")[x]).strip() == 'A']
                     else:
-                        resultados = " "
-                
-                if dadosOrigin[0][32] != None:
-                    entregas = str(dadosOrigin[0][32]).split(',')
-                else:
-                    entregas = ' '
-                
-                metricas = str(dadosOrigin[0][33]).split(',') if dadosOrigin[0][33] != None and dadosOrigin[0][33] != '' else ' '
-                prodProjetos = str(dadosOrigin[0][10]).split(',') if dadosOrigin[0][10] != None else " "
-                prodMvps = str(dadosOrigin[0][25]).split(',') if dadosOrigin[0][25] != None else " "
+                        entregas = ''
 
-                canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos)
-                htmlRow = canvas.CreateHTML()
-                htmlEqp = canvas.tableEqp()
-                htmlUnic = canvas.tableUnic()
-                htmlCol = canvas.tableCol()
+                    metricas = [str(dadosOrigin[0][33]).split("~/>")[x] for x in range(len(str(dadosOrigin[0][33]).split("~/>"))) if str(str(dadosOrigin[0][42]).split("~/>")[x]).strip() == 'A'] if dadosOrigin[0][33] != None else ''
+                    prodProjetos = str(dadosOrigin[0][10]).split("~/>") if dadosOrigin[0][10] != None else ""
+                    prodMvps = str(dadosOrigin[0][25]).split("~/>") if dadosOrigin[0][24] != None else ""
 
-                html = canvas.tableGeral(htmlRow, htmlEqp, htmlUnic, htmlCol)
-                canvaStyle = canvas.cssStyle()
+                    
+                #SEQUÊNCIA --> projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, especialistas, squads, entregas, investimentos
+                    canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos)
+                    htmlRow = canvas.CreateHTML()
+                    htmlEqp = canvas.tableEqp()
+                    htmlUnic = canvas.tableUnic()
+                    htmlCol = canvas.tableCol()
 
-                st.write(f'<div>{html}</div>', unsafe_allow_html=True)
-                st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
+                    html = canvas.tableGeral(htmlRow, htmlEqp, htmlUnic, htmlCol)
+                    canvaStyle = canvas.cssStyle()
+
+                    st.write(f'<div>{html}</div>', unsafe_allow_html=True)
+                    st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
+
+                with tab2:
+                    if str(matriUser).strip() in [str(dadosOrigin[0][3]).strip(), '56126']:
+                    
+                        def status_aux(sigla_status, func=0):
+                            dic_aux = {'A': 'Ativo',
+                                        'I': 'Inativo',
+                                        'E': 'Irregular'}
+                            
+                            if func == 0:
+                                retorno = dic_aux[str(sigla_status).strip().upper()] if str(sigla_status).strip().upper() in list(dic_aux.keys()) else 'Irregular'
+                            else:
+                                dic_invertido = {valor: chave for chave, valor in dic_aux.items()}
+                                retorno = dic_invertido[str(sigla_status).strip()]
+                            
+                            return retorno
+
+                        font_TITLE(f'EDITAR CANVAS', fonte_Projeto,"'Bebas Neue', sans-serif", 24, 'left', 'black')
+                        nomeproj_edit = st.text_input('Nome Projeto', projetos[0])
+                        produtproj_edit = st.text_area('Produto Projeto', str(prodProjetos[0]).strip())
+                        mvp_edit = st.text_input('MVP', mvps[0])
+                        produtmvp_edit = st.text_input('Produto MVP', prodMvps[0])
+                        Resultado_edit = st.text_input('Resultado Esperado', resultados[0])
+                        
+                        ############################# MÉTRICAS #############################
+                        font_TITLE(f'MÉTRICAS', fonte_Projeto,"'Bebas Neue', sans-serif", 24, 'left', 'black')
+                        
+                        metricas_bd = [(str(dadosOrigin[0][41]).split("~/>")[x], str(dadosOrigin[0][33]).split("~/>")[x], str(dadosOrigin[0][42]).split("~/>")[x]) for x in range(len(str(dadosOrigin[0][41]).split("~/>"))) if str(dadosOrigin[0][41]).split("~/>")[x] != 'None']
+                        qntd_metrc_edit = st.number_input('Quantidade', key='qntd Métricas', min_value=0, step=1, value=len(metricas_bd))
+                        if qntd_metrc_edit > len(metricas_bd):
+                            metricas_bd.extend([(None, '', 'A') for x in range(qntd_metrc_edit - len(metricas_bd))])
+
+                        list_metric_edit = []
+                        if qntd_metrc_edit > 0:
+                            col1, col2 = st.columns([4,1])
+                            with col1:
+                                st.caption('Métrica')
+                            with col2:
+                                st.caption('Status')
+
+                            for idx_metr in range(qntd_metrc_edit):
+                                with col1:
+                                    edit_metric_name = st.text_input('metricas_edit', value=metricas_bd[idx_metr][1], label_visibility='collapsed', key=f'edit metric {idx_metr}') 
+                                with col2:
+                                    edit_metric_status = st.selectbox('status_edit', ['Ativo', 'Inativo', 'Irregular'], ['Ativo', 'Inativo', 'Irregular'].index(status_aux(str(metricas_bd[idx_metr][2]).strip())), label_visibility='collapsed', key=f'edit status {idx_metr}')
+                                list_metric_edit.append([metricas_bd[idx_metr][0], edit_metric_name, edit_metric_status])
+            
+                        ############################ ENTREGAS #############################
+                        st.text(' ')
+                        font_TITLE(f'PRINCIPAIS ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 24, 'left', 'black')
+                        
+                        #ENTREGAS ORIGINAIS DO BANCO DE DADOS
+                        
+                        entregas_bd = [(str(dadosOrigin[0][39]).split("~/>")[x],  str(dadosOrigin[0][32]).split("~/>")[x], str(dadosOrigin[0][40]).split("~/>")[x]) for x in range(len(list(str(dadosOrigin[0][39]).split("~/>")))) if str(dadosOrigin[0][39]).split("~/>")[x] != None and str(dadosOrigin[0][39]).split("~/>")[x] != 'None']
+                        qntd_princ_edit = st.number_input('Quantidade', key='qntd Principais entregas', min_value=0, step=1, value=len(entregas_bd))
+                        entregas = list(entregas_bd)
+                        if qntd_princ_edit > len(entregas): #PEGANDO A QUANTIDADE DE VEZES A MAIS QUE O USUÁRIO SELECIONOU E ADCIONANDO NA MINHA LISTA
+                            entregas.extend([(None, '', 'A') for x in range(qntd_princ_edit - len(entregas))])
+                            
+                        list_entreg_edit = []
+                        if qntd_princ_edit > 0:
+                            
+                            col1, col2 = st.columns([4,1])
+                            with col1:
+                                st.caption('Entrega')
+                            with col2:
+                                st.caption('Status')
+
+                            for idx_princ_i in range(qntd_princ_edit):                        
+                                with col1:
+                                    mome_edit = st.text_input('principais_edit', value=entregas[idx_princ_i][1], label_visibility='collapsed', key=f'edit principais entreg{idx_princ_i}')
+                                with col2:
+                                    status_edit = st.selectbox('status_edit', ['Ativo', 'Inativo', 'Irregular'], ['Ativo', 'Inativo', 'Irregular'].index(status_aux(str(entregas[idx_princ_i][2]).strip())) ,label_visibility='collapsed', key=f'edit status entreg{idx_princ_i}')
+                                list_entreg_edit.append((entregas[idx_princ_i][0], mome_edit, status_edit))
+
+                        list_metric_edit = [x for x in list_metric_edit if len(str(x[1]).strip()) > 0]
+                        list_entreg_edit = [x for x in list_entreg_edit if len(str(x[1]).strip()) > 0]
+                        edit_canv_button = st.button('Enviar')
+                        if edit_canv_button:
+                            mycursor_edit = conexao.cursor()
+                            ###################### FAZENDO A ATUALIZAÇÃO DAS INFORMAÇÕES GERAIS DO PROJETO ######################
+                            columns1 = ['name_proj', 'produto_entrega_final', 'nome_mvp', 'produto_mvp', 'result_esperad']
+                            values = [nomeproj_edit, produtproj_edit, mvp_edit, produtmvp_edit, Resultado_edit]
+                            values_aux = [projetos[0], str(prodProjetos[0]).strip(), mvps[0], prodMvps[0], resultados[0]]
+                            
+                            #LISTA range_aux VAI RETORNAR 1 ONDE O INDEX DOS VALORES FOR DIFERENTE DOS VALORES ANTIGOS
+                            #A IDEIA É DESCOBRIR EM QUAL INDEX ESTÁ O VALOR DIFERENTE E SOMENTE USAR O UPDATE ONDE DE FATO OUVER ALGUMA DIFERENÇA
+                            range_aux = [1 if str(values[x]).strip() != str(values_aux[x]).strip() else 0 for x in range(len(values))]
+                            for idx_clm in range(len(columns1)):
+                                if range_aux[idx_clm] == 1:         
+                                    cmd = f'UPDATE projeu_projetos SET {columns1[idx_clm]} = {values[idx_clm]} WHERE id_proj = {dadosOrigin[0][0]};'
+                                    
+                                    mycursor_edit.execute(cmd)
+                                    conexao.commit()
+
+                            ###################### FAZENDO ATUALIZAÇÃO DAS PRINCIPAIS ENTREGAS DO PROJETO ######################
+                            for idx_entrg_edit in range(len(list_entreg_edit)):
+                                if list_entreg_edit[idx_entrg_edit][0] == None:
+                                    cmd_insert_entrg = f'INSERT INTO projeu_princEntregas(entreg, id_proj_fgkey) VALUES ("{list_entreg_edit[idx_entrg_edit][1]}", {dadosOrigin[0][0]});'
+                                    mycursor_edit.execute(cmd_insert_entrg)
+                                    conexao.commit()
+
+                                else:
+                                    id_entrg = list_entreg_edit[idx_entrg_edit][0]
+                                    entr_original = [x for x in entregas_bd if x[0] == id_entrg]
+                                    entr_editadad = [(x[0], x[1], status_aux(x[2], 1)) for x in list_entreg_edit if x[0] == id_entrg]
+                                    
+                                    if sum([1 if entr_original[x] != entr_editadad[x] else 0 for x in range(len(entr_original))]) > 0: #DESCOBRINDO SE HÁ ALGUMA DIFERENÇA ENTRE A LISTA ORIGINAL E A LISTA EDITADO
+                                        cmd_edit_entrg = f'UPDATE projeu_princEntregas SET entreg = "{entr_editadad[0][1]}", status_princp = "{entr_editadad[0][2]}" WHERE id_princ = {entr_editadad[0][0]};'
+                                        
+                                        mycursor_edit.execute(cmd_edit_entrg)
+                                        conexao.commit()
+                            
+                            ###################### FAZENDO ATUALIZAÇÃO DAS MÉTRICAS DO PROJETO ######################
+                            for idx_metric_edit in range(len(list_metric_edit)):
+                                if list_metric_edit[idx_metric_edit][0] == None:
+                                    cmd_insert_metrc = f'INSERT INTO projeu_metricas (id_prj_fgkey, name_metric) VALUES ({dadosOrigin[0][0]} ,"{list_metric_edit[idx_metric_edit][1]}");'
+                                    
+                                    mycursor_edit.execute(cmd_insert_metrc)
+                                    conexao.commit()
+                                
+                                else:
+                                    id_metric = list_metric_edit[idx_metric_edit][0]
+                                    metric_original = [x for x in metricas_bd if x[0] == id_metric]
+                                    metric_editadad = [(x[0], x[1], status_aux(x[2], 1)) for x in list_metric_edit if x[0] == id_metric]
+                                    
+                                    if sum([1 if metric_original[x] != metric_editadad[x] else 0 for x in range(len(metric_original))]) > 0: #DESCOBRINDO SE HÁ ALGUMA DIFERENÇA ENTRE A LISTA ORIGINAL E A LISTA EDITADO
+                                        cmd_edit_metric = f'UPDATE projeu_metricas SET name_metric = "{metric_editadad[0][1]}", status_metric = "{metric_editadad[0][2]}" WHERE id_metric = {metric_editadad[0][0]};'
+                                        
+                                        mycursor_edit.execute(cmd_edit_metric)
+                                        conexao.commit()
+
+                            st.toast('Canvas Atualizado!', icon='✅') 
+                            mycursor_edit.close()
+
+                        st.divider()
+                    else:
+                        st.error('VISUALIZAÇÃO NÃO DISPONÍVEL PARA SEU PERFIL.', icon='❌')
 
                 st.text(' ')
-                
-                func_split = lambda x: x.split(",") if x is not None else [x]
+                st.text(' ')
+                func_split = lambda x: x.split("~/>") if x is not None else [x]
                 #ESPAÇO PARA MANIPULAR OS COLABORADORES VINCULADOS À AQUELE PROJETO
                 with st.expander('Equipe do Projeto'):
                     matriculasEQUIP = func_split(dadosOrigin[0][23])
                     equipe_atual = {matriculasEQUIP[idx_mat]: [matriculasEQUIP[idx_mat], func_split(dadosOrigin[0][21])[idx_mat], func_split(dadosOrigin[0][22])[idx_mat],  func_split(dadosOrigin[0][20])[idx_mat]] for idx_mat in range(len(matriculasEQUIP)) if matriculasEQUIP[idx_mat] != str(dadosOrigin[0][3]).strip()}
 
-                    tab1, tab2 = st.tabs(['Adicionar', 'Excluir'])
+                    tab1, tab2 = st.tabs(['Adcionar', 'Excluir'])
                     
                     with tab1:
                         col1, col2 = st.columns([3,1])
@@ -400,7 +570,6 @@ elif authentication_status:
                                                             {dadosOrigin[0][0]}, 
                                                             (SELECT id_user FROM projeu_users WHERE Matricula = {matric}), 
                                                             '{func}');'''
-                                        st.info(cmd_new_equip)
                                         mycursor.execute(cmd_new_equip)
                                         conexao.commit()
                                     
@@ -449,7 +618,7 @@ elif authentication_status:
                 param_sprint = ['PRÉ MVP', 'MVP', 'PÓS MVP', 'ENTREGA FINAL']
 
                 font_TITLE('SPRINTS DO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
-                with st.expander('Adicionar Sprint'):
+                with st.expander('Adcionar Sprint'):
                     #FUNÇÃO PARA IDENTIFICAR SE A COLUNA DO BANCO DE DADOS ESTÁ VAZIA 
                     maior_idx = max([param_sprint.index(x)+1 if x != None else 0 for x in func_split(dadosOrigin[0][12])])
                     
@@ -477,7 +646,7 @@ elif authentication_status:
                     if matriUser == gestorProj:
                         colAdd, colExc = st.columns([1,7])
                         with colAdd:
-                            button_addSprint = st.button('Adicionar Sprint', disabled=disabledON)
+                            button_addSprint = st.button('Adcionar Sprint', disabled=disabledON)
                         with colExc:
                             button_exSprint = st.button('Excluir Sprint', disabled=disabledOF)
                         
@@ -583,7 +752,7 @@ elif authentication_status:
                                     with tab1:
                                         #FORMULÁRIO APRESENTANDO AS ENTREGAS
                                         col1, col2, col3 = st.columns([3,1,1])
-                                        qnt_att = st.number_input('Adcionar Entregas', min_value=0, step=1, key=f'add{idx_spr} - {idx_parm}')
+                                        qnt_att = st.number_input('Adcionar Atividade', min_value=0, step=1, key=f'add{idx_spr} - {idx_parm}')
                                         
                                         spEntregas.extend([[idx_spr, None, None, 0 , '---', '🟨 Backlog', None] for x in range(qnt_att)])
 
