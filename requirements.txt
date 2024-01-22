@@ -1,5 +1,5 @@
 streamlit-authenticator
 mysql-connector-python
-streamlit 1.29.0
+streamlit==1.29.0
 Pillow
 plotly
