@@ -3,10 +3,10 @@ from PIL import Image
 from datetime import datetime, timedelta, date
 from util import font_TITLE, string_to_datetime, cardMyProject, cardGRANDE
 from collections import Counter
-import mysql.connector 
 import streamlit_authenticator as stauth
 from utilR import PlotCanvas, menuProjeuHtml, menuProjeuCss
 from time import sleep
+from conexao import conexaoBD
 
 icone = Image.open('imagens/icone.png')
 st.set_page_config(
@@ -16,13 +16,7 @@ st.set_page_config(
 
 
 #CONEXÃO COM O BANCO DE DADOS AWS
-conexao = mysql.connector.connect(
-    passwd='nineboxeucatur',
-    port=3306,
-    user='ninebox',
-    host='nineboxeucatur.c7rugjkck183.sa-east-1.rds.amazonaws.com',
-    database='projeu'
-)
+conexao = conexaoBD()
 
 mycursor = conexao.cursor()
 

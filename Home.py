@@ -2,20 +2,14 @@ import streamlit as st
 from PIL import Image
 from utilR import font_TITLE, ninebox_home, css_9box_home, nineboxDatasUnidades_home
 from time import sleep
-import mysql.connector 
 import streamlit_authenticator as stauth
 from utilR import menuProjeuHtml, menuProjeuCss
+from conexao import conexaoBD
 
 st.set_page_config(layout="wide",
     initial_sidebar_state='collapsed')
 
-conexao = mysql.connector.connect(
-    passwd='nineboxeucatur',
-    port=3306,
-    user='ninebox',
-    host='nineboxeucatur.c7rugjkck183.sa-east-1.rds.amazonaws.com',
-    database='projeu'
-)
+conexao = conexaoBD()
 
 def cardMyProject(nome_user, dados_user):
     param = ['Atividades', 'Entregues', 'Horas Total', 'Complexidade']

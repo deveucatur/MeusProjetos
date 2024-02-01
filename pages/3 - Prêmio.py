@@ -1,11 +1,11 @@
 import streamlit as st
 from util import font_TITLE
 from PIL import Image
-import mysql.connector
 from datetime import datetime, timedelta
 import streamlit_authenticator as stauth
 from dateutil.relativedelta import relativedelta
 from utilR import menuProjeuHtml, menuProjeuCss
+from conexao import conexaoBD
 
 icone = Image.open('imagens/icone.png')
 st.set_page_config(
@@ -13,13 +13,7 @@ st.set_page_config(
     page_icon=icone,
     layout="wide")
 
-conexao = mysql.connector.connect(
-    passwd='nineboxeucatur',
-    port=3306,
-    user='ninebox',
-    host='nineboxeucatur.c7rugjkck183.sa-east-1.rds.amazonaws.com',
-    database='projeu'
-    )
+conexao = conexaoBD()
 
 mycursor = conexao.cursor()
 
