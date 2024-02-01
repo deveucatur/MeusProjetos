@@ -238,7 +238,7 @@ elif authentication_status:
     st.write(f'<div>{menuHtml}</div>', unsafe_allow_html=True)
     st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
 
-    font_TITLE('HOME', fonte_Projeto,"'Bebas Neue', sans-serif", 42, 'left')
+    font_TITLE('HOME ', fonte_Projeto,"'Bebas Neue', sans-serif", 42, 'left')
 
     sqlEntregas = f"""SELECT 
             projeu_entregas.id_sprint, 
