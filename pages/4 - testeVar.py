@@ -8,7 +8,7 @@ def ler_configuracoes(nome_arquivo):
     return configuracoes
 
 # Caminho do arquivo YAML
-caminho_arquivo_yaml = '.github\workflows\main.yaml'
+caminho_arquivo_yaml = '.github/workflows/main.yaml'
 
 # Lê as variáveis do arquivo YAML
 config = ler_configuracoes(caminho_arquivo_yaml)
