@@ -19,6 +19,5 @@ def conexaoBD():
         host='nineboxeucatur.c7rugjkck183.sa-east-1.rds.amazonaws.com',
         database='projeu'
     )
-    
 
     return conexao
