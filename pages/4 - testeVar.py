@@ -6,9 +6,8 @@ connect = variavelYAML()
 
 st.write(connect)
 
-st.write("Conteúdo de os.environ:")
-st.write(os.environ)
+env_variables = os.environ
 
 # Itera sobre as variáveis de ambiente e imprime seus valores
-for key, value in os.environ.items():
+for key, value in env_variables.items():
     st.write(f'{key}: {value}')
