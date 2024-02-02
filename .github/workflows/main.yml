@@ -22,6 +22,5 @@ jobs:
         DB_PORT = ${{ secrets.DB_PORT }}
         DB_DATABASE = ${{ secrets.DB_DATABASE }}
 
-
         # Use os segredos no seu código Python
         python -c "print('Conectando ao banco de dados:', '$DB_USER', '$DB_PASSWORD', '$DB_HOST', '$DB_PORT', '$DB_DATABASE')"
