@@ -1,5 +1,6 @@
 import streamlit as st
 from conexao import variavelYAML
+import os
 
 connect = variavelYAML()
 
