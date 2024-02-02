@@ -1,4 +1,4 @@
-name: conexao_bd
+name: Exemplo de Ação
 
 on:
   push:
