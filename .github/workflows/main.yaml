@@ -31,4 +31,4 @@ jobs:
         DB_DATABASE=${{ secrets.DB_DATABASE }}
 
         # Use os segrDB_USERedos no seu código Python
-        python -c "print('Conectando ao banco de dados:', '$DB_USER', '$DB_PASSWORD', '$DB_HOST', '$DB_PORT', '$DB_DATABASE')"
+        python -c "import os; print('Conectando ao banco de dados:', os.environ.get('DB_USER'), os.environ.get('DB_PASSWORD'), os.environ.get('DB_HOST'), os.environ.get('DB_PORT'), os.environ.get('DB_DATABASE'))"
