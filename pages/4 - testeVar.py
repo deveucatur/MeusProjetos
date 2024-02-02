@@ -7,6 +7,7 @@ db_host = os.environ.get('"DB_HOST"')
 db_port = os.environ.get('"DB_PORT"')
 db_database = os.environ.get('"DB_DATABASE"')
 
+st.write("teste - 1.0")
 st.info(db_user)
 st.info(db_password)
 st.info(db_host)
