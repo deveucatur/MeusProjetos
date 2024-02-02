@@ -955,7 +955,7 @@ elif authentication_status:
                 matric_gestor = st.text_input('Matricula Gestor', [x[0] for x in users if x[1] == gestorProjeto][0], disabled=True)
             
             mvp_name = st.text_input('MVP')
-            pdt_entrFinal = st.text_area('Produto Projeto')
+            pdt_entrFinal = st.text_area('Produto Projeto', key='ProdutoEntrega')
 
         with col2:
             nomePrograma = st.selectbox('Programa', [x[0] for x in prog_macro if x[1] == MacroProjeto])
