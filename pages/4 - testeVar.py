@@ -5,8 +5,33 @@ import re
 import sys
 
 yaml_code = """
-coloque o seu YAML aqui
-"""
+        name: Exemplo de Ação
+
+        on:
+        push:
+            branches:
+            - main
+
+        jobs:
+        exemplo_job:
+            runs-on: ubuntu-latest
+            
+            steps:
+            - name: Checkout do código
+            uses: actions/checkout@v2
+
+            - name: Usar segredos
+            run: |
+                # Acesse os segredos durante a execução da ação
+                DB_USER=${{ secrets.DB_USER }}
+                DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+                DB_HOST=${{ secrets.DB_HOST }}
+                DB_PORT=${{ secrets.DB_PORT }}
+                DB_DATABASE=${{ secrets.DB_DATABASE }}
+
+                # Use os segrDB_USERedos no seu código Python
+                python -c "print('Conectando ao banco de dados:', '$DB_USER', '$DB_PASSWORD', '$DB_HOST', '$DB_PORT', '$DB_DATABASE')"
+    """
 
 secrets = {
     'DB_USER': 'valor_secreto_user',
