@@ -24,12 +24,3 @@ jobs:
 
         # Use os segrDB_USERedos no seu código Python
         python -c "print('Conectando ao banco de dados:', '$DB_USER', '$DB_PASSWORD', '$DB_HOST', '$DB_PORT', '$DB_DATABASE')"
-
-    - name: Debug variáveis de ambiente
-      run: |
-        echo "DB_USER=${{ secrets.DB_USER }}"
-        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
-        echo "DB_HOST=${{ secrets.DB_HOST }}"
-        echo "DB_PORT=${{ secrets.DB_PORT }}"
-        echo "DB_DATABASE=${{ secrets.DB_DATABASE }}"
-

@@ -3,11 +3,11 @@ import mysql.connector
 import streamlit as st
 
 def variavelYAML():
-    db_user = os.environ.get('DB_USER')
-    db_password = os.environ.get('DB_PASSWORD')
-    db_host = os.environ.get('DB_HOST')
-    db_port = os.environ.get('DB_PORT')
-    db_database = os.environ.get('DB_DATABASE')
+    db_user = os.environ.get('HOSTNAME')
+    db_password = os.environ.get('USER')
+    db_host = os.environ.get('HOME')
+    db_port = os.environ.get('SF_PARTNER')
+    db_database = os.environ.get('STREAMLIT_SERVER_RUN_ON_SAVE')
 
     return [db_user, db_password, db_host, db_port, db_database]
 
@@ -19,5 +19,5 @@ def conexaoBD():
         host='nineboxeucatur.c7rugjkck183.sa-east-1.rds.amazonaws.com',
         database='projeu'
     )
-    
+
     return conexao
