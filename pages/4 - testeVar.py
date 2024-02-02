@@ -1,19 +1,42 @@
 import streamlit as st
 import os
 import yaml
+import re
+import sys
 
-def ler_configuracoes(nome_arquivo):
-    with open(nome_arquivo, 'r') as arquivo:
-        configuracoes = yaml.safe_load(arquivo)
-    return configuracoes
+yaml_code = """
+coloque o seu YAML aqui
+"""
 
-# Caminho do arquivo YAML
-caminho_arquivo_yaml = '.github/workflows/main.yaml'
+secrets = {
+    'DB_USER': 'valor_secreto_user',
+    'DB_PASSWORD': 'valor_secreto_password',
+    'DB_HOST': 'valor_secreto_host',
+    'DB_PORT': 'valor_secreto_port',
+    'DB_DATABASE': 'valor_secreto_database',
+}
 
-# Lê as variáveis do arquivo YAML
-config = ler_configuracoes(caminho_arquivo_yaml)
+for key, value in secrets.items():
+    yaml_code = re.sub(fr'\${{{{\s+secrets.{key}\s+}}}}', value, yaml_code)
 
-st.write(config)
+st.write(yaml_code)
+
+#===========================================================================
+
+# def ler_configuracoes(nome_arquivo):
+#     with open(nome_arquivo, 'r') as arquivo:
+#         configuracoes = yaml.safe_load(arquivo)
+#     return configuracoes
+
+# # Caminho do arquivo YAML
+# caminho_arquivo_yaml = '.github/workflows/main.yaml'
+
+# # Lê as variáveis do arquivo YAML
+# config = ler_configuracoes(caminho_arquivo_yaml)
+
+# st.write(config)
+
+#==========================================================================
 
 # db_user = os.environ.get('$DB_USER')
 # db_password = os.environ.get('$DB_PASSWORD')
