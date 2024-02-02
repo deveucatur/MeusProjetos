@@ -16,11 +16,11 @@ jobs:
     - name: Usar segredos
       run: |
         # Acesse os segredos durante a execução da ação
-        =${{ secrets.DB_USER }}
+        DB_USER=${{ secrets.DB_USER }}
         DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         DB_HOST=${{ secrets.DB_HOST }}
         DB_PORT=${{ secrets.DB_PORT }}
         DB_DATABASE=${{ secrets.DB_DATABASE }}
 
-        # Use os segrDB_USERedos no seu código Python
-        python -c "print('Conectando ao banco de dados:', '$DB_USER', '$DB_PASSWORD', '$DB_HOST', '$DB_PORT', '$DB_DATABASE')"
+        # Use os segredos no seu código Python
+        python -c "import os; print('Conectando ao banco de dados:', os.environ['DB_USER'], os.environ['DB_PASSWORD'], os.environ['DB_HOST'], os.environ['DB_PORT'], os.environ['DB_DATABASE'])"
