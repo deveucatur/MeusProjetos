@@ -454,7 +454,7 @@ elif authentication_status:
                             range_aux = [1 if str(values[x]).strip() != str(values_aux[x]).strip() else 0 for x in range(len(values))]
                             for idx_clm in range(len(columns1)):
                                 if range_aux[idx_clm] == 1:         
-                                    cmd = f'UPDATE projeu_projetos SET {columns1[idx_clm]} = {values[idx_clm]} WHERE id_proj = {dadosOrigin[0][0]};'
+                                    cmd = f'UPDATE projeu_projetos SET {columns1[idx_clm]} = "{values[idx_clm]}" WHERE id_proj = {dadosOrigin[0][0]};'
                                     
                                     mycursor_edit.execute(cmd)
                                     conexao.commit()
