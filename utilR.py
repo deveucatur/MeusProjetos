@@ -1482,7 +1482,34 @@ def nineboxDatasUnidades_home(dadosNineboxUni, links):
                 txtAux += dados_ninebox
         txtHtml.append(txtAux)
 
-    return txtHtml     
+    return txtHtml   
+
+def statusProjetos(dados):
+                        #LISTA DE UNIDADES NO LISTCELLNINETODOS
+    nomeProj = dados[0] 
+    statusProj = dados[1]
+    style = ["green"]
+    txtHtml = []
+    for i in range(len(nomeProj)):
+        txtAux = ""
+
+        if len(nomeProj[i]) > 0:
+            for j in range(len(nomeProj[i])):
+                dados_ninebox = f"""<table class="tb2">
+                        <tr class="tb-person-{style[i]}2">
+                            <td style="min-width: 100px; max-width: 100px;">
+                                <p>{nomeProj[i][j]}</p>
+                            </td>
+                            <td style="min-width: 50px; max-width: 50px;">
+                                <p>{statusProj[i][j]}</p>
+                            </td>
+                        </tr>
+                    </table>"""
+                
+                txtAux += dados_ninebox
+        txtHtml.append(txtAux)
+
+    return txtHtml
 
 def css_9box_home():
     ninebox_style = """
