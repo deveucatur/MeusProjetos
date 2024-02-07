@@ -2,7 +2,7 @@ import streamlit as st
 from conexao import variavelYAML
 import os
 
-st.info("Essa página está sendo utilizada para a realização de testes no sistema. \n Ignore toda informação presente aqui!")
+st.info("Essa página está sendo utilizada para a realização de testes no sistema. \n\n Ignore toda informação presente aqui!")
 
 connect = variavelYAML()
 
