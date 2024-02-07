@@ -29,7 +29,7 @@ conexao = mysql.connector.connect(
     database=variaveis['DB_DATABASE']
 )
 
-st.write(conexao)
+st.write(conexao) 
 
 # from conexao import variavelYAML
 # import os
