@@ -197,7 +197,12 @@ SELECT
 			GROUP_CONCAT(status_metric SEPARATOR '~/>') 
 		FROM projeu_metricas 
 		WHERE id_prj_fgkey = projeu_projetos.id_proj
-	) AS STATUS_METRICAS
+	) AS STATUS_METRICAS,
+    (
+        SELECT GROUP_CONCAT(IFNULL(check_homolog, 0) SEPARATOR '~/>')
+        FROM projeu_sprints 
+        WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
+    ) as CHECK_HOMOLOG_SPRINT
 FROM 
     projeu_projetos
 JOIN 
@@ -316,10 +321,28 @@ elif authentication_status:
                                                 ) 
                                             );"""
                 
+                cmd_especialist_sprint = f"""SELECT
+                                        PES.id_sp, 
+                                        PES.id_sprt_fgkey, 
+                                        PS.number_sprint,
+                                        PES.id_colab_fgkey, 
+                                        PU.Matricula,
+                                        PU.Nome,
+                                        PES.status_sp
+                                    FROM projeu_especialist_sprint PES
+                                    JOIN projeu_users PU ON PU.id_user = PES.id_colab_fgkey
+                                    JOIN projeu_sprints PS ON PS.id_sprint = PES.id_sprt_fgkey
+                                    WHERE PS.id_proj_fgkey IN (SELECT PP_AUX.id_proj FROM projeu_projetos PP_AUX WHERE PP_AUX.name_proj LIKE '%{str(dadosOrigin[0][1]).strip()}%');"""
+
+                
             if len(dadosOrigin) > 0:
                 mycursor = conexao.cursor()  
                 mycursor.execute(cmd_entregas)
                 EntregasBD = mycursor.fetchall()
+
+                mycursor.execute(cmd_especialist_sprint)
+                especialist_by_proj = mycursor.fetchall()
+                
                 mycursor.close()
 
                 tab1, tab2 = st.tabs(['Canvas', 'Editar'])
@@ -454,7 +477,7 @@ elif authentication_status:
                             range_aux = [1 if str(values[x]).strip() != str(values_aux[x]).strip() else 0 for x in range(len(values))]
                             for idx_clm in range(len(columns1)):
                                 if range_aux[idx_clm] == 1:         
-                                    cmd = f'UPDATE projeu_projetos SET {columns1[idx_clm]} = "{values[idx_clm]}" WHERE id_proj = {dadosOrigin[0][0]};'
+                                    cmd = f'UPDATE projeu_projetos SET {columns1[idx_clm]} = {values[idx_clm]} WHERE id_proj = {dadosOrigin[0][0]};'
                                     
                                     mycursor_edit.execute(cmd)
                                     conexao.commit()
@@ -505,10 +528,12 @@ elif authentication_status:
 
                 st.text(' ')
                 st.text(' ')
+                
                 func_split = lambda x: x.split("~/>") if x is not None else [x]
                 #ESPAÇO PARA MANIPULAR OS COLABORADORES VINCULADOS À AQUELE PROJETO
                 with st.expander('Equipe do Projeto'):
                     matriculasEQUIP = func_split(dadosOrigin[0][23])
+
                     equipe_atual = {matriculasEQUIP[idx_mat]: [matriculasEQUIP[idx_mat], func_split(dadosOrigin[0][21])[idx_mat], func_split(dadosOrigin[0][22])[idx_mat],  func_split(dadosOrigin[0][20])[idx_mat]] for idx_mat in range(len(matriculasEQUIP)) if matriculasEQUIP[idx_mat] != str(dadosOrigin[0][3]).strip()}
 
                     tab1, tab2 = st.tabs(['Adcionar', 'Excluir'])
@@ -519,7 +544,7 @@ elif authentication_status:
                             qntd_clb = st.number_input('Quantidade', min_value=0, step=1)
                         
                         for a in range(qntd_clb):
-                            equipe_atual[f'{a}'] = ['', '', 'Executor']        
+                            equipe_atual[f'{a}'] = [None, None, 'Executor']        
 
                         with st.form('FORMS ATUALIZAR EQUIPE'):
                                 
@@ -536,28 +561,26 @@ elif authentication_status:
 
                             for colb_a in range(len(equipe_list)):
                                 with col_equip2:
-                                    colb_name = st.selectbox('Colaboradores', [x[1] for x in users], list([x[1] for x in users]).index(equipe_list[colb_a][1]),label_visibility="collapsed", key=f'Nome Colab{colb_a}')        
+                                    colb_name = st.selectbox('Colaboradores', [x[1] for x in users], list([x[1] for x in users]).index(equipe_list[colb_a][1]) if equipe_list[colb_a][0] != None else None,label_visibility="collapsed", key=f'Nome Colab{colb_a}')        
                                 with col_equip1:
-                                    colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0], label_visibility="collapsed", disabled=True, key=f'MatriculaColabs{colb_a}')
+                                    colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0] if colb_name != None else None, label_visibility="collapsed", disabled=True, key=f'MatriculaColabs{colb_a}')
                                 with col_equip3:
-                                    colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],list(['Especialista', 'Executor']).index(equipe_list[colb_a][2]), label_visibility="collapsed", key=f'funcaoColab{colb_a}')
+                                    colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],list(['Especialista', 'Executor']).index(equipe_list[colb_a][2]) if colb_name != None else None, label_visibility="collapsed", key=f'funcaoColab{colb_a}')
                                 list_colbs.append([colab_matric, colb_funç])
                             
-                            block_att = True
-                            if matriUser == gestorProj:
-                                 block_att = False
-
-                            button_att_equipe = st.form_submit_button('Atualizar', disabled=block_att)
+                            button_att_equipe = st.form_submit_button('Atualizar')
                             if button_att_equipe:
                                 equipe_limp = [x for x in list_colbs if str(x[0]).strip() != '0']
                                 mycursor = conexao.cursor()
 
                                 for matric, func in equipe_limp:
                                     if str(matric).strip() in [str(x).strip() for x in equipe_atual.keys()]: #VERIFICANDO SE O COLABORADOR JÁ ESTÁ VINCULADO A EQUIPE
-                                        if str(equipe_atual[matric][2]).strip() != str(func).strip(): #VERIFICANDO SE OUVE ALGUMA MUDANÇA NOS COLABORADORES JÁ VINCULADOS
+                                                                        
+                                        if str(equipe_atual[matric][2]).strip() != str(func).strip(): #VERIFICANDO SE OUVE ALGUMA MUDANÇA NOS COLABORADORES JÁ VINCULADOS        
                                             cmd_att_equipe = f'UPDATE projeu_registroequipe SET papel = "{func}" WHERE id_registro = {equipe_atual[matric][3]}'
                                             mycursor.execute(cmd_att_equipe)
                                             conexao.commit()
+                                    
                                     else: #SE FOR UM COLABORADOR NOVO NA EQUIPE
                                         cmd_new_equip = f'''INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel)
                                                         VALUES (
@@ -568,24 +591,21 @@ elif authentication_status:
                                         conexao.commit()
                                     
                                 mycursor.close()
-                                st.toast('Dados Atualizados!', icon='✅') 
-                                sleep(0.6)
-                                st.rerun()
-                                
-                    with tab2:
-                        
+                                st.toast('Equipe Atualizada!', icon='✅') 
+                    with tab2:                
                         font_TITLE('EXCLUIR COLABORADOR DA EQUIPE', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left')
-                        st.text(' ')
-                        col1, col2, col3 = st.columns([0.6,3,2])
-                        
-                        with col2:
-                            colab_ex = st.selectbox('Colaborador', [str(x[1]).strip() for x in equipe_atual.values()])
-                        with col1:
-                            matric_ex = st.text_input('Matricula', [x[0] for x in users if str(x[1]).strip().lower() == str(colab_ex).strip().lower()][0], disabled=True)
-                        with col3:
-                            funca_ex = st.text_input('Função', equipe_atual[matric_ex][2], disabled=True)
 
-                        if matriUser == gestorProj:
+                        if len(equipe_atual) > 0:
+                        
+                            st.text(' ')
+                            col1, col2, col3 = st.columns([0.6,3,2])
+                            with col2:
+                                colab_ex = st.selectbox('Colaborador', [str(x[1]).strip() for x in equipe_atual.values()])                
+                            with col1:
+                                matric_ex = st.text_input('Matricula', [x[0] for x in users if str(x[1]).strip().lower() == str(colab_ex).strip().lower()][0], disabled=True)
+                            with col3:
+                                funca_ex = st.text_input('Função', equipe_atual[matric_ex][2], disabled=True)
+
                             button_ex_equip = st.button('Excluir', key='EXCLUIR COLABORADOR DO PROJETO')
                             if button_ex_equip:
                                 mycursor = conexao.cursor()
@@ -593,8 +613,9 @@ elif authentication_status:
 
                                 mycursor.execute(cmd_ex_equip)
                                 conexao.commit()
-                            
-                                st.rerun()
+
+                        else:
+                            st.error('Não há colaboradores vinculados a equipe do projeto.', icon='❌')
 
 
                 #####APRESENTANDO HORAS TOTAIS GASTAS NO PROJETO DAQUELE COLABORADOR
@@ -610,72 +631,84 @@ elif authentication_status:
                 st.text(' ')
 
                 param_sprint = ['PRÉ MVP', 'MVP', 'PÓS MVP', 'ENTREGA FINAL']
-
-                font_TITLE('SPRINTS DO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 40, 'left', '#228B22')
+                font_TITLE('SPRINTS DO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 28, 'left', '#228B22')
                 with st.expander('Adcionar Sprint'):
                     #FUNÇÃO PARA IDENTIFICAR SE A COLUNA DO BANCO DE DADOS ESTÁ VAZIA 
                     maior_idx = max([param_sprint.index(x)+1 if x != None else 0 for x in func_split(dadosOrigin[0][12])])
-                    
+        
                     if None in func_split(dadosOrigin[0][11]):
                         on_ex = False
                     else:    
                         on_ex = st.toggle('Excluir sprint')
 
-                    listAddSprOF_EX = [len([x for x in func_split(dadosOrigin[0][11]) if x != None]) + 1, param_sprint[:maior_idx+1], datetime.today()]
+                    listAddSprOF_EX = [max([int(x) for x in func_split(dadosOrigin[0][11]) if x != None]) if len([int(x) for x in func_split(dadosOrigin[0][11]) if x != None]) != 0 else 0, param_sprint[:maior_idx+1], datetime.today()]
+                    
                     listAddSprON_EX = [[int(x) if x != None else '' for x in func_split(dadosOrigin[0][11])], func_split(dadosOrigin[0][12]), [string_to_datetime(x) if x != None and x != " " else datetime.today() for x in func_split(dadosOrigin[0][13])]]
 
                     disabledON = True if on_ex else False
                     disabledOF = False if on_ex else True
 
                     col0, col1, col2, col3 = st.columns([0.5,3,1,1])
-                    with col0:
-                        number_sprint_new = int(st.text_input('Sprint', max(listAddSprON_EX[0]) if on_ex else listAddSprOF_EX[0], disabled=True))
                     with col1:
-                        type_sprint_new = st.selectbox('Tipo', [listAddSprON_EX[1][listAddSprON_EX[0].index(number_sprint_new)]] if on_ex else listAddSprOF_EX[1], disabled=disabledON)
+                        type_sprint_new = st.selectbox('Tipo', [listAddSprON_EX[1][listAddSprON_EX[0].index(max(listAddSprON_EX[0]))]] if on_ex else listAddSprOF_EX[1], disabled=disabledON)
+                    with col0:
+                        number_sprt =listAddSprOF_EX[0] + 1 if type_sprint_new != 'MVP' else None
+                        number_sprint_new = st.text_input('Sprint', max(listAddSprON_EX[0]) if on_ex else number_sprt, disabled=True)
+
                     with col2:
-                        dat_inc_new = st.date_input('Início', value=listAddSprON_EX[2][listAddSprON_EX[0].index(number_sprint_new)] if on_ex else listAddSprOF_EX[2], disabled=disabledON)
+                        dat_inc_new = st.date_input('Início', value=listAddSprON_EX[2][listAddSprON_EX[0].index(max(listAddSprON_EX[0]))] if on_ex else listAddSprOF_EX[2], disabled=disabledON)
                     with col3:
                         dat_fim_new = st.date_input('Fim', value=dat_inc_new + timedelta(days=14), disabled=True)
-
-                    if matriUser == gestorProj:
-                        colAdd, colExc = st.columns([1,7])
-                        with colAdd:
-                            button_addSprint = st.button('Adcionar Sprint', disabled=disabledON)
-                        with colExc:
-                            button_exSprint = st.button('Excluir Sprint', disabled=disabledOF)
+                    
+                    #st.error([str(str(dadosOrigin[0][11]).split("~/>")[x]).strip() for x in range(len(str(dadosOrigin[0][27]).split("~/>"))) if str(str(dadosOrigin[0][45]).split("~/>")[x]).strip() == '1'])
+                    colAdd, colExc = st.columns([1,7])
+                    with colAdd:
+                        button_addSprint = st.button('Adcionar Sprint', disabled=disabledON)
+                    with colExc:
+                        button_exSprint = st.button('Excluir Sprint', disabled=disabledOF)
+                    
+                    if button_addSprint:
+                        mycursor = conexao.cursor()
+                        columns = 'id_proj_fgkey, status_sprint, date_inic_sp, date_fim_sp'
+                        values = f'''{dadosOrigin[0][0]}, '{type_sprint_new}', STR_TO_DATE('{dat_inc_new}', '%Y-%m-%d'), STR_TO_DATE('{dat_fim_new}', '%Y-%m-%d')'''
                         
-                        if button_addSprint:
-                            mycursor = conexao.cursor()
-                            cmd_addSprint = f'''INSERT INTO projeu_sprints(number_sprint, id_proj_fgkey, status_sprint, date_inic_sp, date_fim_sp) 
-                            VALUES ({number_sprint_new}, (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{project_filter}'), '{type_sprint_new}', STR_TO_DATE('{dat_inc_new}', '%Y-%m-%d'), STR_TO_DATE('{dat_fim_new}', '%Y-%m-%d'));'''
-                            
-                            mycursor.execute(cmd_addSprint)
+                        if number_sprint_new != None:
+                            columns += ', number_sprint'
+                            values += f', {number_sprint_new}'
+
+                        cmd_addSprint = f'''INSERT INTO projeu_sprints({columns}) 
+                        VALUES ({values});'''
+                        
+                        mycursor.execute(cmd_addSprint)
+                        conexao.commit()
+                        
+                        if number_sprint_new == 1:
+                            cmdUP_stt_proj = f'UPDATE projeu_projetos SET status_proj = "Em Andamento" WHERE id_proj = {dadosOrigin[0][0]};'
+                            mycursor.execute(cmdUP_stt_proj)
                             conexao.commit()
                             
-                            if number_sprint_new == 1:
-                                cmdUP_stt_proj = f'UPDATE projeu_projetos SET status_proj = "Em Andamento" WHERE id_proj = {dadosOrigin[0][0]};'
-                                mycursor.execute(cmdUP_stt_proj)
-                                conexao.commit()
-                                
-                            mycursor.close()
-                            st.toast('Sucesso na adição da sprint!', icon='✅')
-                            st.text(' ')
-                            st.rerun()
+                        mycursor.close()
+                        st.toast('Sucesso na adição da sprint!', icon='✅')
+                        st.text(' ')
+                        
 
-                        if button_exSprint:
-                            NoTentrg = False
-                            if on_ex:
-                                mycursor = conexao.cursor()
-                                if len(EntregasBD) == 0:
-                                    NoTentrg = True
-                                else:
-                                    NoTentrg = True if number_sprint_new not in list(set([x[0] for x in EntregasBD])) else False
+                    if button_exSprint:
+                        NotEntrg = False
+                        if on_ex:
+                            mycursor = conexao.cursor()
+
+                            if str(listAddSprOF_EX[0]) not in [str(str(dadosOrigin[0][11]).split("~/>")[x]).strip() for x in range(len(str(dadosOrigin[0][27]).split("~/>"))) if str(str(dadosOrigin[0][43]).split("~/>")[x]).strip() == '1']:
                                 
-                                if NoTentrg:
+                                #CHECANDO SE HÁ ENTREGAS VINCULADAS A SPRINT
+                                if len(EntregasBD) == 0:
+                                    NotEntrg = True
+                                else:
+                                    NotEntrg = True if number_sprint_new not in list(set([x[0] for x in EntregasBD])) else False
+                                
+                                if NotEntrg:
                                     cmdDEL = f'''DELETE FROM projeu_sprints 
-                                                WHERE number_sprint = {number_sprint_new} 
-                                                AND id_proj_fgkey = (SELECT id_proj FROM projeu_projetos 
-                                                    WHERE name_proj = '{project_filter}') 
+                                                WHERE number_sprint = {listAddSprOF_EX[0]} 
+                                                AND id_proj_fgkey = {dadosOrigin[0][0]} 
                                                 AND status_sprint = '{type_sprint_new}'
                                                 AND date_inic_sp = STR_TO_DATE('{dat_inc_new}', '%Y-%m-%d')
                                                 AND date_fim_sp = STR_TO_DATE('{dat_fim_new}', '%Y-%m-%d');'''                
@@ -683,13 +716,17 @@ elif authentication_status:
                                     mycursor.execute(cmdDEL)
                                     conexao.commit()
 
-                                    mycursor.close()
                                     st.toast('Excluido!', icon='✅') 
-                                    st.rerun()
+
+                                    sleep(0.5)
+                                    # st.rerun()
                                 else:
                                     st.toast('Primeiramente, é necessário excluir todas as atividades dessa sprint.', icon='❌')
                             else:
-                                st.toast('Primeiramente, ative a opção de excluir sprint.', icon='❌')
+                                st.toast('Sprint já homologada, calculo de bonificação do projeto realizado.', icon='❌')
+                            mycursor.close()
+                        else:
+                            st.toast('Primeiramente, ative a opção de excluir sprint.', icon='❌')
         
                 if func_split(dadosOrigin[0][11])[0] != None:
                     
@@ -710,6 +747,8 @@ elif authentication_status:
                             font_TITLE(f'{param_sprint[idx_parm]}', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left')
 
                             for idx_spr in [int(x[0]) for x in ddSprint]:
+
+                                
                                 listDadosAux = []
 
                                 name_evento = f'Sprint {idx_spr}' if str(param_sprint[idx_parm]).strip() not in ('MVP', 'ENTREGA FINAL') else f'Evento - {param_sprint[idx_parm]}'
@@ -736,8 +775,51 @@ elif authentication_status:
                                     with colPROJ2:
                                         font_TITLE('STATUS DO PROJETO - EM ANDAMENTO', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
                                         
+                                    especialistBD_sprint = [x for x in especialist_by_proj if str(x[1]) == str(id_sprint)]  #ESPECIALISTAS ATIVOS E NÃO ATIVOS VINCULADOS A SPRINT                        
+                            
                                     especialist_proj = [list(func_split(dadosOrigin[0][21]))[x] for x in range(len(func_split(dadosOrigin[0][22]))) if str(list(func_split(dadosOrigin[0][22]))[x]).upper() == 'ESPECIALISTA']
-                                    especialist_sprint = st.multiselect('Especialistas',especialist_proj, especialist_proj, key=f'especialista multi{idx_spr}')
+                                    
+                                    especialist_opc = especialist_proj if len(especialistBD_sprint) == 0 else [str(x[5]).strip() for x in especialistBD_sprint if str(x[6]).strip() == 'A']
+                    
+                                    especialist_sprint = st.multiselect('Especialistas', list(set(especialist_proj)), list(set(especialist_opc)), key=f'especialista multi{idx_spr}')
+                                    
+                                    def tratamento_especialist():
+                                        for espec_bd in especialist_proj:
+                                            espec_bd = str(espec_bd).strip()
+                                            dd_espec = {matric: lista for matric, lista in dict(equipe_atual).items() if str(lista[1]).strip() == str(espec_bd)} 
+                                            
+                                            matricula_especil = str(list(dict(dd_espec).keys())[0]).strip()
+
+                                            cmd_aux = None
+                                            matric_all_espc = [str(x[4]) for x in especialistBD_sprint] #MATRICULA DE TODOS OS ESPECIALISTAS VINCULADOS A SPRINT
+                                            
+                                            if matricula_especil not in matric_all_espc and espec_bd in [str(x).strip() for x in especialist_sprint]: #SE SIM, NOVO ESPECIALISTA
+                                                cmd_aux = f'''
+                                                        INSERT INTO projeu_especialist_sprint (
+                                                            id_sprt_fgkey, 
+                                                            id_colab_fgkey
+                                                        ) VALUES (
+                                                            {id_sprint}, 
+                                                            (SELECT id_user FROM projeu_users WHERE Matricula = {matricula_especil}));'''
+                                                                    
+                                            else: #ESTÁ VINCULADO A SPRINT DO PROJETO
+                                                if espec_bd in [str(x).strip() for x in especialist_sprint] and especialistBD_sprint[0][6] == 'I': #FOI SELECIONADO
+                                                    cmd_aux = f'''
+                                                                UPDATE 
+                                                                    projeu_especialist_sprint SET status_sp = "A" 
+                                                                WHERE 
+                                                                    id_colab_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {matricula_especil}) 
+                                                                        AND id_sprt_fgkey = {id_sprint};'''
+                                                
+                                                elif espec_bd not in [str(x).strip() for x in especialist_sprint] and especialistBD_sprint[0][6] == 'A': #FOI RETIRADO
+                                                    cmd_aux = f'''
+                                                                UPDATE 
+                                                                    projeu_especialist_sprint SET status_sp = "I" 
+                                                                WHERE 
+                                                                    id_colab_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {matricula_especil}) 
+                                                                        AND id_sprt_fgkey = {id_sprint};'''
+                                            #cmd_aux=''
+                                            return cmd_aux
                                     
                                     st.text(' ')
                                     spEntregas = [x for x in spEntregas if x[1] != None and x[2] != None and x[3] != None]
@@ -748,7 +830,7 @@ elif authentication_status:
                                         col1, col2, col3 = st.columns([3,1,1])
                                         qnt_att = st.number_input('Adcionar Atividade', min_value=0, step=1, key=f'add{idx_spr} - {idx_parm}')
                                         
-                                        spEntregas.extend([[idx_spr, None, None, 0 , '---', '🟨 Backlog', None] for x in range(qnt_att)])
+                                        spEntregas.extend([[id_sprint, None, None, 0 , '---', '🟨 Backlog', None] for x in range(qnt_att)])
 
                                         if len(spEntregas) > 0:
                                             with st.form(f'Formulário Entregas {idx_parm} - {id_sprint}'):
@@ -787,28 +869,26 @@ elif authentication_status:
                                                 if len(entrgasBD_by_sprint) > 0:
                                                     col1, col2, col3 = st.columns([1,3,7])
                                                     with col1:
-                                                        #, key=f'{idx_spr} {idx_parm}'
                                                         button_atual = st.form_submit_button('Atualizar', disabled=block_sprint)        
+
                                                     if str(matriUser).strip() == str(dadosOrigin[0][3]).strip():
                                                         with col2:
-                                                            # key=f'Finalizar Sprint {idx_spr} {idx_parm}',
-                                                            if matriUser == gestorProj:
-                                                                button_final = st.form_submit_button('Finalizar Sprint', disabled=block_sprint) 
-                                                        
-                                                                if button_final:
-                                                                    mycursor = conexao.cursor()
-                                                                    columns_final = ['check_sprint', 'data_check']
-                                                                    values_final = [0, f'"{datetime.today()}"']
+                                                            button_final = st.form_submit_button('Finalizar Sprint', disabled=block_sprint) 
+                                                    
+                                                            if button_final:
+                                                                mycursor = conexao.cursor()
+                                                                columns_final = ['check_sprint', 'data_check']
+                                                                values_final = [0, f'"{datetime.today()}"']
 
-                                                                    for idx_column in range(len(columns_final)):
-                                                                        cmd_final = f'''UPDATE projeu_sprints SET {columns_final[idx_column]} = {values_final[idx_column]} WHERE id_sprint = {int(id_sprint)};'''
-                                                                        mycursor.execute(cmd_final)
-                                                                        conexao.commit()
+                                                                for idx_column in range(len(columns_final)):
+                                                                    cmd_final = f'''UPDATE projeu_sprints SET {columns_final[idx_column]} = {values_final[idx_column]} WHERE id_sprint = {int(id_sprint)};'''
+                                                                    mycursor.execute(cmd_final)
+                                                                    conexao.commit()
 
-                                                                    mycursor.close()
-                                                                    st.toast('Sprint Finalizada!', icon='✅')
-                                                                    sleep(0.6)
-                                                                    st.rerun()
+                                                                mycursor.close()
+                                                                st.toast('Sprint Finalizada!', icon='✅')
+                                                                sleep(0.6)
+                                                                st.rerun()
 
                                                     if button_atual:
                                                         mycursor = conexao.cursor()
@@ -827,6 +907,7 @@ elif authentication_status:
                                                                 if list_atual[0] != None and list_atual[0] != '': 
                                                                     tables = ['projeu_entregas', 'projeu_entregas_planejamento']
 
+                                                                    
                                                                     for table_name in tables:
                                                                         cmd_insert = f'''
                                                                             INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
@@ -841,10 +922,12 @@ elif authentication_status:
                                                                         mycursor.execute(cmd_insert)
                                                                         conexao.commit()
 
+                                                            cmd_especialist = tratamento_especialist()
+                                                            mycursor.execute(cmd_especialist)
+                                                            conexao.commit()
 
                                                         mycursor.close()
                                                         st.toast('Dados Atualizados!', icon='✅')
-                                                        st.rerun()
 
                                                 else:
                                                     button_inic_entreg = st.form_submit_button('Enviar')
@@ -856,21 +939,29 @@ elif authentication_status:
                                                             for list_atual in listDadosAux:
                                                                 cmd_insert = f'''
                                                                     INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
-                                                                        values((SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {spEntregas[0][0]}  
-                                                                            AND id_proj_fgkey = 
-                                                                                (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{dadosOrigin[0][1]}') LIMIT 1),
+                                                                        values({spEntregas[0][0]},
                                                                                 "{limp_entrg(list_atual[0])}", 
-                                                                                (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
+                                                                                (SELECT id_user FROM projeu_users WHERE Nome LIKE "%{list_atual[1]}%" LIMIT 1),
                                                                                 {list_atual[2]},
                                                                                 "{list_atual[3]}",
                                                                                 "{list_atual[4]}");'''
 
                                                                 mycursor.execute(cmd_insert)
                                                                 conexao.commit()
+
+                                                        for i in range(len(especialist_sprint)):
+                                                            cmd_insert_espc = f"""INSERT INTO projeu_especialist_sprint (
+                                                                                    id_sprt_fgkey, 
+                                                                                    id_colab_fgkey
+                                                                                ) VALUES (
+                                                                                    {id_sprint}, 
+                                                                                    (SELECT id_user FROM projeu_users WHERE Nome LIKE '%{str(especialist_sprint[i]).strip()}%'));"""
+                                                            
+                                                            mycursor.execute(cmd_insert_espc)
+                                                            conexao.commit()
+
                                                         st.toast('Entregas Enviadas!', icon='✅')
                                                         mycursor.close()
-                                                        sleep(0.6)
-                                                        st.rerun()
                                                     
                                     with tab2:
                                         font_TITLE('EXCLUIR', fonte_Projeto,"'Bebas Neue', sans-serif", 23, 'left')  
@@ -925,6 +1016,8 @@ elif authentication_status:
                                 sleep(0.6)
                                 mycursor.close()
                                 st.rerun()
+                        else:
+                            st.toast('')
                                 
 
         else:               
@@ -1060,7 +1153,7 @@ elif authentication_status:
                         ############# INSERINDO MÉTRICAS DO PROJETO #############
                         dd_metric = ''
                         for metric_name in listMetric:
-                            dd_metric += f"((SELECT id_proj FROM projeu_projetos WHERE name_proj = '{nomeProjeto}'), '{metric_name}'),"
+                            dd_metric += f"({dadosOrigin[0][0]}, '{metric_name}'),"
                         dd_metric = dd_metric[:len(dd_metric)-1]
 
                         cmd_metric = f"""INSERT INTO projeu_metricas(id_prj_fgkey, name_metric) 
@@ -1072,7 +1165,7 @@ elif authentication_status:
                         ############# INSERINDO COMPLEXIDADE #############
                         cmd_insert_complx = f'''INSERT INTO projeu_complexidade (proj_fgkey, date_edic) 
                         VALUES (
-                        (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{nomeProjeto}' LIMIT 1),
+                        {dadosOrigin[0][0]},
                         '{date.today()}'
                         );'''
                         mycursor.execute(cmd_insert_complx)
@@ -1083,7 +1176,7 @@ elif authentication_status:
                         ############# INSERINDO EQUIPE #############
                         for list_colb in list_colbs:
                             comand_insert_colabs = f"""INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel) VALUES 
-                            ((SELECT id_proj FROM projeu_projetos WHERE name_proj = "{nomeProjeto}" AND gestor_id_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor} limit 1) limit 1), (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]} limit 1), '{list_colb[1]}');"""
+                            ({dadosOrigin[0][0]}, (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]} limit 1), '{list_colb[1]}');"""
                             
                             mycursor.execute(comand_insert_colabs)
                             conexao.commit()
@@ -1100,7 +1193,7 @@ elif authentication_status:
                             values (
                                 '{name_entr}',
                                 (
-                                SELECT id_proj FROM projeu_projetos WHERE name_proj = '{nomeProjeto}')
+                                {dadosOrigin[0][0]}
                                 )'''
                             mycursor.execute(cmd_insert_princp)
                             conexao.commit()
