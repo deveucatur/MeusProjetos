@@ -1016,6 +1016,8 @@ elif authentication_status:
                                 sleep(0.6)
                                 mycursor.close()
                                 st.rerun()
+                        else:
+                            st.toast('')
                                 
 
         else:               
