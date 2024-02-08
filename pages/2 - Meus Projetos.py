@@ -454,7 +454,7 @@ elif authentication_status:
                             range_aux = [1 if str(values[x]).strip() != str(values_aux[x]).strip() else 0 for x in range(len(values))]
                             for idx_clm in range(len(columns1)):
                                 if range_aux[idx_clm] == 1:         
-                                    cmd = f'UPDATE projeu_projetos SET {columns1[idx_clm]} = "{values[idx_clm]}" WHERE id_proj = {dadosOrigin[0][0]};'
+                                    cmd = f'UPDATE projeu_projetos SET {columns1[idx_clm]} = {values[idx_clm]} WHERE id_proj = {dadosOrigin[0][0]};'
                                     
                                     mycursor_edit.execute(cmd)
                                     conexao.commit()
@@ -509,6 +509,7 @@ elif authentication_status:
                 #ESPAÇO PARA MANIPULAR OS COLABORADORES VINCULADOS À AQUELE PROJETO
                 with st.expander('Equipe do Projeto'):
                     matriculasEQUIP = func_split(dadosOrigin[0][23])
+
                     equipe_atual = {matriculasEQUIP[idx_mat]: [matriculasEQUIP[idx_mat], func_split(dadosOrigin[0][21])[idx_mat], func_split(dadosOrigin[0][22])[idx_mat],  func_split(dadosOrigin[0][20])[idx_mat]] for idx_mat in range(len(matriculasEQUIP)) if matriculasEQUIP[idx_mat] != str(dadosOrigin[0][3]).strip()}
 
                     tab1, tab2 = st.tabs(['Adcionar', 'Excluir'])
@@ -519,7 +520,7 @@ elif authentication_status:
                             qntd_clb = st.number_input('Quantidade', min_value=0, step=1)
                         
                         for a in range(qntd_clb):
-                            equipe_atual[f'{a}'] = ['', '', 'Executor']        
+                            equipe_atual[f'{a}'] = [None, None, 'Executor']        
 
                         with st.form('FORMS ATUALIZAR EQUIPE'):
                                 
@@ -536,28 +537,26 @@ elif authentication_status:
 
                             for colb_a in range(len(equipe_list)):
                                 with col_equip2:
-                                    colb_name = st.selectbox('Colaboradores', [x[1] for x in users], list([x[1] for x in users]).index(equipe_list[colb_a][1]),label_visibility="collapsed", key=f'Nome Colab{colb_a}')        
+                                    colb_name = st.selectbox('Colaboradores', [x[1] for x in users], list([x[1] for x in users]).index(equipe_list[colb_a][1]) if equipe_list[colb_a][0] != None else None,label_visibility="collapsed", key=f'Nome Colab{colb_a}')        
                                 with col_equip1:
-                                    colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0], label_visibility="collapsed", disabled=True, key=f'MatriculaColabs{colb_a}')
+                                    colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0] if colb_name != None else None, label_visibility="collapsed", disabled=True, key=f'MatriculaColabs{colb_a}')
                                 with col_equip3:
-                                    colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],list(['Especialista', 'Executor']).index(equipe_list[colb_a][2]), label_visibility="collapsed", key=f'funcaoColab{colb_a}')
+                                    colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],list(['Especialista', 'Executor']).index(equipe_list[colb_a][2]) if colb_name != None else None, label_visibility="collapsed", key=f'funcaoColab{colb_a}')
                                 list_colbs.append([colab_matric, colb_funç])
                             
-                            block_att = True
-                            if matriUser == gestorProj:
-                                 block_att = False
-
-                            button_att_equipe = st.form_submit_button('Atualizar', disabled=block_att)
+                            button_att_equipe = st.form_submit_button('Atualizar')
                             if button_att_equipe:
                                 equipe_limp = [x for x in list_colbs if str(x[0]).strip() != '0']
                                 mycursor = conexao.cursor()
 
                                 for matric, func in equipe_limp:
                                     if str(matric).strip() in [str(x).strip() for x in equipe_atual.keys()]: #VERIFICANDO SE O COLABORADOR JÁ ESTÁ VINCULADO A EQUIPE
-                                        if str(equipe_atual[matric][2]).strip() != str(func).strip(): #VERIFICANDO SE OUVE ALGUMA MUDANÇA NOS COLABORADORES JÁ VINCULADOS
+                                                                        
+                                        if str(equipe_atual[matric][2]).strip() != str(func).strip(): #VERIFICANDO SE OUVE ALGUMA MUDANÇA NOS COLABORADORES JÁ VINCULADOS        
                                             cmd_att_equipe = f'UPDATE projeu_registroequipe SET papel = "{func}" WHERE id_registro = {equipe_atual[matric][3]}'
                                             mycursor.execute(cmd_att_equipe)
                                             conexao.commit()
+                                    
                                     else: #SE FOR UM COLABORADOR NOVO NA EQUIPE
                                         cmd_new_equip = f'''INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel)
                                                         VALUES (
@@ -568,24 +567,21 @@ elif authentication_status:
                                         conexao.commit()
                                     
                                 mycursor.close()
-                                st.toast('Dados Atualizados!', icon='✅') 
-                                sleep(0.6)
-                                st.rerun()
-                                
-                    with tab2:
-                        
+                                st.toast('Equipe Atualizada!', icon='✅') 
+                    with tab2:                
                         font_TITLE('EXCLUIR COLABORADOR DA EQUIPE', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left')
-                        st.text(' ')
-                        col1, col2, col3 = st.columns([0.6,3,2])
-                        
-                        with col2:
-                            colab_ex = st.selectbox('Colaborador', [str(x[1]).strip() for x in equipe_atual.values()])
-                        with col1:
-                            matric_ex = st.text_input('Matricula', [x[0] for x in users if str(x[1]).strip().lower() == str(colab_ex).strip().lower()][0], disabled=True)
-                        with col3:
-                            funca_ex = st.text_input('Função', equipe_atual[matric_ex][2], disabled=True)
 
-                        if matriUser == gestorProj:
+                        if len(equipe_atual) > 0:
+                        
+                            st.text(' ')
+                            col1, col2, col3 = st.columns([0.6,3,2])
+                            with col2:
+                                colab_ex = st.selectbox('Colaborador', [str(x[1]).strip() for x in equipe_atual.values()])                
+                            with col1:
+                                matric_ex = st.text_input('Matricula', [x[0] for x in users if str(x[1]).strip().lower() == str(colab_ex).strip().lower()][0], disabled=True)
+                            with col3:
+                                funca_ex = st.text_input('Função', equipe_atual[matric_ex][2], disabled=True)
+
                             button_ex_equip = st.button('Excluir', key='EXCLUIR COLABORADOR DO PROJETO')
                             if button_ex_equip:
                                 mycursor = conexao.cursor()
@@ -593,8 +589,9 @@ elif authentication_status:
 
                                 mycursor.execute(cmd_ex_equip)
                                 conexao.commit()
-                            
-                                st.rerun()
+
+                        else:
+                            st.error('Não há colaboradores vinculados a equipe do projeto.', icon='❌')
 
 
                 #####APRESENTANDO HORAS TOTAIS GASTAS NO PROJETO DAQUELE COLABORADOR
