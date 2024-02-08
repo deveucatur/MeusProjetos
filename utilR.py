@@ -1535,8 +1535,8 @@ def css_9box_home():
     }
 
     p{
-        font-weight: bold;
-        font-size: 20px;
+        font-size: 14px;
+        margin: 0;
     }
 
     img{
