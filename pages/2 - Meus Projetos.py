@@ -1017,7 +1017,7 @@ elif authentication_status:
                                 mycursor.close()
                                 st.rerun()
                         else:
-                            st.toast('')
+                            st.toast('Primeiramente, adcionar evento ENTREGA FINAL ao projeto.', icon='❌')
                                 
 
         else:               
@@ -1136,11 +1136,11 @@ elif authentication_status:
                             produto_mvp, produto_entrega_final,  
                             ano, date_posse_gestor,  status_proj, investim_proj
                             ) VALUES (
-                            (SELECT id_type FROM projeu_type_proj WHERE type_proj = '{str(typ_proj).strip()}'), (SELECT id FROM projeu_macropr WHERE macroprocesso = '{MacroProjeto}'), 
-                            (SELECT id_prog FROM projeu_programas WHERE nome_prog = '{nomePrograma}'), 
-                            '{nomeProjeto}', '{result_esperd}', 
-                            (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{mvp_name}', '{mvp_produt}', 
-                            '{pdt_entrFinal}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{ivsProget}'); """
+                            (SELECT id_type FROM projeu_type_proj WHERE type_proj LIKE '%{str(typ_proj).strip()}%'), (SELECT id FROM projeu_macropr WHERE macroprocesso LIKE '%{str(MacroProjeto).strip()}%'), 
+                            (SELECT id_prog FROM projeu_programas WHERE nome_prog LIKE '%{nomePrograma}%'), 
+                            '{str(nomeProjeto).strip()}', '{str(result_esperd).strip()}', 
+                            (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{str(mvp_name).strip()}', '{str(mvp_produt).strip()}', 
+                            '{str(pdt_entrFinal).strip()}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{str(ivsProget).strip()}');"""
 
                         
                         mycursor.execute(cmd_criar_project)
@@ -1191,8 +1191,7 @@ elif authentication_status:
                             id_proj_fgkey
                             )
                             values (
-                                '{name_entr}',
-                                (
+                                '{str(name_entr).strip()}',
                                 {dadosOrigin[0][0]}
                                 )'''
                             mycursor.execute(cmd_insert_princp)
