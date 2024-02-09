@@ -407,8 +407,9 @@ elif authentication_status:
                         font_TITLE(f'EDITAR CANVAS', fonte_Projeto,"'Bebas Neue', sans-serif", 24, 'left', 'black')
                         nomeproj_edit = st.text_input('Nome Projeto', projetos[0])
                         produtproj_edit = st.text_area('Produto Projeto', str(prodProjetos[0]).strip())
-                        mvp_edit = st.text_input('MVP', mvps[0])
-                        produtmvp_edit = st.text_input('Produto MVP', prodMvps[0])
+                        if dadosOrigin[0][4] != "Rápido":
+                            mvp_edit = st.text_input('MVP', mvps[0])
+                            produtmvp_edit = st.text_input('Produto MVP', prodMvps[0])
                         Resultado_edit = st.text_input('Resultado Esperado', resultados[0])
                         
                         ############################# MÉTRICAS #############################
