@@ -579,7 +579,7 @@ class PlotCanvas:
         prodProjetoCode = ""
         for i in range(len(self.prodProjetos)):
             prodProjetoCode += f"""<tr class="tdata1">
-                                <td>{self.prodProjetos[i]}
+                                <td>{self.prodProjetos[i]}</td>
                             </tr>"""
 
         
@@ -609,8 +609,9 @@ class PlotCanvas:
                             <div>{prodProjetoCode}</div>
                         </table>
                     </div>
-                </div>
-                <div class="box">
+                </div>"""
+        if len(mvpCode) > 72 and len(prodMvpCode) > 80:
+            htmlRow += f"""<div class="box">
                     <div class="box2">
                         <table class="table2">
                             <tr class="thead2">
@@ -623,8 +624,13 @@ class PlotCanvas:
                             <div>{prodMvpCode}</div>
                         </table>
                     </div>
-                </div>
-                <div class="flex-column">
+                </div>"""
+        else:
+            htmlRow += f"""<div class="box">
+                    <p> </p>
+                </div>"""
+            
+        htmlRow += f"""<div class="flex-column">
                     <div class="box">
                         <div class="box6">
                             <table class="table6">
@@ -760,7 +766,22 @@ class PlotCanvas:
         return htmlGeral
 
     @staticmethod
-    def cssStyle():
+    def cssStyle(mvps, prodMvps):
+        mvp = mvps
+        prodMvp = prodMvps
+
+        mvpCode = ""
+        for i in range(len(mvp)):
+            mvpCode += f"""<tr class="tdata2">
+                    <td>{mvp[i]}</td>
+                </tr>"""
+            
+        prodMvpCode = ""
+        for i in range(len(prodMvp)):
+            prodMvpCode += f"""<tr class="tdata2">
+                        <td>{prodMvp[i]}</td>
+                    </tr>"""
+
         canvaStyle = """body{
             font-family: Arial, sans-serif;
             margin: 0;
@@ -772,23 +793,6 @@ class PlotCanvas:
             display: flex;
             align-items: flex-end;
             justify-content: center;
-        }
-
-        .box1,
-        .box2,
-        .box3,
-        .box4,
-        .box5,
-        .box6,
-        .box7{
-            width: 100%;
-            height: auto;
-            max-width: 350px;
-            max-height: 250px;
-            margin: 5px;
-            overflow: auto;
-            overflow-x: hidden;
-            scrollbar-width: thin;
         }
 
         .box1:hover,
@@ -828,25 +832,84 @@ class PlotCanvas:
 
         .box7:hover{
             box-shadow: 0px 0px 25px rgba(255, 255, 68, 1);
-        }
+        }"""
 
-        .table1,
-        .table2,
-        .table3,
-        .table4,
-        .table5,
-        .table6,
-        .table7{
-            width: 350px;
-            border-collapse: collapse;
-            border-radius: 10px;
-            overflow: hidden; 
-            min-height: 250px;
-            max-height: 250px;
-            border-collapse: collapse;
-        }
-
-        th{
+        if len(mvpCode) > 72 and len(prodMvpCode) > 80:
+             canvaStyle += """.box1,
+                .box2,
+                .box3,
+                .box4,
+                .box5,
+                .box6,
+                .box7{
+                    width: 100%;
+                    height: auto;
+                    max-width: 350px;
+                    max-height: 250px;
+                    margin: 5px;
+                    overflow: auto;
+                    overflow-x: hidden;
+                    scrollbar-width: thin;
+                }
+             
+                .table1,
+                .table2,
+                .table3,
+                .table4,
+                .table5,
+                .table6,
+                .table7{
+                    min-width: 350px;
+                    border-collapse: collapse;
+                    border-radius: 10px;
+                    overflow: hidden; 
+                    min-height: 250px;
+                    max-height: 250px;
+                    border-collapse: collapse;
+                }"""
+        else:
+             canvaStyle += """.box1,
+                .box2,
+                .box3,
+                .box4,
+                .box5,
+                .box6,
+                .box7{
+                    width: 100%;
+                    height: auto;
+                    max-height: 250px;
+                    margin: 5px;
+                    overflow: auto;
+                    overflow-x: hidden;
+                    scrollbar-width: thin;
+                }
+             
+                .table1,
+                .table6{
+                    min-width: 534px;
+                    border-collapse: collapse;
+                    border-radius: 10px;
+                    overflow: hidden; 
+                    min-height: 250px;
+                    max-height: 250px;
+                    border-collapse: collapse;
+                }
+                
+                .table2,
+                .table3,
+                .table4,
+                .table5,
+                .table7{
+                    min-width: 350px;
+                    border-collapse: collapse;
+                    border-radius: 10px;
+                    overflow: hidden; 
+                    min-height: 250px;
+                    max-height: 250px;
+                    border-collapse: collapse;
+                }"""
+             
+        canvaStyle += """th{
             height: 20px;
         }
 

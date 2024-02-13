@@ -383,7 +383,7 @@ elif authentication_status:
                     htmlCol = canvas.tableCol()
 
                     html = canvas.tableGeral(htmlRow, htmlEqp, htmlUnic, htmlCol)
-                    canvaStyle = canvas.cssStyle()
+                    canvaStyle = canvas.cssStyle(mvps, prodMvps)
 
                     st.write(f'<div>{html}</div>', unsafe_allow_html=True)
                     st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
