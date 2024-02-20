@@ -1,5 +1,9 @@
 import streamlit as st
 from datetime import datetime
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
 fonte = '''<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1525,19 +1529,20 @@ def nineboxDatasUnidades_home(dadosNineboxUni, links):
     qtdUnidades = dadosNineboxUni[1] 
     style = ["green"]
     txtHtml = []
-    imgRank = [f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692905.png"/>""", f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692911.png"/>""", f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692913.png"/>""", f"""<p>4º</p>""", f"""<p>5º</p>""", f"""<p>6º</p>""", f"""<p>7º</p>""", f"""<p>8º</p>""", f"""<p>9º</p>""", f"""<p>10º</p>"""]
+    # imgRank = [f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692905.png"/>""", f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692911.png"/>""", f"""<img src="https://cdn-icons-png.flaticon.com/128/4692/4692913.png"/>""", f"""<p>4º</p>""", f"""<p>5º</p>""", f"""<p>6º</p>""", f"""<p>7º</p>""", f"""<p>8º</p>""", f"""<p>9º</p>""", f"""<p>10º</p>"""]
     href = [f'''<a href = "{y}"> ''' for y in links] if len([x for x in links if x != None]) > 0 else ['' for y in range(len(links))]
-    rank = [f'''{y}''' for y in imgRank] if len([x for x in links if x == None]) > 0 else ['' for y in range(len(imgRank))]
+    # rank = [f'''{y}''' for y in imgRank] if len([x for x in links if x == None]) > 0 else ['' for y in range(len(imgRank))]
+    
     for i in range(len(qtdUnidades)):
         txtAux = ""
 
         if len(qtdUnidades[i]) > 0:
             for j in range(len(qtdUnidades[i])):
+                
                 dados_ninebox = f"""<table class="tb2">
                         <tr class="tb-person-{style[i]}2">
                             <td>
-                                <div class="rank">{rank[j]}</div>
-                                {href[j]}{qtdUnidades[i][j]}</a>
+                                <p>{href[j]}{qtdUnidades[i][j]}</a></p>
                             </td>
                         </tr>
                     </table>"""
@@ -1545,7 +1550,7 @@ def nineboxDatasUnidades_home(dadosNineboxUni, links):
                 txtAux += dados_ninebox
         txtHtml.append(txtAux)
 
-    return txtHtml   
+    return txtHtml    
 
 def statusProjetos(dados):
                         #LISTA DE UNIDADES NO LISTCELLNINETODOS
@@ -1572,50 +1577,50 @@ def statusProjetos(dados):
                 txtAux += dados_ninebox
         txtHtml.append(txtAux)
 
-    return txtHtml
+    return txtHtml      
 
-def css_9box_home():
-    ninebox_style = """
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');
-    *{
+def css_9box_home(fonte0="""'Bebas Neue', sans-serif;""", fonte1="""@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');"""):
+    ninebox_style = f"""
+    {fonte1}
+    *{{
         margin: 0;
         padding: 0;
-    }
+    }}
 
-    main{
+    main{{
         width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
-    }
+    }}
 
-    .box2{
+    .box2{{
         display: flex;
         align-items: flex-end;
         justify-content: center;
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: {fonte0}
         font-color: black;
-    }
+    }}
 
-    p{
+    p{{
         font-size: 14px;
         margin: 0;
-    }
+    }}
 
-    img{
+    img{{
         max-width: 30px;
         max-height: 30px;
-    }
+    }}
 
-    .rank{
+    .rank{{
         display: inline-block;
-    }
+    }}
 
-    .st-emotion-cache-uvn0xz tr {
-    border-top: none
-    }
+    .st-emotion-cache-uvn0xz tr {{
+        border-top: none
+    }}
 
-    .box-green2{
+    .box-green2{{
         margin: 10px 0px;
         border-radius: 8px;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -1628,17 +1633,17 @@ def css_9box_home():
         padding-right: 10px;
         z-index: 2;
 
-    }
+    }}
 
-    .box-green2:hover{
+    .box-green2:hover{{
         transform: scale(1.05);
-    }
+    }}
 
-    .box-green2 {
+    .box-green2 {{
         background-color: #fff;
-    }
+    }}
 
-    .header-green2{
+    .header-green2{{
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -1648,11 +1653,11 @@ def css_9box_home():
         width: 100%;
         height: 60px;
         background-color: #fff;
-    }
+    }}
 
-    .title-green2{
+    .title-green2{{
         text-align: left;
-        font-size: 23px;
+        font-size: 17px;
         margin: 0 5px;
         width: auto;
         height: auto;
@@ -1660,9 +1665,9 @@ def css_9box_home():
         padding-top: 10px;
         flex: 1;
         color: black;
-       }
+       }}
 
-    .data-green2{
+    .data-green2{{
         font-size: 14px;
         font-weight: bold;
         color: #000;
@@ -1672,14 +1677,14 @@ def css_9box_home():
         width: 30px;
         height: auto;
         padding: 5px;
-    }
+    }}
 
-    .data-green2{
+    .data-green2{{
         background-color: #D3D3D3; 
         color: #002100;
-    }
+    }}
 
-    .datap-green2{
+    .datap-green2{{
         font-size: 14px;
         font-weight: bold;
         color: #000;
@@ -1689,74 +1694,78 @@ def css_9box_home():
         width: auto;
         height: auto;
         padding: 5px;
-    }
+    }}
 
-    .datap-green2{
+    .datap-green2{{
         background-color: #C8E6C9; 
         color: #002100;
-    }
+    }}
 
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
-    #h4 {
+    #h4 {{
         font-family: 'Poppins', sans-serif;
         color: white;
-    }
+    }}
 
-    .tb2 {
+    .tb2 {{
         width: 100%;
         border-collapse: collapse;
         margin-top: 10px;
         margin: 5px;
-    }
+    }}
 
-    .tb-person-green2 td{
+    .tb-person-green2 td{{
         padding: 5px 5px;
         border-radius: 5px;
         color: #000;
         font-size: 13px;
         transition: background-color 0.6s ease;
-    }
+        margin: 5px;
+    }}
 
-    .tb-person-green2{
+    td{{
+        margin: 5px;
+    }}
+
+    .tb-person-green2{{
         background-color: #DCDBDB;
         width: 100%;
-    }
+    }}
 
-    .tb-person-green2:last-child td{
+    .tb-person-green2:last-child td{{
         border: none;
-    }
+    }}
 
-    .box-green2::-webkit-scrollbar {
+    .box-green2::-webkit-scrollbar {{
         width: 8px;
         border-radius: 20px;
-    }
+    }}
 
-    .box-green2::-webkit-scrollbar-track {
+    .box-green2::-webkit-scrollbar-track {{
         background: #848484;
         border-radius: 20px;
-    }
+    }}
 
 
-    .box-green2::-webkit-scrollbar-thumb {
+    .box-green2::-webkit-scrollbar-thumb {{
         background-color: #6c6c6c;
         border-radius: 20px;
         border: 1px solid #000;
-    }
+    }}
 
     a,
-    a:hover{
+    a:hover{{
         color: inherit;
         text-decoration: none;
-    }
+    }}
 
-    .tb-person-green2:hover td{
+    .tb-person-green2:hover td{{
         background: linear-gradient(to bottom, #9fdafc, #bae6ff, #dbf2fe);
-        width: 100%;
-    }
+    }}
 
 
-    @media(max-width: 1400px){
-        .header-green2{
+    @media(max-width: 1400px){{
+        .header-green2{{
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1765,32 +1774,32 @@ def css_9box_home():
             z-index: 1;
             width: 100%;
             height: auto;
-        }   
-    }
-    }
+        }}
+    }}
+    
 
-    @media(max-width: 1000px){
-        .main{
+    @media(max-width: 1000px){{
+        .main{{
             flex-direction: column;
             align-items: stretch;
-        }
+        }}
 
         .line1,
         .line2,
-        .line3{
+        .line3{{
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
+        }}
 
-        .box-green2{
+        .box-green2{{
             width: 90%;
             min-height: auto;
             margin: 10px 5px;
-        }
+        }}
 
-        .header-green2{
+        .header-green2{{
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1799,8 +1808,8 @@ def css_9box_home():
             z-index: 1;
             width: 100%;
             height: auto;
-        }
-    }"""
+        }}
+    }}"""
 
     return ninebox_style
 
@@ -2067,7 +2076,6 @@ class CalculoPrêmio:
         else:
             retorno = 'PRIMAIRAMENTE, É NECESSÁRIO CONSUMIR O BANCO DADOS PARA PEGAR AS ENTREGAS DO PROJETO'
         return retorno
-    
 
 def menuProjeuHtml(nome):
     menuProjeu = f"""<head>
@@ -2082,16 +2090,19 @@ def menuProjeuHtml(nome):
                         <h3>PROJEU</h3>
                     </div>
                     <div class="botoes">
-                        <!-- <a href="https://meusprojetos-mpjj.streamlit.app/" target="_self"><button type="button" id="home">Home</button></a>
-                        <a href="https://meusprojetos-mpjj.streamlit.app/Meus_Projetos" target="_self"><button type="button" id="projetos">Projetos</button></a>
-                        <a href="https://meusprojetos-mpjj.streamlit.app/Pr%C3%AAmio" target="_self"><button type="button" id="premio">Prêmio</button></a> -->
+                        <!-- <a href="https://meusprojetos-mpjj-mg.streamlit.app/" target="_self"><button type="button" id="home">Home</button></a>
+                        <a href="https://meusprojetos-mpjj-mg.streamlit.app/Cadastro_de_Projetos" target="_self"><button type="button" id="projetos">Projetos</button></a>
+                        <a href="https://meusprojetos-mpjj-mg.streamlit.app/Portf%C3%B3lio" target="_self"><button type="button" id="portfolio">Portfólio</button></a>
+                        <a href="https://meusprojetos-mpjj-mg.streamlit.app/Novo_Usu%C3%A1rio" target="_self"><button type="button" id="usuario">Usuários</button></a>
+                        <a href="https://meusprojetos-mpjj-mg.streamlit.app/Gest%C3%A3o_de_Pr%C3%AAmios" target="_self"><button type="button" id="premio">Prêmios</button></a>
+                        <a href="https://meusprojetos-mpjj-mg.streamlit.app/Configura%C3%A7%C3%B5es" target="_self"><button type="button" id="config">Configurações</button></a> -->
                     </div>
                     <div class="nome"><p>{nome}</p></div>
                     <div class="icone">
-                        <button type="button"><img src="https://cdn-icons-png.flaticon.com/128/5261/5261124.png" alt="ícone de configurações para alteração do módulo de uso"></button>
+                        <button type="button"><img src="https://cdn-icons-png.flaticon.com/128/1570/1570102.png" alt="ícone de configurações para alteração do módulo de uso"></button>
                         <div class="modulo">
                             <a href="https://meusprojetos-mpjj.streamlit.app/"><button type="button">Módulo de Execução</button></a>
-                            <!-- <a href="https://meusprojetos-mpjj-mg.streamlit.app/"><button type="button">Módulo de Gestão</button></a> -->
+                            <a href="https://meusprojetos-mpjj-mg.streamlit.app/"><button type="button">Módulo de Gestão</button></a>
                         </div>
                     </div>
                 </div>
@@ -2254,3 +2265,112 @@ def menuProjeuCss():
             }}
         }}"""
     return styleMenuProjeu
+
+def validarEmail(codigo):
+    htmlGeral = f"""<head>
+            <style>
+                body{{
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #fff;
+                }}
+
+                .email{{
+                    max-width: 600px;
+                    margin: 50px auto;
+                    background-color: #f1f1f1;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+                    padding-bottom: 20px;
+                }}
+
+                .logo img{{
+                    width: 100%;
+                    height: auto;
+                    border-bottom: 1px solid #ddd;
+                    margin-bottom: 20px;
+                    border-radius: 8px 8px 0 0;
+                }}
+
+                .titulo h1{{
+                    color: #333;
+                    text-align: center;
+                }}
+
+                .mensagem{{
+                    text-align: center;
+                }}
+
+                .mensagem p{{
+                    margin: 10px;
+                    line-height: 1.5;
+                    color: #666;
+                }}
+
+                hr{{
+                    border: 0.5px solid #ddd;
+                    margin: 20px 10px;
+                }}
+
+                h2{{
+                    color: #333;
+                    font-size: 24px;
+                    margin: 10px;
+                }}
+
+                button{{
+                    background-color: #4CAF50;
+                    color: #fff;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }}
+
+                button:hover{{
+                    background-color: #245326;
+                    cursor: pointer;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="email">
+                <div class="logo">
+                    <img src="https://raw.githubusercontent.com/RahyanRamos/Imagens.Eucatur/main/CabecalhoEmail.png" alt="cabeçalho do email Eucatur">
+                </div>
+                <div class="titulo">
+                    <h1>Confirme seu Email</h1>
+                </div>
+                <div class="mensagem">
+                    <p>Uma nova conta utilizando esse e-mail foi criada nos sistemas Eucatur</p>
+                    <hr>
+                    <p>Acesse a página de confirmação e insira o código abaixo para validar seu e-mail</p>
+                    <h2>{codigo}</h2>
+                    <a href="https://meusprojetos-mpjj-mg.streamlit.app/Validar_Email">
+                        <button type="button">VALIDAR</button>
+                    </a>
+                </div>
+            </div>
+        </body>"""
+
+    return htmlGeral
+
+def enviar_email(destino, codigo):    
+    msg = MIMEMultipart()
+    msg['Subject'] = "Validação de e-mail - Eucatur"
+    msg['From'] = 'automacao1.processos@gmail.com'
+    msg['To'] = destino
+    msg['Cc'] = ', automacao1.processos@gmail.com'
+    
+    html = validarEmail(codigo)
+    msg.attach(MIMEText(html, 'html'))
+
+    s = smtplib.SMTP('smtp.gmail.com: 587')
+    s.starttls()
+
+    password = 'zobl ekzk sljm zrwk'
+    s.login(msg['From'], password)
+
+    s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
+    print('Email enviado!')
