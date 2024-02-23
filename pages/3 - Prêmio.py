@@ -52,7 +52,8 @@ def premios_user_bd(matricula):
             WHERE id_empresa = PU.empresa_fgkey
         ) AS NUMBER_EMPRESA,
         PS.status_sprint,
-        PS.date_check_consolid
+        PS.date_check_consolid,
+        PS.referenc_consolid
     FROM projeu_premio_entr AS PPE
     LEFT JOIN 
         projeu_sprints PS ON PS.id_sprint = PPE.id_sprint_fgkey
@@ -65,9 +66,10 @@ def premios_user_bd(matricula):
     WHERE 
         PPE.bonificado_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {str(matricula).strip()})
         AND
-            PS.check_consolid = 1 OR PS.check_consolid IS NULL
+            PS.check_consolid = 1
     GROUP BY PPE.id_premio;""" 
     
+
     mycursor.execute(cmd)
 
     premiosbd = mycursor.fetchall()
@@ -151,7 +153,8 @@ def meses_by_number(mes):
             "Outubro":9,
             "Novembro":10,
             "Dezembro":11
-        }
+        }        
+
     return meses_do_ano[mes]
 
 
@@ -223,21 +226,15 @@ elif authentication_status:
 
             mes_atual = datetime.now()
 
-            mes_project = st.selectbox('Período', meses, (mes_atual.month)-1)
-            
-            #PEGANDO O RANGE DE DATAS
-            data_final = datetime(mes_atual.year, meses_by_number(mes_project), 25) 
-            data_inicial = (data_final - relativedelta(months=1)) + timedelta(days=1)
-            
-            range_datas = []
-            data_atual = data_inicial
-            while data_atual <= data_final:
-                range_datas.append(data_atual)
-                data_atual += timedelta(days=1)    
+            def chave_ordenacao(elemento):
+                mes, ano = elemento.split('-')
+                return (int(ano), int(mes))
 
-                                                #PEGANDO SOMENTE AS ENTREGAS DAQUELE PROJETO                                         #SOMENTE AS ENTREGAS QUE FINALIZAM DENTRO NO RANGE DE DATAS
-            premiosuser = [x for x in premiosbd if str(x[4]).strip().lower() in [str(x).strip().lower() for x in list(user_project)] and datetime.strptime(str(x[18]), "%Y-%m-%d") in range_datas] 
-
+            dd_by_perid = {f'{meses[int(str(per.split("-")[0]).strip())-1]} - {str(per.split("-")[1]).strip()}': [x for x in premiosbd if str(x[19]).strip() == str(per).strip() and str(x[4]).strip() in user_project] for per in sorted(list(set([x[19] for x in premiosbd if str(x[4]).strip().lower() in [str(x).lower() for x in user_project]])), key=chave_ordenacao)}
+            
+            mes_project = st.selectbox('Período', list(dict(dd_by_perid).keys()))
+            premiosuser = dd_by_perid[mes_project]
+        
         if len(premiosuser) > 0:
             st.text(' ')
             col1, col2 = st.columns([1, 3])
