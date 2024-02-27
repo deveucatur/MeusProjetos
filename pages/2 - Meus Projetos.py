@@ -202,7 +202,12 @@ SELECT
         SELECT GROUP_CONCAT(IFNULL(check_homolog, 0) SEPARATOR '~/>')
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
-    ) as CHECK_HOMOLOG_SPRINT
+    ) as CHECK_HOMOLOG_SPRINT,
+	(
+        SELECT GROUP_CONCAT(IFNULL(check_govern, 0) SEPARATOR '~/>')
+        FROM projeu_sprints 
+        WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
+    ) as CHECK_GOVERN
 FROM 
     projeu_projetos
 JOIN 
@@ -759,6 +764,13 @@ elif authentication_status:
 
                                     #FILTRANDO ENTREGAS DAQUELA SPRINT
                                     spEntregas = [x for x in SprintsEntregs if x[0] == idx_spr]
+
+                                    numSprint = dadosOrigin[0][11].split("~/>")
+                                    sprintAtual = numSprint.index(str(idx_spr))
+
+                                    checkSprint = dadosOrigin[0][34].split("~/>")
+                                    checkGovern = dadosOrigin[0][44].split("~/>")
+                                    checkHomolog = dadosOrigin[0][43].split("~/>")
                                     
                                     #PREPARANDO OS DADOS PARA APRESENTAR NO CARD DA SPRINT
                                     contagem_dif = Counter([x[4] for x in spEntregas])                
@@ -774,7 +786,14 @@ elif authentication_status:
                                     with colPROJ1:
                                         font_TITLE('ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
                                     with colPROJ2:
-                                        font_TITLE('STATUS DO PROJETO - EM ANDAMENTO', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+                                        if str(checkSprint[sprintAtual]) == "1":
+                                            font_TITLE('STATUS DA SPRINT - EM ANDAMENTO', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+                                        elif str(checkSprint[sprintAtual]) == "0" and str(checkGovern[sprintAtual]) == "0" and str(checkHomolog[sprintAtual]) == "0":
+                                            font_TITLE('STATUS DA SPRINT - AGUARDANDO GOVERNANÇA', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+                                        elif str(checkHomolog[sprintAtual]) == "1":
+                                            font_TITLE('STATUS DA SPRINT - HOMOLOGADO', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+                                        elif str(checkGovern[sprintAtual]) == "1":
+                                            font_TITLE('STATUS DA SPRINT - AGUARDANDO HOMOLOGAÇÃO', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
                                         
                                     especialistBD_sprint = [x for x in especialist_by_proj if str(x[1]) == str(id_sprint)]  #ESPECIALISTAS ATIVOS E NÃO ATIVOS VINCULADOS A SPRINT                        
                             
