@@ -2374,3 +2374,757 @@ def enviar_email(destino, codigo):
 
     s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
     print('Email enviado!')
+
+def CanvaImplantacao(dadosImplantacao):
+    dadosJustificativas = ""
+    dadosProduto = ""
+    dadosStakeholder = ""
+    dadosPremissa = ""
+    dadosRisco = ""
+    dadosObjSmart = ""
+    dadosRequisitos = ""
+    dadosEquipe = ""
+    dadosGrpEntregas = ""
+    dadosLinhaTempo = ""
+    dadosBnfFuturos = ""
+    dadosRestricao = ""
+    dadosCusto = ""
+
+    for i in range(len(dadosImplantacao[0])):
+        dadosJustificativas += f"""<td>{dadosImplantacao[0][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[1])):
+        dadosProduto += f"""<td>{dadosImplantacao[1][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[2])):
+        dadosStakeholder += f"""<td>{dadosImplantacao[2][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[3])):
+        dadosPremissa += f"""<td>{dadosImplantacao[3][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[4])):
+        dadosRisco += f"""<td>{dadosImplantacao[4][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[5])):
+        dadosObjSmart += f"""<td>{dadosImplantacao[5][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[6])):
+        dadosRequisitos += f"""<td>{dadosImplantacao[6][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[7])):
+        dadosEquipe += f"""<td>{dadosImplantacao[7][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[8])):
+        dadosGrpEntregas += f"""<td>{dadosImplantacao[8][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[9])):
+        dadosLinhaTempo += f"""<td>{dadosImplantacao[9][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[10])):
+        dadosBnfFuturos += f"""<td>{dadosImplantacao[10][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[11])):
+        dadosRestricao += f"""<td>{dadosImplantacao[11][i]}</td>"""
+
+    for i in range(len(dadosImplantacao[12])):
+        dadosCusto += f"""<td>R${dadosImplantacao[12][i]}</td>"""
+
+    htmlCanvaImplant = f"""<body>
+            <div class="linha">
+                <div class="caixaImplant">
+                    <div class="caixaImplant1">
+                        <table class="tabela1">
+                            <tr class="cabecalho1">
+                                <th>JUSTIFICATIVA</th>
+                            </tr>
+                            <tr class="dados1">
+                                {dadosJustificativas}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant2">
+                        <table class="tabela2">
+                            <tr class="cabecalho2">
+                                <th>PRODUTO</th>
+                            </tr>
+                            <tr class="dados2">
+                                {dadosProduto}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant3">
+                        <table class="tabela3">
+                            <tr class="cabecalho3">
+                                <th>STAKEHOLDER</th>
+                            </tr>
+                            <tr class="dados3">
+                                {dadosStakeholder}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant4">
+                        <table class="tabela4">
+                            <tr class="cabecalho4">
+                                <th>PREMISSA</th>
+                            </tr>
+                            <tr class="dados4">
+                                {dadosPremissa}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="linha">
+                <div class="caixaImplant">
+                    <div class="caixaImplant5">
+                        <table class="tabela5">
+                            <tr class="cabecalho5">
+                                <th>RISCO</th>
+                            </tr>
+                            <tr class="dados5">
+                                {dadosRisco}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant6">
+                        <table class="tabela6">
+                            <tr class="cabecalho6">
+                                <th>OBJ. SMART</th>
+                            </tr>
+                            <tr class="dados6">
+                                {dadosObjSmart}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant7">
+                        <table class="tabela7">
+                            <tr class="cabecalho7">
+                                <th>REQUISITO</th>
+                            </tr>
+                            <tr class="dados7">
+                                {dadosRequisitos}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant8">
+                        <table class="tabela8">
+                            <tr class="cabecalho8">
+                                <th>EQUIPE</th>
+                            </tr>
+                            <tr class="dados8">
+                                {dadosEquipe}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="linha">
+                <div class="caixaImplant">
+                    <div class="caixaImplant9">
+                        <table class="tabela9">
+                            <tr class="cabecalho9">
+                                <th>GRUPO DE ENTREGAS</th>
+                            </tr>
+                            <tr class="dados9">
+                                {dadosGrpEntregas}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant10">
+                        <table class="tabela10">
+                            <tr class="cabecalho10">
+                                <th>LINHA DO TEMPO</th>
+                            </tr>
+                            <tr class="dados10">
+                                {dadosLinhaTempo}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant11">
+                        <table class="tabela11">
+                            <tr class="cabecalho11">
+                                <th>BENEFÍCIO FUTURO</th>
+                            </tr>
+                            <tr class="dados11">
+                                {dadosBnfFuturos}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant12">
+                        <table class="tabela12">
+                            <tr class="cabecalho12">
+                                <th>RESTRIÇÃO</th>
+                            </tr>
+                            <tr class="dados12">
+                                {dadosRestricao}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="caixaImplant">
+                    <div class="caixaImplant13">
+                        <table class="tabela13">
+                            <tr class="cabecalho13">
+                                <th>CUSTO</th>
+                            </tr>
+                            <tr class="dados13">
+                                {dadosCusto}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </body>"""
+
+    return htmlCanvaImplant
+
+def StyleCanvaImplantacao():
+    cssCanvaImplantacao = """@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
+
+        .linha{
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .caixaImplant{
+            margin-right: 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            height: 170px;
+            min-height: 170px;
+            max-height: 170px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+        }
+
+        .caixaImplant:hover{
+            transform: scale(0.95);
+        }
+
+        .caixaImplant1{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 250px;
+            max-width: 250px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant1 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant1 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant1:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant1::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant1::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius:12px;
+        }
+
+        .caixaImplant2{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 250px;
+            max-width: 250px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant2 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant2 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant2:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant2::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant2::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant3{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 250px;
+            max-width: 250px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant3 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant3 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant3:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant3::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant3::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant4{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 250px;
+            max-width: 250px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant4 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant4 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant4:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant4::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant4::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant5{
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 250px;
+            max-width: 250px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant5 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant5 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant5:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant5::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant5::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant6{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 250px;
+            max-width: 250px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant6 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant6 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant6:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant6::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant6::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant7{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 250px;
+            max-width: 250px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant7 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant7 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant7:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant7::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant7::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant8{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 250px;
+            max-width: 250px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant8 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant8 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant8:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant8::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant8::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant9{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 197px;
+            max-width: 197px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant9 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant9 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant9:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant9::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant9::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant10{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 197px;
+            max-width: 197px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant10 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant10 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant10:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant10::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant10::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant11{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 197px;
+            max-width: 197px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant11 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant11 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant11:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant11::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant11::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant12{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 197px;
+            max-width: 197px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant12 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant12 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+        }
+
+        .caixaImplant12:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant12::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant12::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant13{ 
+            background-color: #e3ffff;
+            border: 1px solid #7f9fc3;
+            border-radius: 12px;
+            min-height: 170px;
+            max-height: 170px;
+            min-width: 197px;
+            max-width: 197px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .caixaImplant13 th{
+            background-color: #b1cfe1;
+            border: 1px solid #98b7d2;
+        }
+
+        .caixaImplant13 td{
+            border: 0px;
+            border-bottom: 1px solid #98b7d2;
+            text-align: center;
+            justify-content: center;
+            display: flex;
+            margin: 40px 0;
+            font-weight: bold;
+        }
+
+        .caixaImplant13:hover{
+            box-shadow: 0 0 20px rgba(127, 159, 195, 1);
+        }
+
+        .caixaImplant13::-webkit-scrollbar{
+            width: 5px;
+        }
+
+        .caixaImplant13::-webkit-scrollbar-thumb{
+            background-color: rgba(127, 159, 195, 0.5);
+            border-radius: 12px;
+        }
+
+        .caixaImplant table{
+            width: 100%;
+            border-radius: 12px;
+            min-height: 150px;
+            max-height: 150px;
+        }
+
+        .caixaImplant th{
+            text-align: center;
+            padding: 5px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            height: 20px;
+        }
+
+        .caixaImplant td{
+            text-align: left;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .caixaImplant td:last-child{
+            border-bottom: none;
+        }
+
+        .linha:after{
+            content: "";
+            display: table;
+            clear: both;
+        }"""
+    
+    return cssCanvaImplantacao
