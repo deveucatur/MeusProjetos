@@ -219,7 +219,15 @@ SELECT
         SELECT COALESCE(GROUP_CONCAT(marco_line_tempo SEPARATOR '~/>'), " ") 
         FROM projeu_impl_linhaTempo 
         WHERE projeu_impl_linhaTempo.id_proj_fgkey = projeu_projetos.id_proj 
-    ) AS linhaTempo
+    ) AS linhaTempo,
+    (SELECT id_type FROM projeu_type_proj WHERE id_type = projeu_projetos.type_proj_fgkey) AS id_type_proj,
+    (
+	 	SELECT 
+		 	GROUP_CONCAT(DISTINCT(PPP.typ_event) SEPARATOR '~/>') 
+		FROM 
+			projeu_param_premio AS PPP 
+		WHERE PPP.typ_proj_fgkey = projeu_projetos.type_proj_fgkey
+	 ) AS EVENTOS_PROGRAMADOS
 FROM 
     projeu_projetos
 JOIN 
@@ -247,6 +255,15 @@ comandUSERS = 'SELECT * FROM projeu_users;'
 mycursor.execute(comandUSERS)
 dadosUser = mycursor.fetchall()
 mycursor.close()
+
+def tratar_name_event(name_event):
+    name_event_aux = str(name_event).strip().upper()
+    aux = {'SPRINT PÓS MVP': 'PÓS MVP',
+           'SPRINT PRÉ MVP': 'PRÉ MVP'}
+    
+    retorno = aux[name_event_aux] if name_event_aux in list(aux.keys()) else name_event
+
+    return retorno
 
 def mapear_dificuldade(dificuldade):
     if dificuldade == 'Fácil':
@@ -365,7 +382,6 @@ elif authentication_status:
                 with tab1:
                     font_TITLE(f'{dadosOrigin[0][1]}', fonte_Projeto,"'Bebas Neue', sans-serif", 31, 'center', '#228B22')
                     ########CANVAS DO PROJETO SELECIONADO########
-                    
                     projetos = [dadosOrigin[0][1]] if dadosOrigin[0][1] != None else " "
                     mvps = [dadosOrigin[0][7]] if dadosOrigin[0][7] != None else " "  
                     investimentos = [f"{dadosOrigin[0][8]}"] if f"{dadosOrigin[0][8]}" != None else " "
@@ -656,7 +672,18 @@ elif authentication_status:
                 st.text(' ')
                 st.text(' ')
 
-                param_sprint = ['PRÉ MVP', 'MVP', 'PÓS MVP', 'ENTREGA FINAL']
+                param_sprint_aux = [str(tratar_name_event(x)).strip().upper() for x in list(str(dadosOrigin[0][54]).split("~/>"))]
+
+                eventos_aux_sorted = ['SPRINT', 'PRÉ MVP', 'MVP', 'PÓS MVP', 'ENTREGA FINAL']
+
+                if int(dadosOrigin[0][53]) == 3:
+                    eventos_aux_sorted = ['SPRINT PRÉ MARCO 1', 'MARCO 1', 'SPRINT PRÉ MARCO 2', 'MARCO 2', 'SPRINT PRÉ MARCO 3', 'MARCO 3', 'SPRINT PRÉ MARCO 4', 'MARCO 4', 'SPRINT PRÉ MARCO 5', 'MARCO 5', 'SPRINT PRÉ MARCO 6', 'MARCO 6', 'SPRINT PRÉ MARCO 7', 'MARCO 7', 'SPRINT PRÉ MARCO 8', 'MARCO 8']
+                    param_sprint_aux = list(set([str(x).strip() for x in str(dadosOrigin[0][12]).split("~/>")] + [eventos_aux_sorted[eventos_aux_sorted.index([str(x).strip() for x in str(dadosOrigin[0][12]).split("~/>")][-1])+1]] if dadosOrigin[0][12] != None else ['MARCO 1']))
+                    
+                    eventos_aux_sorted = ['SPRINT PRÉ MARCO 1', 'MARCO 1', 'SPRINT PRÉ MARCO 2', 'MARCO 2', 'SPRINT PRÉ MARCO 3', 'MARCO 3', 'SPRINT PRÉ MARCO 4', 'MARCO 4', 'SPRINT PRÉ MARCO 5', 'MARCO 5', 'SPRINT PRÉ MARCO 6', 'MARCO 6', 'SPRINT PRÉ MARCO 7', 'MARCO 7', 'SPRINT PRÉ MARCO 8', 'MARCO 8']
+
+                param_sprint = [str(x).strip().upper() for x in eventos_aux_sorted if str(x).strip().upper() in param_sprint_aux and str(x).strip().upper() != 'SPRINT']
+
                 font_TITLE('SPRINTS DO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 28, 'left', '#228B22')
                 with st.expander('Adcionar Sprint'):
                     #FUNÇÃO PARA IDENTIFICAR SE A COLUNA DO BANCO DE DADOS ESTÁ VAZIA 
