@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, date
 from util import font_TITLE, string_to_datetime, cardMyProject, cardGRANDE
 from collections import Counter
 import streamlit_authenticator as stauth
-from utilR import PlotCanvas, menuProjeuHtml, menuProjeuCss
+from utilR import PlotCanvas, menuProjeuHtml, menuProjeuCss, CanvaImplantacao, StyleCanvaImplantacao
 from time import sleep
 from conexao import conexaoBD
 
@@ -207,7 +207,19 @@ SELECT
         SELECT GROUP_CONCAT(IFNULL(check_govern, 0) SEPARATOR '~/>')
         FROM projeu_sprints 
         WHERE projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
-    ) as CHECK_GOVERN
+    ) as CHECK_GOVERN,
+    projeu_projetos.justific_impl_proj,
+    projeu_projetos.stakeholders_impl_proj,
+    projeu_projetos.premissas_impl_proj,
+    projeu_projetos.riscos_impl_proj,
+    projeu_projetos.restric_impl_proj,
+    projeu_projetos.objSmart_impl_proj,
+    projeu_projetos.requisitos_impl_proj,
+    (
+        SELECT COALESCE(GROUP_CONCAT(marco_line_tempo SEPARATOR '~/>'), " ") 
+        FROM projeu_impl_linhaTempo 
+        WHERE projeu_impl_linhaTempo.id_proj_fgkey = projeu_projetos.id_proj 
+    ) AS linhaTempo
 FROM 
     projeu_projetos
 JOIN 
@@ -339,7 +351,6 @@ elif authentication_status:
                                     JOIN projeu_sprints PS ON PS.id_sprint = PES.id_sprt_fgkey
                                     WHERE PS.id_proj_fgkey IN (SELECT PP_AUX.id_proj FROM projeu_projetos PP_AUX WHERE PP_AUX.name_proj LIKE '%{str(dadosOrigin[0][1]).strip()}%');"""
 
-                
             if len(dadosOrigin) > 0:
                 mycursor = conexao.cursor()  
                 mycursor.execute(cmd_entregas)
@@ -354,6 +365,7 @@ elif authentication_status:
                 with tab1:
                     font_TITLE(f'{dadosOrigin[0][1]}', fonte_Projeto,"'Bebas Neue', sans-serif", 31, 'center', '#228B22')
                     ########CANVAS DO PROJETO SELECIONADO########
+                    
                     projetos = [dadosOrigin[0][1]] if dadosOrigin[0][1] != None else " "
                     mvps = [dadosOrigin[0][7]] if dadosOrigin[0][7] != None else " "  
                     investimentos = [f"{dadosOrigin[0][8]}"] if f"{dadosOrigin[0][8]}" != None else " "
@@ -378,20 +390,28 @@ elif authentication_status:
                     metricas = [str(dadosOrigin[0][33]).split("~/>")[x] for x in range(len(str(dadosOrigin[0][33]).split("~/>"))) if str(str(dadosOrigin[0][42]).split("~/>")[x]).strip() == 'A'] if dadosOrigin[0][33] != None else ' '
                     prodProjetos = str(dadosOrigin[0][10]).split("~/>") if dadosOrigin[0][10] != None else " "
                     prodMvps = str(dadosOrigin[0][25]).split("~/>") if dadosOrigin[0][25] != None else " "
+                        
+                    if dadosOrigin[0][4] == "Implantação":
+                        dadosImplantacao = [[dadosOrigin[0][45]], [dadosOrigin[0][10]], [dadosOrigin[0][46]], [dadosOrigin[0][47]], [dadosOrigin[0][48]], [dadosOrigin[0][50]], [dadosOrigin[0][51]], dadosOrigin[0][21].split("~/>"), dadosOrigin[0][32].split("~/>"), dadosOrigin[0][52].split("~/>"), [dadosOrigin[0][9]], [dadosOrigin[0][49]], [dadosOrigin[0][8]]]
+                
+                        html = CanvaImplantacao(dadosImplantacao)
+                        css = StyleCanvaImplantacao()
 
-                    
-                #SEQUÊNCIA --> projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, especialistas, squads, entregas, investimentos
-                    canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos)
-                    htmlRow = canvas.CreateHTML()
-                    htmlEqp = canvas.tableEqp()
-                    htmlUnic = canvas.tableUnic()
-                    htmlCol = canvas.tableCol()
+                        st.write(f'<div>{html}</div>', unsafe_allow_html=True)
+                        st.write(f'<style>{css}</style>', unsafe_allow_html=True)
+                    else:
+                        #SEQUÊNCIA --> projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, especialistas, squads, entregas, investimentos
+                        canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos)
+                        htmlRow = canvas.CreateHTML()
+                        htmlEqp = canvas.tableEqp()
+                        htmlUnic = canvas.tableUnic()
+                        htmlCol = canvas.tableCol()
 
-                    html = canvas.tableGeral(htmlRow, htmlEqp, htmlUnic, htmlCol)
-                    canvaStyle = canvas.cssStyle(mvps, prodMvps)
+                        html = canvas.tableGeral(htmlRow, htmlEqp, htmlUnic, htmlCol)
+                        canvaStyle = canvas.cssStyle(mvps, prodMvps)
 
-                    st.write(f'<div>{html}</div>', unsafe_allow_html=True)
-                    st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
+                        st.write(f'<div>{html}</div>', unsafe_allow_html=True)
+                        st.write(f'<style>{canvaStyle}</style>', unsafe_allow_html=True)
 
                 with tab2:
                     if str(matriUser).strip() in [str(dadosOrigin[0][3]).strip(), '56126']:
