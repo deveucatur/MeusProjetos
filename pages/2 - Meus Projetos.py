@@ -682,7 +682,7 @@ elif authentication_status:
                     
                     eventos_aux_sorted = ['SPRINT PRÉ MARCO 1', 'MARCO 1', 'SPRINT PRÉ MARCO 2', 'MARCO 2', 'SPRINT PRÉ MARCO 3', 'MARCO 3', 'SPRINT PRÉ MARCO 4', 'MARCO 4', 'SPRINT PRÉ MARCO 5', 'MARCO 5', 'SPRINT PRÉ MARCO 6', 'MARCO 6', 'SPRINT PRÉ MARCO 7', 'MARCO 7', 'SPRINT PRÉ MARCO 8', 'MARCO 8']
 
-                param_sprint = [str(x).strip().upper() for x in eventos_aux_sorted if str(x).strip().upper() in param_sprint_aux and str(x).strip().upper() != 'SPRINT']
+                param_sprint = [str(x).strip().upper() for x in eventos_aux_sorted if str(x).strip().upper() in param_sprint_aux]
 
                 font_TITLE('SPRINTS DO PROJETO', fonte_Projeto,"'Bebas Neue', sans-serif", 28, 'left', '#228B22')
                 with st.expander('Adcionar Sprint'):
