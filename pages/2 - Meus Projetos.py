@@ -804,7 +804,19 @@ elif authentication_status:
                                 
                                 listDadosAux = []
 
-                                name_evento = f'Sprint {idx_spr}' if str(param_sprint[idx_parm]).strip() not in ('MVP', 'ENTREGA FINAL') else f'Evento - {param_sprint[idx_parm]}'
+                                def aux_name(name_expader):
+                                    name = str(name_expader).strip()
+                                    aux = {'MVP': 'Evento - MVP',
+                                        'ENTREGA FINAL': 'Evento - ENTREGA FINAL'}
+                                    
+                                    if name in list(aux.keys()):
+                                        retorno = aux[name]
+                                    else:
+                                        retorno = name
+
+                                    return retorno
+
+                                name_evento = f'Sprint {int(ddSprint[[x[0] for x in ddSprint].index(str(idx_spr))][0])}' if str(param_sprint[idx_parm]).strip() not in ('MVP', 'ENTREGA FINAL', 'MARCO 1','MARCO 2','MARCO 3','MARCO 4','MARCO 5','MARCO 6','MARCO 7','MARCO 8') else aux_name(param_sprint[idx_parm])
                                 with st.expander(name_evento):
 
                                     id_sprint = [x[4] for x in  ddSprint if str(x[0]).strip() == str(idx_spr).strip()][0]
