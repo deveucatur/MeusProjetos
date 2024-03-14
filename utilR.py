@@ -1126,7 +1126,7 @@ class PlotCanvas:
             .box5,
             .box6,
             .box7{
-                max-width: 100%;
+                max-width: 350px;
                 margin: 10px 0;
             }
 
