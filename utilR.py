@@ -1112,7 +1112,6 @@ class PlotCanvas:
             .flex-row{
                 display: flex;
                 flex-direction: column;
-                width: 97%;
             }
 
             .flex-column {
