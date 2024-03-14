@@ -1108,7 +1108,7 @@ class PlotCanvas:
             border: 1px solid;
         }
         
-        @media only screen and (max-width: 600px){
+        @media only screen and (max-width: 1000px){
             .flex-row{
                 display: flex;
                 flex-direction: column;
