@@ -2241,26 +2241,43 @@ def menuProjeuCss():
             text-decoration: underline;
         }}
         
-        @media screen and (max-width: 650px){{
-            .menu{{
-                flex-direction: column;
-                height: auto;
+        @media only screen and (max-width: 600px) {{
+            .menu {{
+                padding: 10px;
             }}
 
-            .botoes{{
-                margin-top: 10px;
+            .logo img,
+            .logo h3 {{
+                font-size: 24px;
             }}
 
-            button{{
-                margin: 5px 0;
+            .botoes button {{
+                padding: 3px 8px;
+                font-size: 12px;
             }}
 
-            .icone{{
-                margin-top: 10px;
+            .nome p {{
+                margin-right: 20px;
+                font-size: 12px;
             }}
 
-            .modulo{{
-                right: -20px;
+            .icone img {{
+                width: 24px;
+                height: 24px;
+            }}
+
+            .icone button {{
+                width: 25px;
+                height: 25px;
+            }}
+
+            .modulo {{
+                width: 180px;
+            }}
+
+            .modulo button{{
+                width: 100%;
+                margin: 0px 0px 10px;
             }}
         }}"""
     return styleMenuProjeu
