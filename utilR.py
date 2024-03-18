@@ -2121,7 +2121,7 @@ def menuProjeuHtml(nome):
             <div class="fixed">
                 <div class="menu">
                     <div class="logo">
-                        <h3>PROJEU</h3>
+                        <img src="https://raw.githubusercontent.com/RahyanRamos/Imagens.Eucatur/main/LogoProjeu_menu.png" alt="Logo projeu">
                     </div>
                     <div class="botoes">
                         <!-- <a href="https://meusprojetos-mpjj-mg.streamlit.app/" target="_self"><button type="button" id="home">Home</button></a>
@@ -2156,7 +2156,7 @@ def menuProjeuCss():
             display: flex;
             position: absolute;
             align-items: center;
-            background: linear-gradient(to bottom, #9fdafc, #bae6ff, #dbf2fe);
+            background: #622673;
             color: #fff;
             padding: 10px 20px;
             width: 100%;
@@ -2172,8 +2172,8 @@ def menuProjeuCss():
 
         .logo img,
         .logo h3{{
-            min-width: 40px;
-            min-height: 40px;
+            min-width: 50px;
+            min-height: 35px;
             font-family: 'M PLUS Rounded 1c', sans-serif;
             font-size: 40px;
             margin: 0;
@@ -2193,7 +2193,7 @@ def menuProjeuCss():
 
         .nome p{{
             margin-right: 50px;
-            color: #000;
+            color: #fff;
             font-weight: bold;
             font-size: 16px;
             margin-top: 12px;
@@ -2205,7 +2205,7 @@ def menuProjeuCss():
         }}
 
         .icone button{{
-            background-color: #9fdafc;
+            background-color: #e6dde6;
             border-radius: 50%;
             cursor: pointer;
             border: none;
@@ -2219,7 +2219,7 @@ def menuProjeuCss():
             top: auto;
             right: 0;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: #9fdafc;
+            background-color: #e6dde6;
             height: auto;
             width: 175px;
             border-radius: 10px;
@@ -2239,7 +2239,7 @@ def menuProjeuCss():
             position: absolute;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-bottom: 20px solid #9fdafc;
+            border-bottom: 20px solid #e6dde6;
             top: -15px;
             right: 25px
         }}
@@ -2263,12 +2263,12 @@ def menuProjeuCss():
 
         .botoes button:hover{{
             border: none;
-            border-bottom: 2px solid #9fdafc;
+            border-bottom: 2px solid #e6dde6;
             cursor: pointer;
         }}
 
         .modulo button:hover{{
-            background-color: #91c1dd;
+            background-color: #dac0da;
         }}
 
         .logo:hover{{
