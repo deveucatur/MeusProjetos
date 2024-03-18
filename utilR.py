@@ -2173,7 +2173,9 @@ def menuProjeuCss():
         .logo img,
         .logo h3{{
             min-width: 50px;
+            max-width: 50px;
             min-height: 35px;
+            max-height: 35px;
             font-family: 'M PLUS Rounded 1c', sans-serif;
             font-size: 40px;
             margin: 0;
