@@ -67,9 +67,10 @@ def premios_user_bd(matricula):
         PPE.bonificado_fgkey = (SELECT id_user FROM projeu_users WHERE Matricula = {str(matricula).strip()})
         AND
             PS.check_consolid = 1
+        AND
+            PS.referenc_consolid IS NOT NULL
     GROUP BY PPE.id_premio;""" 
     
-
     mycursor.execute(cmd)
 
     premiosbd = mycursor.fetchall()
@@ -230,6 +231,7 @@ elif authentication_status:
                 mes, ano = elemento.split('-')
                 return (int(ano), int(mes))
 
+            
             dd_by_perid = {f'{meses[int(str(per.split("-")[0]).strip())-1]} - {str(per.split("-")[1]).strip()}': [x for x in premiosbd if str(x[19]).strip() == str(per).strip() and str(x[4]).strip() in user_project] for per in sorted(list(set([x[19] for x in premiosbd if str(x[4]).strip().lower() in [str(x).lower() for x in user_project]])), key=chave_ordenacao)}
             
             mes_project = st.selectbox('Período', list(dict(dd_by_perid).keys()))
