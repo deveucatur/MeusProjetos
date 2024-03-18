@@ -8,7 +8,7 @@ from utilR import PlotCanvas, menuProjeuHtml, menuProjeuCss, CanvaImplantacao, S
 from time import sleep
 from conexao import conexaoBD
 
-icone = Image.open('imagens/icone.png')
+icone = Image.open('imagens/LogoProjeu.png')
 st.set_page_config(
     page_title="Meus Projetos",
     page_icon=icone,

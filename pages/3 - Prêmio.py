@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from utilR import menuProjeuHtml, menuProjeuCss
 from conexao import conexaoBD
 
-icone = Image.open('imagens/icone.png')
+icone = Image.open('imagens/LogoProjeu.png')
 st.set_page_config(
     page_title="Meus Prêmio",
     page_icon=icone,

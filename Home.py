@@ -6,8 +6,10 @@ import streamlit_authenticator as stauth
 from utilR import menuProjeuHtml, menuProjeuCss
 from conexao import conexaoBD
 
+icone = Image.open('imagens/LogoProjeu.png')
 st.set_page_config(layout="wide",
-    initial_sidebar_state='collapsed')
+    initial_sidebar_state='collapsed',
+    page_icon=icone)
 
 conexao = conexaoBD()
 
