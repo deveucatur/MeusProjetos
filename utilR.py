@@ -2121,7 +2121,7 @@ def menuProjeuHtml(nome):
             <div class="fixed">
                 <div class="menu">
                     <div class="logo">
-                        <img src="https://raw.githubusercontent.com/RahyanRamos/Imagens.Eucatur/main/LogoProjeu_menu.png" alt="Logo projeu">
+                        <img src="https://raw.githubusercontent.com/RahyanRamos/Imagens.Eucatur/main/LogoProjeu_semFundo.png" alt="Logo projeu">
                     </div>
                     <div class="botoes">
                         <!-- <a href="https://meusprojetos-mpjj-mg.streamlit.app/" target="_self"><button type="button" id="home">Home</button></a>
