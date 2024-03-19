@@ -103,7 +103,7 @@ def botao1(nomeBotao, link, image_path):
             transition: background-color 0.5s ease;
         }}
         .botao-estiloso:hover {{
-            background: linear-gradient(to bottom, #9fdafc, #bae6ff, #dbf2fe);
+            background: linear-gradient(to bottom, #e990ff, #f2bcff, #fbeaff);
             border-radius: 20px;
         }}
         .botao-imagem {{
