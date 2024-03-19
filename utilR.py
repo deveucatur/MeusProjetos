@@ -1794,7 +1794,7 @@ def css_9box_home(fonte0="""'Bebas Neue', sans-serif;""", fonte1="""@import url(
     }}
 
     .tb-person-green2:hover td{{
-        background: linear-gradient(to bottom, #9fdafc, #bae6ff, #dbf2fe);
+        background: linear-gradient(to bottom, #e990ff, #f2bcff, #fbeaff);
     }}
 
 
