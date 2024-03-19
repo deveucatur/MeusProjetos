@@ -257,25 +257,17 @@ elif authentication_status:
     entregaProj = mycursor.fetchall()
     mycursor.close()
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     with col1:
         st.write("")
-        nomeBotão = "CADASTRO DE PROJETOS"
-        link = "https://meusprojetos-mpjj.streamlit.app/Meus_Projetos"
+        nomeBotão = "MEUS PROJETOS"
+        link = "https://cc81-186-232-176-19.ngrok-free.app/Meus_Projetos"
         image_url=  "https://cdn-icons-png.flaticon.com/128/3803/3803936.png"
         botao1(nomeBotão,link,image_url)
-
-    with col2:
-        st.write("")
-        nomeBotão = "MEUS PROJETOS"
-        link = "https://meusprojetos-mpjj.streamlit.app/Meus_Projetos"
-        image_url=  "https://cdn-icons-png.flaticon.com/128/64/64572.png"
-        botao1(nomeBotão,link,image_url)
-
-    with col3:    
+    with col2:    
         st.write("")
         nomeBotão = 'PRÊMIO'
-        link = "https://meusprojetos-mpjj.streamlit.app/Pr%C3%AAmio"
+        link = "https://cc81-186-232-176-19.ngrok-free.app/Prêmio"
         image_url="https://cdn-icons-png.flaticon.com/128/4798/4798118.png"
         botao1(nomeBotão,link,image_url)
 
