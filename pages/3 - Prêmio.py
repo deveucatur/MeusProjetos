@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from utilR import menuProjeuHtml, menuProjeuCss
 from conexao import conexaoBD
 
-icone = Image.open('imagens/LogoProjeu.png')
+icone = Image.open('imagens/icone.png')
 st.set_page_config(
     page_title="Meus Prêmio",
     page_icon=icone,
@@ -234,8 +234,11 @@ elif authentication_status:
             
             dd_by_perid = {f'{meses[int(str(per.split("-")[0]).strip())-1]} - {str(per.split("-")[1]).strip()}': [x for x in premiosbd if str(x[19]).strip() == str(per).strip() and str(x[4]).strip() in user_project] for per in sorted(list(set([x[19] for x in premiosbd if str(x[4]).strip().lower() in [str(x).lower() for x in user_project]])), key=chave_ordenacao)}
             
+            premiosuser = []
             mes_project = st.selectbox('Período', list(dict(dd_by_perid).keys()))
-            premiosuser = dd_by_perid[mes_project]
+            
+            if mes_project is not None:    
+                premiosuser = dd_by_perid[mes_project]
         
         if len(premiosuser) > 0:
             st.text(' ')
