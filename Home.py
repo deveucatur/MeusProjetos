@@ -217,7 +217,7 @@ authenticator = stauth.Authenticate(credentials, "Teste", "abcde", 30)
 
 col1, col2,col3 = st.columns([1,3,1])
 with col2:
-    name, authentication_status, username = authenticator.login('Acesse o sistema PROJEU', 'main')
+    name, authentication_status, username = authenticator.login(location='main', fields={'Form name':'Acessar PROJEU', 'Username':'Login', 'Password':'Senha', 'Login':'Entrar'})
 
 if authentication_status == False:
     with col2:
@@ -252,7 +252,7 @@ elif authentication_status:
         FROM projeu_entregas
         JOIN projeu_sprints ON projeu_entregas.id_sprint = projeu_sprints.id_sprint
         JOIN projeu_projetos ON projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
-        WHERE projeu_entregas.stt_entrega NOT LIKE '%Concluído%' AND projeu_entregas.executor = {matriUser};"""
+        WHERE projeu_entregas.stt_entrega NOT LIKE '%Concluído%' AND projeu_entregas.executor = {matriUser} AND projeu_sprints.check_sprint = 1;"""
     mycursor.execute(sqlEntregas)
     entregaProj = mycursor.fetchall()
     mycursor.close()
@@ -530,10 +530,10 @@ elif authentication_status:
         #     if entregaProj == 'None' or len(entregaProj) <= 0:
         #         st.info("Você não possui atividades pendentes no momento.")
 
+        st.subheader("Entregas Pendentes")
         for i in range(len(entregaProj)):
             cardEntregaHtml = f"""<div class="main">
                     <div class="card">
-                        <div class="sprint">Sprint {str(entregaProj[i][4])}</div>
                         <div class="entrega">Entrega: {entregaProj[i][1]}</div>
                         <div class="status">Status: {entregaProj[i][3]}</div>
                     </div>
@@ -550,15 +550,11 @@ elif authentication_status:
                 }
 
                 .card:hover{
-                    transform: scale(1.03);
-                }
-
-                .sprint{
-                    font-size: 18px;
-                    font-weight: bold;
+                    transform: scale(1.01);
                 }
 
                 .entrega{
+                    font-weight: bold;
                     margin-top: 10px;
                     font-size: 16px;
                 }
@@ -568,6 +564,8 @@ elif authentication_status:
                     font-size: 16px;
                 }"""
             
-            with st.expander(f"{str(entregaProj[i][5])} || {entregaProj[i][1]}"):
+            with st.expander(f"Sprint {str(entregaProj[i][4])} - {str(entregaProj[i][5])}"):
                 st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
                 st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
+                if st.button("Ir para Projetos", key=f"bt-{i}"):
+                    st.switch_page("pages/2 - Meus Projetos.py")
