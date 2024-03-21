@@ -531,41 +531,64 @@ elif authentication_status:
         #         st.info("Você não possui atividades pendentes no momento.")
 
         st.subheader("Entregas Pendentes")
+        projUnico = []
+        repetido = {}
         for i in range(len(entregaProj)):
-            cardEntregaHtml = f"""<div class="main">
-                    <div class="card">
-                        <div class="entrega">Entrega: {entregaProj[i][1]}</div>
-                        <div class="status">Status: {entregaProj[i][3]}</div>
-                    </div>
-                </div>"""
-            
-            cardEntregaCss = """.main{
-                    display: flex;
-                    align-items: center;
-                }
+            sprintProj = entregaProj[i][4]
+            nomeProj = entregaProj[i][5]
+            statusProj = entregaProj[i][1], entregaProj[i][3]
 
-                .card{
-                    max-width: 100%;
-                    min-width: 100%;
-                }
+            if sprintProj not in projUnico:
+                projUnico.append(sprintProj)
 
-                .card:hover{
-                    transform: scale(1.01);
-                }
+            if nomeProj not in repetido:
+                repetido[nomeProj] = (sprintProj, [])
 
-                .entrega{
-                    font-weight: bold;
-                    margin-top: 10px;
-                    font-size: 16px;
-                }
+            if sprintProj in projUnico:
+                repetido[nomeProj][1].append(statusProj)
 
-                .status{
-                    margin-top: 10px;
-                    font-size: 16px;
-                }"""
-            
-            with st.expander(f"Sprint {str(entregaProj[i][4])} - {str(entregaProj[i][5])}"):
-                st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
-                st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
-                if st.button("Ir para Projetos", key=f"bt-{i}"):
-                    st.switch_page("pages/2 - Meus Projetos.py")
+        if len(repetido) != 0:
+            for projeto, (sprint, entregas) in repetido.items():
+                cardEntregaHtml = """<div class="main">
+                            <div class="card">"""
+                    
+                for entrega, status in entregas:
+                    cardEntregaHtml += f"""<div class="entrega">Entrega: {entrega}</div>
+                        <div class="status">Status: {status}</div>
+                        <hr>"""
+                    
+                cardEntregaHtml += """</div>
+                        </div>"""
+                    
+                cardEntregaCss = """.main{
+                        display: flex;
+                        align-items: center;
+                    }
+
+                    .card{
+                        max-width: 100%;
+                        min-width: 100%;
+                    }
+
+                    .card:hover{
+                        transform: scale(1.01);
+                    }
+
+                    .entrega{
+                        font-weight: bold;
+                        margin-top: 10px;
+                        font-size: 16px;
+                    }
+
+                    .status{
+                        margin-top: 10px;
+                        font-size: 16px;
+                    }"""
+                
+                with st.expander(f"{sprint} - {projeto}"):
+                    st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
+                    st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
+                    if st.button("Ir para Projetos", key=f"bt-{projeto}"):
+                        st.switch_page("pages/2 - Meus Projetos.py")
+        else:
+            st.info("Você não possui entregas pendentes")
