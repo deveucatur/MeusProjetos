@@ -714,7 +714,7 @@ elif authentication_status:
                         number_sprint_new = st.text_input('Sprint', listAddSprON_EX[0][-1:][0] if on_ex else number_sprt, disabled=True)
 
                     with col2:
-                        dat_inc_new = st.date_input('Início', value=listAddSprON_EX[2][listAddSprON_EX[0].index(max(listAddSprON_EX[0]))] if on_ex else listAddSprOF_EX[2], disabled=disabledON)
+                        dat_inc_new = st.date_input('Início', value=listAddSprON_EX[2][-1:][0] if on_ex else listAddSprOF_EX[2], disabled=disabledON)
                     with col3:
                         dat_fim_new = st.date_input('Fim', value=dat_inc_new + timedelta(days=14), disabled=True)
                     
