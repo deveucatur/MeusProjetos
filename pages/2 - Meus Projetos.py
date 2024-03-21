@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 from datetime import datetime, timedelta, date
-from util import font_TITLE, string_to_datetime, cardMyProject, cardGRANDE
+from util import font_TITLE, string_to_datetime, cardMyProject, cardGRANDE, date_americ_by_brasil
 from collections import Counter
 import streamlit_authenticator as stauth
 from utilR import PlotCanvas, menuProjeuHtml, menuProjeuCss, CanvaImplantacao, StyleCanvaImplantacao
@@ -824,7 +824,7 @@ elif authentication_status:
                                 name_evento = f'Sprint {int(ddSprint[[x[0] for x in ddSprint].index(str(idx_spr))][0])}' if str(param_sprint[idx_parm]).strip() not in ('MVP', 'ENTREGA FINAL', 'MARCO 1','MARCO 2','MARCO 3','MARCO 4','MARCO 5','MARCO 6','MARCO 7','MARCO 8') else aux_name(param_sprint[idx_parm])
                                 with st.expander(name_evento):
 
-                                    id_sprint = [x[4] for x in  ddSprint if str(x[0]).strip() == str(idx_spr).strip()][0]
+                                    id_sprint = [x[4] for x in ddSprint if str(x[0]).strip() == str(idx_spr).strip()][0]
                                     
                                     #FILTRANDO ENTREGAS DAQUELA SPRINT
                                     spEntregas = [x for x in SprintsEntregs if x[0] == idx_spr]
@@ -844,9 +844,9 @@ elif authentication_status:
 
                                     porc_avan = f'{int((len([x for x in spEntregas if str(x[5]).strip() == "🟩 Concluído"]) / len([x for x in spEntregas if x[1] != None])) * 100) if len([x for x in spEntregas if x[1] != None]) > 0 else 0}%'           
                                     cardGRANDE(['Colaboradores', 'Atividades', 'Entregues', 'Avanço', 'Horas', 'Complexidade'], [len(list(set([x[2] for x in spEntregas if x[2] != None]))), len([x for x in spEntregas if x[1] != None]), len([x for x in spEntregas if str(x[5]).strip() == '🟩 Concluído']), porc_avan, sum([x[3] for x in spEntregas]), mapear_dificuldade(dif_comum[0][0])])
-                                
+                            
                                     st.text(' ')
-                                    colPROJ1, colPROJ2 = st.columns([2,1])
+                                    colPROJ1, colPROJ2, colPROJ3, colPROJ4 = st.columns([4, 2, 0.8, 0.8])
                                     with colPROJ1:
                                         font_TITLE('ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
                                     with colPROJ2:
@@ -858,7 +858,12 @@ elif authentication_status:
                                             font_TITLE('STATUS DA SPRINT - HOMOLOGADO', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
                                         elif str(checkGovern[sprintAtual]) == "1":
                                             font_TITLE('STATUS DA SPRINT - AGUARDANDO HOMOLOGAÇÃO', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+                                    with colPROJ3:
                                         
+                                        font_TITLE(f'{date_americ_by_brasil(str(ddSprint[[x[4] for x in ddSprint].index(str(id_sprint))][2]))}', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+                                    with colPROJ4:
+                                        font_TITLE(f'{date_americ_by_brasil(str(ddSprint[[x[4] for x in ddSprint].index(str(id_sprint))][3]))}', fonte_Projeto,"'Bebas Neue', sans-serif", 25, 'left','#228B22')
+
                                     especialistBD_sprint = [x for x in especialist_by_proj if str(x[1]) == str(id_sprint)]  #ESPECIALISTAS ATIVOS E NÃO ATIVOS VINCULADOS A SPRINT                        
                             
                                     especialist_proj = [list(func_split(dadosOrigin[0][21]))[x] for x in range(len(func_split(dadosOrigin[0][22]))) if str(list(func_split(dadosOrigin[0][22]))[x]).upper() == 'ESPECIALISTA']
