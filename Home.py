@@ -241,6 +241,7 @@ elif authentication_status:
     st.write(f'<style>{menuCss}</style>', unsafe_allow_html=True)
 
     font_TITLE('HOME', fonte_Projeto,"'Bebas Neue', sans-serif", 42, 'left')
+    idUser = [x[0] for x in dadosUser if x[1] == matriUser][0]
 
     sqlEntregas = f"""SELECT 
             projeu_entregas.id_sprint, 
@@ -252,7 +253,7 @@ elif authentication_status:
         FROM projeu_entregas
         JOIN projeu_sprints ON projeu_entregas.id_sprint = projeu_sprints.id_sprint
         JOIN projeu_projetos ON projeu_sprints.id_proj_fgkey = projeu_projetos.id_proj
-        WHERE projeu_entregas.stt_entrega NOT LIKE '%Concluído%' AND projeu_entregas.executor = {matriUser} AND projeu_sprints.check_sprint = 1;"""
+        WHERE projeu_entregas.stt_entrega NOT LIKE '%Concluído%' AND projeu_entregas.executor = {idUser} AND projeu_sprints.check_sprint = 1;"""
     mycursor.execute(sqlEntregas)
     entregaProj = mycursor.fetchall()
     mycursor.close()
@@ -542,53 +543,56 @@ elif authentication_status:
                 projUnico.append(sprintProj)
 
             if nomeProj not in repetido:
-                repetido[nomeProj] = (sprintProj, [])
+                repetido[nomeProj] = {}
 
-            if sprintProj in projUnico:
-                repetido[nomeProj][1].append(statusProj)
+            if sprintProj not in repetido[nomeProj]:
+                repetido[nomeProj][sprintProj] = []
+
+            repetido[nomeProj][sprintProj].append(statusProj)
 
         if len(repetido) != 0:
-            for projeto, (sprint, entregas) in repetido.items():
-                cardEntregaHtml = """<div class="main">
-                            <div class="card">"""
+            for projeto, sprints in repetido.items():
+                for sprint, entregas in sprints.items():
+                    cardEntregaHtml = """<div class="main">
+                                <div class="card">"""
+                        
+                    for entrega, status in entregas:
+                        cardEntregaHtml += f"""<div class="entrega">Entrega: {entrega}</div>
+                            <div class="status">Status: {status}</div>
+                            <hr>"""
+                        
+                    cardEntregaHtml += """</div>
+                            </div>"""
+                        
+                    cardEntregaCss = """.main{
+                            display: flex;
+                            align-items: center;
+                        }
+
+                        .card{
+                            max-width: 100%;
+                            min-width: 100%;
+                        }
+
+                        .card:hover{
+                            transform: scale(1.01);
+                        }
+
+                        .entrega{
+                            font-weight: bold;
+                            margin-top: 10px;
+                            font-size: 16px;
+                        }
+
+                        .status{
+                            margin-top: 10px;
+                            font-size: 16px;
+                        }"""
                     
-                for entrega, status in entregas:
-                    cardEntregaHtml += f"""<div class="entrega">Entrega: {entrega}</div>
-                        <div class="status">Status: {status}</div>
-                        <hr>"""
-                    
-                cardEntregaHtml += """</div>
-                        </div>"""
-                    
-                cardEntregaCss = """.main{
-                        display: flex;
-                        align-items: center;
-                    }
-
-                    .card{
-                        max-width: 100%;
-                        min-width: 100%;
-                    }
-
-                    .card:hover{
-                        transform: scale(1.01);
-                    }
-
-                    .entrega{
-                        font-weight: bold;
-                        margin-top: 10px;
-                        font-size: 16px;
-                    }
-
-                    .status{
-                        margin-top: 10px;
-                        font-size: 16px;
-                    }"""
-                
-                with st.expander(f"{sprint} - {projeto}"):
-                    st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
-                    st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
-                    if st.button("Ir para Projetos", key=f"bt-{projeto}"):
-                        st.switch_page("pages/2 - Meus Projetos.py")
+                    with st.expander(f"{sprint} - {projeto}"):
+                        st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
+                        st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
+                        if st.button("Ir para Projetos", key=f"bt-{sprint}-{projeto}"):
+                            st.switch_page("pages/2 - Meus Projetos.py")
         else:
             st.info("Você não possui entregas pendentes")
