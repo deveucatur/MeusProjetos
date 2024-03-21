@@ -334,26 +334,30 @@ elif authentication_status:
                 gestorProj = [x[3] for x in ddPaging if x[1] == project_filter][0]
 
                 dadosOrigin = [x for x in ddPaging if x[1] == project_filter]
-                cmd_entregas = f"""SELECT 
-                                    (SELECT number_sprint FROM projeu_sprints WHERE id_sprint = projeu_entregas.id_sprint) AS NUMERO_SPRINT, 
-                                    nome_Entrega AS NOME_ENTREGA, 
-                                    (select Nome FROM projeu_users WHERE id_user = executor) AS EXECUTOR, 
-                                    hra_necess AS HORAS, 
-                                    compl_entrega AS COMPLEXIDADE,
-                                    stt_entrega AS STATUS,
-                                    id_entr,
-                                    (SELECT Matricula FROM projeu_users WHERE id_user = executor) AS MATRICULA_EXECUTOR
-                                FROM projeu_entregas 
+                cmd_entregas = f"""
+                                    SELECT 
+                                        (SELECT number_sprint FROM projeu_sprints WHERE id_sprint = projeu_entregas.id_sprint) AS NUMERO_SPRINT,
+                                        nome_Entrega AS NOME_ENTREGA,
+                                        (SELECT Nome FROM projeu_users WHERE id_user = executor) AS EXECUTOR,
+                                        hra_necess AS HORAS,
+                                        compl_entrega AS COMPLEXIDADE,
+                                        stt_entrega AS STATUS,
+                                        id_entr,
+                                        (SELECT Matricula FROM projeu_users WHERE id_user = executor) AS MATRICULA_EXECUTOR,
+                                        id_sprint 
+                                    FROM 
+                                        projeu_entregas 
                                     WHERE 
-                                        id_sprint IN ( 
+                                        id_sprint IN (
                                             SELECT id_sprint 
                                             FROM projeu_sprints 
                                             WHERE id_proj_fgkey = (
                                                 SELECT id_proj 
                                                 FROM projeu_projetos 
-                                                WHERE name_proj = '{project_filter}'
-                                                ) 
-                                            );"""
+                                                WHERE name_proj = '{str(project_filter).strip()}'
+                                            )
+                                        );
+                                    ;"""
                 
                 cmd_especialist_sprint = f"""SELECT
                                         PES.id_sp, 
@@ -367,7 +371,7 @@ elif authentication_status:
                                     JOIN projeu_users PU ON PU.id_user = PES.id_colab_fgkey
                                     JOIN projeu_sprints PS ON PS.id_sprint = PES.id_sprt_fgkey
                                     WHERE PS.id_proj_fgkey IN (SELECT PP_AUX.id_proj FROM projeu_projetos PP_AUX WHERE PP_AUX.name_proj LIKE '%{str(dadosOrigin[0][1]).strip()}%');"""
-
+            
             if len(dadosOrigin) > 0:
                 mycursor = conexao.cursor()  
                 mycursor.execute(cmd_entregas)
@@ -936,34 +940,35 @@ elif authentication_status:
                                                     with col2:
                                                         opc_stt = ['🟨 Backlog', '🟥 Impeditivo', '🟦 Executando',  '🟩 Concluído']
                                                         status_entreg = st.selectbox('Status', opc_stt, opc_stt.index(str(spEntregas[ativIDX][5]).strip()) if spEntregas[ativIDX][5] != None and spEntregas[ativIDX][5] != '' else 0, key=f'status{id_sprint}  - {idx_parm} - {ativIDX}', disabled=block_sprint, label_visibility="collapsed")
+                                                        
                                                         opc_colb = func_split(dadosOrigin[0][21])
-                                                        colab_entreg = st.selectbox('Colaborador', opc_colb, None, key=f'colab{id_sprint} - {ativIDX} - {idx_parm}',disabled=block_sprint, label_visibility="collapsed")
+                                                        colab_entreg = st.selectbox('Colaborador', opc_colb, opc_colb.index(str(spEntregas[ativIDX][2]).strip()) if spEntregas[ativIDX][2] != None else None, key=f'colab{id_sprint} - {ativIDX} - {idx_parm}',disabled=block_sprint, label_visibility="collapsed")
                                             
 
                                                     listDadosAux.append([name_entreg, colab_entreg, horas_entreg, status_entreg, compl_entreg, spEntregas[ativIDX][6]]) 
                                                 
                                                 listDadosAux = [x for x in listDadosAux if x[0] != '' and x[0] != None]
-                                                entrgasBD_by_sprint = [x for x in EntregasBD if str(x[0]).strip() == str(id_sprint).strip()]
+
+                                                entrgasBD_by_sprint = [x for x in EntregasBD if str(x[8]).strip() == str(id_sprint).strip()]
 
                                                 limp_entrg = lambda entr: str(entr).strip().replace('"', "'")
                                                 if len(entrgasBD_by_sprint) > 0:
                                                     col1, col2, col3 = st.columns([1,3,7])
                                                     with col1:
                                                         button_atual = st.form_submit_button('Atualizar', disabled=block_sprint)        
-
+                                                    
                                                     if str(matriUser).strip() == str(dadosOrigin[0][3]).strip():
                                                         with col2:
                                                             button_final = st.form_submit_button('Finalizar Sprint', disabled=block_sprint) 
                                                     
-                                                            if button_final:
+                                                            if button_final: 
                                                                 mycursor = conexao.cursor()
                                                                 columns_final = ['check_sprint', 'data_check']
                                                                 values_final = [0, f'"{datetime.today()}"']
 
-                                                                for idx_column in range(len(columns_final)):
-                                                                    cmd_final = f'''UPDATE projeu_sprints SET {columns_final[idx_column]} = {values_final[idx_column]} WHERE id_sprint = {int(id_sprint)};'''
-                                                                    mycursor.execute(cmd_final)
-                                                                    conexao.commit()
+                                                                cmd_final = f'''UPDATE projeu_sprints SET {columns_final[0]} = {values_final[0]}, {columns_final[1]} = {values_final[1]} WHERE id_sprint = {int(id_sprint)};'''
+                                                                mycursor.execute(cmd_final)
+                                                                conexao.commit()
 
                                                                 mycursor.close()
                                                                 st.toast('Sprint Finalizada!', icon='✅')
@@ -973,76 +978,87 @@ elif authentication_status:
                                                     if button_atual:
                                                         mycursor = conexao.cursor()
 
-                                                        for list_atual in listDadosAux:
-                                                            if list_atual[5] != None: #SE A ENTREGA DA "list_atual" JÁ ESTIVER DENTRO DO BANCO DE DADOS SOMENTE VAI ATUALIZAR AS INFORMAÇÕES SOBRE A ENTREGA
-                                                                columnsUP = ['nome_Entrega', 'executor', 'hra_necess', 'stt_entrega', 'compl_entrega']
+                                                        if len([x for x in listDadosAux if x[1] == None]) < 1:
+                                                            for list_atual in listDadosAux:
+                                                                if list_atual[5] != None: #SE A ENTREGA DA "list_atual" JÁ ESTIVER DENTRO DO BANCO DE DADOS SOMENTE VAI ATUALIZAR AS INFORMAÇÕES SOBRE A ENTREGA
+                                                                    columnsUP = ['nome_Entrega', 'executor', 'hra_necess', 'stt_entrega', 'compl_entrega']
 
-                                                                for idxColum in range(len(columnsUP)):
-                                                                    cmd_update = f'''UPDATE projeu_entregas SET {columnsUP[idxColum]} = {f'"{list_atual[idxColum]}"' if idxColum != 1 else f'(SELECT id_user FROM projeu_users WHERE Nome = "{list_atual[idxColum]}" LIMIT 1)'} WHERE id_entr = {list_atual[5]};'''
-                                                                    mycursor.execute(cmd_update)
-                                                                    conexao.commit()
-
-
-                                                            else: #INSERT DA ENTREGA CASO ELA NÃO ESTEJA PRESENTE DENTRO DO BANCO DE DADOS
-                                                                if list_atual[0] != None and list_atual[0] != '': 
-                                                                    tables = ['projeu_entregas', 'projeu_entregas_planejamento']
-
-                                                                    
-                                                                    for table_name in tables:
-                                                                        cmd_insert = f'''
-                                                                            INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
-                                                                                values((SELECT id_sprint FROM projeu_sprints WHERE number_sprint = {spEntregas[0][0]}  
-                                                                                    AND id_proj_fgkey = 
-                                                                                        (SELECT id_proj FROM projeu_projetos WHERE name_proj = '{dadosOrigin[0][1]}') LIMIT 1),
-                                                                                        "{limp_entrg(list_atual[0])}", 
-                                                                                        (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
-                                                                                        {list_atual[2]},
-                                                                                        "{list_atual[3]}",
-                                                                                        "{list_atual[4]}");'''
-                                                                        mycursor.execute(cmd_insert)
+                                                                    for idxColum in range(len(columnsUP)):
+                                                                        cmd_update = f'''UPDATE projeu_entregas SET {columnsUP[idxColum]} = {f'"{list_atual[idxColum]}"' if idxColum != 1 else f'(SELECT id_user FROM projeu_users WHERE Nome = "{list_atual[idxColum]}" LIMIT 1)'} WHERE id_entr = {list_atual[5]};'''
+                                                                        mycursor.execute(cmd_update)
                                                                         conexao.commit()
 
-                                                            cmd_especialist = tratamento_especialist()
-                                                            mycursor.execute(cmd_especialist)
-                                                            conexao.commit()
 
-                                                        mycursor.close()
-                                                        st.toast('Dados Atualizados!', icon='✅')
+                                                                else: #INSERT DA ENTREGA CASO ELA NÃO ESTEJA PRESENTE DENTRO DO BANCO DE DADOS
+                                                                    if list_atual[0] != None and list_atual[0] != '': 
+                                                                        tables = ['projeu_entregas', 'projeu_entregas_planejamento']
 
+                                                                        for table_name in tables:
+                                                                            cmd_insert = f'''
+                                                                                INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
+                                                                                    values({id_sprint},
+                                                                                            "{limp_entrg(list_atual[0])}", 
+                                                                                            (SELECT id_user FROM projeu_users WHERE Nome = '{list_atual[1]}' LIMIT 1),
+                                                                                            {list_atual[2]},
+                                                                                            "{list_atual[3]}",
+                                                                                            "{list_atual[4]}");'''
+                                                                            
+                                                                            mycursor.execute(cmd_insert)
+                                                                            conexao.commit()
+
+                                                                cmd_especialist = tratamento_especialist()
+                                                                mycursor.execute(cmd_especialist)
+                                                                conexao.commit()
+
+                                                            mycursor.close()
+                                                            st.toast('Dados Atualizados!', icon='✅')
+
+                                                            sleep(0.1)
+                                                            st.rerun()
+                                                        else:
+                                                            st.toast('Entregas com executor vazio no planejamento da sua sprint.', icon='❌')
+                                                        
+                                                        
                                                 else:
                                                     button_inic_entreg = st.form_submit_button('Enviar')
                                                     if button_inic_entreg:
-                                                        mycursor = conexao.cursor()
-                                                        tables = ['projeu_entregas', 'projeu_entregas_planejamento']
 
-                                                        for table_name in tables:
-                                                            for list_atual in listDadosAux:
-                                                                cmd_insert = f'''
-                                                                    INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
-                                                                        values({spEntregas[0][0]},
-                                                                                "{limp_entrg(list_atual[0])}", 
-                                                                                (SELECT id_user FROM projeu_users WHERE Nome LIKE "%{list_atual[1]}%" LIMIT 1),
-                                                                                {list_atual[2]},
-                                                                                "{list_atual[3]}",
-                                                                                "{list_atual[4]}");'''
+                                                        if len([x for x in listDadosAux if x[1] == None]) < 1:
+                                                            mycursor = conexao.cursor()
+                                                            tables = ['projeu_entregas', 'projeu_entregas_planejamento']
 
-                                                                mycursor.execute(cmd_insert)
+                                                            for table_name in tables:
+                                                                for list_atual in listDadosAux:
+                                                                    cmd_insert = f'''
+                                                                        INSERT INTO {table_name} (id_sprint, nome_Entrega, executor, hra_necess, stt_entrega, compl_entrega) 
+                                                                            values({id_sprint},
+                                                                                    "{limp_entrg(list_atual[0])}", 
+                                                                                    (SELECT id_user FROM projeu_users WHERE Nome LIKE "%{list_atual[1]}%" LIMIT 1),
+                                                                                    {list_atual[2]},
+                                                                                    "{list_atual[3]}",
+                                                                                    "{list_atual[4]}");'''
+
+                                                                    mycursor.execute(cmd_insert)
+                                                                    conexao.commit()
+
+                                                            for i in range(len(especialist_sprint)):
+                                                                cmd_insert_espc = f"""INSERT INTO projeu_especialist_sprint (
+                                                                                        id_sprt_fgkey, 
+                                                                                        id_colab_fgkey
+                                                                                    ) VALUES (
+                                                                                        {id_sprint}, 
+                                                                                        (SELECT id_user FROM projeu_users WHERE Nome LIKE '%{str(especialist_sprint[i]).strip()}%'));"""
+                                                                
+                                                                mycursor.execute(cmd_insert_espc)
                                                                 conexao.commit()
 
-                                                        for i in range(len(especialist_sprint)):
-                                                            cmd_insert_espc = f"""INSERT INTO projeu_especialist_sprint (
-                                                                                    id_sprt_fgkey, 
-                                                                                    id_colab_fgkey
-                                                                                ) VALUES (
-                                                                                    {id_sprint}, 
-                                                                                    (SELECT id_user FROM projeu_users WHERE Nome LIKE '%{str(especialist_sprint[i]).strip()}%'));"""
-                                                            
-                                                            mycursor.execute(cmd_insert_espc)
-                                                            conexao.commit()
-
-                                                        st.toast('Entregas Enviadas!', icon='✅')
-                                                        mycursor.close()
+                                                            st.toast('Entregas Enviadas!', icon='✅')
+                                                            mycursor.close()
+                                                        else:
+                                                            st.toast('Entregas com executor vazio no planejamento da sua sprint.', icon='❌')
                                                     
+                                                        sleep(0.1)
+                                                        st.rerun()
                                     with tab2:
                                         if len(spEntregas) > 0:
                                             font_TITLE('EXCLUIR', fonte_Projeto,"'Bebas Neue', sans-serif", 23, 'left')  
