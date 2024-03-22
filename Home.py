@@ -262,13 +262,13 @@ elif authentication_status:
     with col1:
         st.write("")
         nomeBotão = "MEUS PROJETOS"
-        link = "https://cc81-186-232-176-19.ngrok-free.app/Meus_Projetos"
+        link = "https://95cf-186-232-176-19.ngrok-free.app/Meus_Projetos"
         image_url=  "https://cdn-icons-png.flaticon.com/128/1087/1087927.png"
         botao1(nomeBotão,link,image_url)
     with col2:    
         st.write("")
         nomeBotão = 'PRÊMIOS'
-        link = "https://cc81-186-232-176-19.ngrok-free.app/Prêmio"
+        link = "https://95cf-186-232-176-19.ngrok-free.app/Prêmio"
         image_url="https://cdn-icons-png.flaticon.com/128/5517/5517593.png"
         botao1(nomeBotão,link,image_url)
 
