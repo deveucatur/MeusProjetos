@@ -718,7 +718,6 @@ elif authentication_status:
                     with col3:
                         dat_fim_new = st.date_input('Fim', value=dat_inc_new + timedelta(days=14), disabled=True)
                     
-                    #st.error([str(str(dadosOrigin[0][11]).split("/>")[x]).strip() for x in range(len(str(dadosOrigin[0][27]).split("/>"))) if str(str(dadosOrigin[0][45]).split("~/>")[x]).strip() == '1'])
                     colAdd, colExc = st.columns([1,7])
                     with colAdd:
                         button_addSprint = st.button('Adcionar Sprint', disabled=disabledON)
@@ -740,7 +739,7 @@ elif authentication_status:
                         mycursor.execute(cmd_addSprint)
                         conexao.commit()
                         
-                        if number_sprint_new == 1:
+                        if number_sprint_new == str(1):
                             cmdUP_stt_proj = f'UPDATE projeu_projetos SET status_proj = "Em Andamento" WHERE id_proj = {dadosOrigin[0][0]};'
                             mycursor.execute(cmdUP_stt_proj)
                             conexao.commit()
