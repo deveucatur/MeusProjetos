@@ -329,6 +329,7 @@ elif authentication_status:
             with st.expander('Filtro Projetos', expanded=False):
                 macropr_filter = st.multiselect('Macroprocesso', set([x[5] for x in ddPaging]), set([x[5] for x in ddPaging]))
                 program_filter = st.multiselect('Programas', set([x[6] for x in ddPaging if x[5] in macropr_filter]), set([x[6] for x in ddPaging if x[5] in macropr_filter]))
+                
                 project_filter = st.selectbox('Projetos', [x[1] for x in ddPaging if x[6] in program_filter])
                 
                 gestorProj = [x[3] for x in ddPaging if x[1] == project_filter][0]
@@ -1131,298 +1132,298 @@ elif authentication_status:
     
     with tabs2:
         font_TITLE('CADASTRO DE PROJETOS', fonte_Projeto,"'Bebas Neue', sans-serif", 49, 'center')
-    complix = ['SEGURO', 'ACESSÍVEL', 'ABSTRATO I', 'ABSTRATO II', 'ABSTRATO III', 'SINGULAR I', 'SINGULAR II',
-            'SINGULAR III']
+        complix = ['SEGURO', 'ACESSÍVEL', 'ABSTRATO I', 'ABSTRATO II', 'ABSTRATO III', 'SINGULAR I', 'SINGULAR II',
+                'SINGULAR III']
 
-    nomeProjeto = st.text_input('Nome do Projeto')
-    col1, col2 = st.columns(2)
-    with col1:
-        colaux1, colaux2 = st.columns([1.3, 2])    
-        with colaux1:
-            typ_proj = st.selectbox('Tipo Projeto', ['Estratégico', 'OKR', 'Implantação', 'Rápido'])
-        with colaux2:
-            MacroProjeto = st.selectbox('Macroprocesso', list(set([x[1] for x in prog_macro])))    
-
-        colG1, colG2 = st.columns([1,3]) 
-        with colG2:
-            gestorProjeto = st.selectbox('Gestor do Projeto', list(set([x[1] for x in users])), 0)
-        with colG1:
-            matric_gestor = st.text_input('Matricula Gestor', [x[0] for x in users if x[1] == gestorProjeto][0], disabled=True)
-        
-        if typ_proj not in ("Rápido", "Implantação"):
-            mvp_name = st.text_input('MVP')
-
-        pdt_entrFinal = st.text_area('Produto Projeto', key='ProdutoEntrega')
-
-    with col2:
-        nomePrograma = st.selectbox('Programa', [x[0] for x in prog_macro if x[1] == MacroProjeto])
-
-        colD1, colD2 = st.columns([2,1]) 
-        with colD1:
-            dat_inic = st.date_input('Início Projeto')
-        with colD2:
-            ivsProget = st.text_input('Investimento', placeholder='R$ 0,00')
-
-        if typ_proj not in ("Rápido", "Implantação"):
-            mvp_produt = st.text_input('Produto MVP')    
-
-        result_esperd = st.text_area('Resultado Esperado')
-
-    if typ_proj in ('Implantação'):
-        #PARÂMETROS ESPECÍFICOS DOS PROJETOS DE IMPLANTAÇÃO
-        font_TITLE('PARÂMETROS DE IMPLANTAÇÃO', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
-        
-        impl_stake = st.text_input('Stakeholders')
-        impl_premi = st.text_input('Premissas')
-        impl_risco = st.text_input('Riscos')
-        impl_justific = st.text_area('Justificativa')
-        col1, col2, col3 = st.columns(3)
+        nomeProjeto = st.text_input('Nome do Projeto')
+        col1, col2 = st.columns(2)
         with col1:
-            impl_obj = st.text_area('Objetivo Smart')
-        with col2:
-            impl_requis = st.text_area('Requisitos do Projeto')
-        with col3:
-            impl_restric = st.text_area('Restrições')
-        
+            colaux1, colaux2 = st.columns([1.3, 2])    
+            with colaux1:
+                typ_proj = st.selectbox('Tipo Projeto', ['Estratégico', 'OKR', 'Implantação', 'Rápido'])
+            with colaux2:
+                MacroProjeto = st.selectbox('Macroprocesso', list(set([x[1] for x in prog_macro])))    
 
-        ##### ADCIONANDO MARCOS NA LINHA DO TEMPO #####
+            colG1, colG2 = st.columns([1,3]) 
+            with colG2:
+                gestorProjeto = st.selectbox('Gestor do Projeto', list(set([x[1] for x in users])), 0)
+            with colG1:
+                matric_gestor = st.text_input('Matricula Gestor', [x[0] for x in users if x[1] == gestorProjeto][0], disabled=True)
+            
+            if typ_proj not in ("Rápido", "Implantação"):
+                mvp_name = st.text_input('MVP')
+
+            pdt_entrFinal = st.text_area('Produto Projeto', key='ProdutoEntrega')
+
+        with col2:
+            nomePrograma = st.selectbox('Programa', [x[0] for x in prog_macro if x[1] == MacroProjeto])
+
+            colD1, colD2 = st.columns([2,1]) 
+            with colD1:
+                dat_inic = st.date_input('Início Projeto')
+            with colD2:
+                ivsProget = st.text_input('Investimento', placeholder='R$ 0,00')
+
+            if typ_proj not in ("Rápido", "Implantação"):
+                mvp_produt = st.text_input('Produto MVP')    
+
+            result_esperd = st.text_area('Resultado Esperado')
+
+        if typ_proj in ('Implantação'):
+            #PARÂMETROS ESPECÍFICOS DOS PROJETOS DE IMPLANTAÇÃO
+            font_TITLE('PARÂMETROS DE IMPLANTAÇÃO', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
+            
+            impl_stake = st.text_input('Stakeholders')
+            impl_premi = st.text_input('Premissas')
+            impl_risco = st.text_input('Riscos')
+            impl_justific = st.text_area('Justificativa')
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                impl_obj = st.text_area('Objetivo Smart')
+            with col2:
+                impl_requis = st.text_area('Requisitos do Projeto')
+            with col3:
+                impl_restric = st.text_area('Restrições')
+            
+
+            ##### ADCIONANDO MARCOS NA LINHA DO TEMPO #####
+            st.write('---')
+            col1, col2 = st.columns([3,1])
+            with col1:
+                font_TITLE('LINHA DO TEMPO', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
+            with col2:
+                qntd_entr = st.number_input('Quantidade', min_value=1, step=1, key='Cadastrar linha do tempo')
+
+            listMarcosTime = []
+            st.caption('Principais etapas e marcos do projeto')
+            for a_entr in range(qntd_entr):
+                listMarcosTime.append(st.text_input('', label_visibility="collapsed", key=f'Cadastrar linha do tempo{a_entr}'))
+
+        else:
+            ##### ADCIONANDO MÉTRICAS #####
+            st.write('---')
+            col1, col2 = st.columns([3,1])
+            with col1:
+                font_TITLE('MÉTRICAS', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
+            with col2:
+                qntd_metric = st.number_input('Quantidade', min_value=1, step=1, key=f'Cadastrar Metricas')
+
+            listMetric = []
+            st.caption('Métricas')
+            for a_metrc in range(qntd_metric):
+                listMetric.append(st.text_input('', label_visibility="collapsed", key=f'Cadastrar Metricas{a_metrc}'))
+                
+
+        ##### ADCIONANDO AS PRÍNCIPAIS ENTREGAS #####
         st.write('---')
         col1, col2 = st.columns([3,1])
         with col1:
-            font_TITLE('LINHA DO TEMPO', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
+            font_TITLE('PRINCIPAIS ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
         with col2:
-            qntd_entr = st.number_input('Quantidade', min_value=1, step=1, key='Cadastrar linha do tempo')
+            qntd_entr = st.number_input('Quantidade', min_value=1, step=1, key='Cadastrar Entregas')
 
-        listMarcosTime = []
-        st.caption('Principais etapas e marcos do projeto')
+        listEntregas = []
+        st.caption('Entregas')
         for a_entr in range(qntd_entr):
-            listMarcosTime.append(st.text_input('', label_visibility="collapsed", key=f'Cadastrar linha do tempo{a_entr}'))
+            listEntregas.append(st.text_input('', label_visibility="collapsed", key=f'Cadastrar Entreg{a_entr}'))
 
-    else:
-        ##### ADCIONANDO MÉTRICAS #####
+            
+        ##### ADCIONANDO A EQUIPE #####
         st.write('---')
         col1, col2 = st.columns([3,1])
         with col1:
-            font_TITLE('MÉTRICAS', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
+            font_TITLE('CADASTRO EQUIPE', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
         with col2:
-            qntd_metric = st.number_input('Quantidade', min_value=1, step=1, key=f'Cadastrar Metricas')
+            qntd_clb = st.number_input('Quantidade', min_value=1, step=1)
 
-        listMetric = []
-        st.caption('Métricas')
-        for a_metrc in range(qntd_metric):
-            listMetric.append(st.text_input('', label_visibility="collapsed", key=f'Cadastrar Metricas{a_metrc}'))
-            
-
-    ##### ADCIONANDO AS PRÍNCIPAIS ENTREGAS #####
-    st.write('---')
-    col1, col2 = st.columns([3,1])
-    with col1:
-        font_TITLE('PRINCIPAIS ENTREGAS', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
-    with col2:
-        qntd_entr = st.number_input('Quantidade', min_value=1, step=1, key='Cadastrar Entregas')
-
-    listEntregas = []
-    st.caption('Entregas')
-    for a_entr in range(qntd_entr):
-        listEntregas.append(st.text_input('', label_visibility="collapsed", key=f'Cadastrar Entreg{a_entr}'))
-
-        
-    ##### ADCIONANDO A EQUIPE #####
-    st.write('---')
-    col1, col2 = st.columns([3,1])
-    with col1:
-        font_TITLE('CADASTRO EQUIPE', fonte_Projeto,"'Bebas Neue', sans-serif", 33, 'left')
-    with col2:
-        qntd_clb = st.number_input('Quantidade', min_value=1, step=1)
-
-    col_equip1, col_equip2, col_equip3 = st.columns([0.3, 2, 1])
-    with col_equip1:
-        st.caption('Matricula')
-    with col_equip2:
-        st.caption('Colaboradores')
-    with col_equip3:
-        st.caption('Função')
-
-    #A IDEIA É QUE OS USUÁRIOS SELECIONADOS DURANTE O PREENCHIMENTO DO FORMULÁRIO SEJAM PEGOS AS INFORMAÇÕES DO BANCO DE DADOS DE USUÁRIO
-    list_colbs = [[matric_gestor, 'Gestor']]
-    for colb_a in range(qntd_clb):
-        with col_equip2:
-            colb_name = st.selectbox('Colaboradores', [x[1] for x in users], label_visibility="collapsed", key=f'Cadastrar Nome Colab{colb_a}')        
+        col_equip1, col_equip2, col_equip3 = st.columns([0.3, 2, 1])
         with col_equip1:
-            colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0], label_visibility="collapsed", disabled=True, key=f'Cadastrar MatriculaColabs{colb_a}')
+            st.caption('Matricula')
+        with col_equip2:
+            st.caption('Colaboradores')
         with col_equip3:
-            colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],None, label_visibility="collapsed", key=f'Cadastrar funcaoColab{colb_a}')
-        list_colbs.append([colab_matric, colb_funç])
+            st.caption('Função')
 
-    st.text(' ')
-    st.text(' ')
-    colb1,colb2,colb3 = st.columns([3,3,1])
-    with colb3:
+        #A IDEIA É QUE OS USUÁRIOS SELECIONADOS DURANTE O PREENCHIMENTO DO FORMULÁRIO SEJAM PEGOS AS INFORMAÇÕES DO BANCO DE DADOS DE USUÁRIO
+        list_colbs = [[matric_gestor, 'Gestor']]
+        for colb_a in range(qntd_clb):
+            with col_equip2:
+                colb_name = st.selectbox('Colaboradores', [x[1] for x in users], label_visibility="collapsed", key=f'Cadastrar Nome Colab{colb_a}')        
+            with col_equip1:
+                colab_matric = st.text_input('Matricula', list(set([x[0] for x in users if x[1] == colb_name]))[0], label_visibility="collapsed", disabled=True, key=f'Cadastrar MatriculaColabs{colb_a}')
+            with col_equip3:
+                colb_funç = st.selectbox('Função', ['Especialista', 'Executor'],None, label_visibility="collapsed", key=f'Cadastrar funcaoColab{colb_a}')
+            list_colbs.append([colab_matric, colb_funç])
+
         st.text(' ')
-        btt_criar_prj = st.button('Criar Projeto')
+        st.text(' ')
+        colb1,colb2,colb3 = st.columns([3,3,1])
+        with colb3:
+            st.text(' ')
+            btt_criar_prj = st.button('Criar Projeto')
 
-    if btt_criar_prj:
-        if len([x for x in list_colbs if x[1] == None]) < 1:
-            
-            if str(nomeProjeto).strip() not in [str(x).strip() for x in dd_proj]:
-                if typ_proj == "Estratégico":
-                    parametros = [len(str(x).strip()) if type(x) in (date, str) else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, mvp_name, pdt_entrFinal, nomePrograma, dat_inic, mvp_produt, result_esperd, listEntregas, list_colbs]]
-                elif typ_proj == 'Rápido':
-                    parametros = [len(str(x).strip()) if type(x) in (date, str) else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, pdt_entrFinal, nomePrograma, dat_inic, result_esperd, listEntregas, list_colbs]]
-                elif typ_proj == 'Implantação':
-                    parametros = [len(str(x).strip()) if type(x) in (date, str) else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, pdt_entrFinal, nomePrograma, dat_inic, listEntregas, list_colbs, impl_stake, impl_premi, impl_risco, impl_obj, impl_requis, impl_restric, impl_justific]]
+        if btt_criar_prj:
+            if len([x for x in list_colbs if x[1] == None]) < 1:
+                
+                if str(nomeProjeto).strip() not in [str(x).strip() for x in dd_proj]:
+                    if typ_proj == "Estratégico":
+                        parametros = [len(str(x).strip()) if type(x) in (date, str) else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, mvp_name, pdt_entrFinal, nomePrograma, dat_inic, mvp_produt, result_esperd, listEntregas, list_colbs]]
+                    elif typ_proj == 'Rápido':
+                        parametros = [len(str(x).strip()) if type(x) in (date, str) else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, pdt_entrFinal, nomePrograma, dat_inic, result_esperd, listEntregas, list_colbs]]
+                    elif typ_proj == 'Implantação':
+                        parametros = [len(str(x).strip()) if type(x) in (date, str) else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, pdt_entrFinal, nomePrograma, dat_inic, listEntregas, list_colbs, impl_stake, impl_premi, impl_risco, impl_obj, impl_requis, impl_restric, impl_justific]]
 
-                if 0 not in parametros:
+                    if 0 not in parametros:
 
-                    mycursor = conexao.cursor()
-                    try:
-                        ############# INSERINDO O PROJETO #############
-                        if typ_proj == "Estratégico":
-                            cmd_criar_project = f"""INSERT INTO projeu_projetos(
-                                type_proj_fgkey, macroproc_fgkey, progrm_fgkey, name_proj, 
-                                result_esperad, gestor_id_fgkey, nome_mvp,
-                                produto_mvp, produto_entrega_final,  
-                                ano, date_posse_gestor,  status_proj, investim_proj
-                                ) VALUES (
-                                (SELECT id_type FROM projeu_type_proj WHERE type_proj LIKE '%{str(typ_proj).strip()}%'), (SELECT id FROM projeu_macropr WHERE macroprocesso LIKE '%{str(MacroProjeto).strip()}%'), 
-                                (SELECT id_prog FROM projeu_programas WHERE nome_prog LIKE '%{nomePrograma}%'), 
-                                '{str(nomeProjeto).strip()}', '{str(result_esperd).strip()}', 
-                                (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{str(mvp_name).strip()}', '{str(mvp_produt).strip()}', 
-                                '{str(pdt_entrFinal).strip()}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{str(ivsProget).strip()}');"""
-                        elif typ_proj == 'Rápido':
-                            cmd_criar_project = f"""INSERT INTO projeu_projetos(
-                                type_proj_fgkey, macroproc_fgkey, progrm_fgkey, name_proj, 
-                                result_esperad, gestor_id_fgkey, produto_entrega_final,  
-                                ano, date_posse_gestor,  status_proj, investim_proj
-                                ) VALUES (
-                                (SELECT id_type FROM projeu_type_proj WHERE type_proj LIKE '%{str(typ_proj).strip()}%'), (SELECT id FROM projeu_macropr WHERE macroprocesso LIKE '%{str(MacroProjeto).strip()}%'), 
-                                (SELECT id_prog FROM projeu_programas WHERE nome_prog LIKE '%{nomePrograma}%'), 
-                                '{str(nomeProjeto).strip()}', '{str(result_esperd).strip()}', 
-                                (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{str(pdt_entrFinal).strip()}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{str(ivsProget).strip()}');"""
-                        elif typ_proj == 'Implantação':
-                            cmd_criar_project = f"""
-                                INSERT INTO 
-                                    projeu_projetos( 
-                                        type_proj_fgkey, 
-                                        macroproc_fgkey, 
-                                        progrm_fgkey, 
-                                        name_proj, 
-                                        result_esperad, 
-                                        gestor_id_fgkey, 
-                                        produto_entrega_final,
-                                        ano, 
-                                        date_posse_gestor, 
-                                        status_proj, 
-                                        investim_proj,
-                                        justific_impl_proj,
-                                        stakeholders_impl_proj,
-                                        premissas_impl_proj,
-                                        riscos_impl_proj,
-                                        restric_impl_proj,
-                                        objSmart_impl_proj,
-                                        requisitos_impl_proj 
-                                ) VALUES (
-                                (SELECT id_type FROM projeu_type_proj WHERE type_proj LIKE '%{str(typ_proj).strip()}%'), (SELECT id FROM projeu_macropr WHERE macroprocesso LIKE '%{str(MacroProjeto).strip()}%'), 
-                                (SELECT id_prog FROM projeu_programas WHERE nome_prog LIKE '%{nomePrograma}%'), 
-                                '{str(nomeProjeto).strip()}', '{str(result_esperd).strip()}', 
-                                (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{str(pdt_entrFinal).strip()}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{str(ivsProget).strip()}', '{impl_justific}', '{impl_stake}', '{impl_premi}', '{impl_risco}', '{impl_restric}', '{impl_obj}', '{impl_requis}');"""
+                        mycursor = conexao.cursor()
+                        try:
+                            ############# INSERINDO O PROJETO #############
+                            if typ_proj == "Estratégico":
+                                cmd_criar_project = f"""INSERT INTO projeu_projetos(
+                                    type_proj_fgkey, macroproc_fgkey, progrm_fgkey, name_proj, 
+                                    result_esperad, gestor_id_fgkey, nome_mvp,
+                                    produto_mvp, produto_entrega_final,  
+                                    ano, date_posse_gestor,  status_proj, investim_proj
+                                    ) VALUES (
+                                    (SELECT id_type FROM projeu_type_proj WHERE type_proj LIKE '%{str(typ_proj).strip()}%'), (SELECT id FROM projeu_macropr WHERE macroprocesso LIKE '%{str(MacroProjeto).strip()}%'), 
+                                    (SELECT id_prog FROM projeu_programas WHERE nome_prog LIKE '%{nomePrograma}%'), 
+                                    '{str(nomeProjeto).strip()}', '{str(result_esperd).strip()}', 
+                                    (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{str(mvp_name).strip()}', '{str(mvp_produt).strip()}', 
+                                    '{str(pdt_entrFinal).strip()}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{str(ivsProget).strip()}');"""
+                            elif typ_proj == 'Rápido':
+                                cmd_criar_project = f"""INSERT INTO projeu_projetos(
+                                    type_proj_fgkey, macroproc_fgkey, progrm_fgkey, name_proj, 
+                                    result_esperad, gestor_id_fgkey, produto_entrega_final,  
+                                    ano, date_posse_gestor,  status_proj, investim_proj
+                                    ) VALUES (
+                                    (SELECT id_type FROM projeu_type_proj WHERE type_proj LIKE '%{str(typ_proj).strip()}%'), (SELECT id FROM projeu_macropr WHERE macroprocesso LIKE '%{str(MacroProjeto).strip()}%'), 
+                                    (SELECT id_prog FROM projeu_programas WHERE nome_prog LIKE '%{nomePrograma}%'), 
+                                    '{str(nomeProjeto).strip()}', '{str(result_esperd).strip()}', 
+                                    (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{str(pdt_entrFinal).strip()}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{str(ivsProget).strip()}');"""
+                            elif typ_proj == 'Implantação':
+                                cmd_criar_project = f"""
+                                    INSERT INTO 
+                                        projeu_projetos( 
+                                            type_proj_fgkey, 
+                                            macroproc_fgkey, 
+                                            progrm_fgkey, 
+                                            name_proj, 
+                                            result_esperad, 
+                                            gestor_id_fgkey, 
+                                            produto_entrega_final,
+                                            ano, 
+                                            date_posse_gestor, 
+                                            status_proj, 
+                                            investim_proj,
+                                            justific_impl_proj,
+                                            stakeholders_impl_proj,
+                                            premissas_impl_proj,
+                                            riscos_impl_proj,
+                                            restric_impl_proj,
+                                            objSmart_impl_proj,
+                                            requisitos_impl_proj 
+                                    ) VALUES (
+                                    (SELECT id_type FROM projeu_type_proj WHERE type_proj LIKE '%{str(typ_proj).strip()}%'), (SELECT id FROM projeu_macropr WHERE macroprocesso LIKE '%{str(MacroProjeto).strip()}%'), 
+                                    (SELECT id_prog FROM projeu_programas WHERE nome_prog LIKE '%{nomePrograma}%'), 
+                                    '{str(nomeProjeto).strip()}', '{str(result_esperd).strip()}', 
+                                    (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{str(pdt_entrFinal).strip()}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{str(ivsProget).strip()}', '{impl_justific}', '{impl_stake}', '{impl_premi}', '{impl_risco}', '{impl_restric}', '{impl_obj}', '{impl_requis}');"""
 
-                        st.error(cmd_criar_project)
-                        mycursor.execute(cmd_criar_project)
-                        conexao.commit()
-                        print('PROJETO CRIADO!')
-                        print('---'*30)
-                        print('VINCULANDO COLABORADORES AO PROJETO')
-                        sleep(0.2)
-
-                        if typ_proj not in ('Implantação'):
-                            ############# INSERINDO MÉTRICAS DO PROJETO #############
-                            dd_metric = ''
-                            for metric_name in listMetric:
-                                dd_metric += f"((SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1), '{metric_name}'),"
-                            dd_metric = dd_metric[:len(dd_metric)-1]
-
-                            cmd_metric = f"""INSERT INTO projeu_metricas(id_prj_fgkey, name_metric) 
-                                                VALUES {dd_metric};"""
-                            
-                            st.info(cmd_metric)
-                            mycursor.execute(cmd_metric)
+                            st.error(cmd_criar_project)
+                            mycursor.execute(cmd_criar_project)
                             conexao.commit()
+                            print('PROJETO CRIADO!')
+                            print('---'*30)
+                            print('VINCULANDO COLABORADORES AO PROJETO')
                             sleep(0.2)
 
-                        #else:
-                        #    ############# INSERINDO MARCOS DO PROJETO #############
-                        #    values_line = ''
-                        #    for marco_time in listMarcosTime:
-                        #        
-                        #        if len(str(marco_time).strip()) > 0: 
-                        #            cmd_line_tempo = f"""('{marco_time}', (SELECT * FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%')),"""
-                        #            values_line += cmd_line_tempo
-                        #    
-                        #    values_line = values_line[:-1]
-                        #
-                        #    if len(str(values_line).strip()) > 0:
-                        #        cmd_insert_marcos = f"""
-                        #        INSERT INTO projeu_impl_linhaTempo (marco_line_tempo, id_proj_fgkey)
-                        #            VALUES {values_line};"""
-                        #
+                            if typ_proj not in ('Implantação'):
+                                ############# INSERINDO MÉTRICAS DO PROJETO #############
+                                dd_metric = ''
+                                for metric_name in listMetric:
+                                    dd_metric += f"((SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1), '{metric_name}'),"
+                                dd_metric = dd_metric[:len(dd_metric)-1]
+
+                                cmd_metric = f"""INSERT INTO projeu_metricas(id_prj_fgkey, name_metric) 
+                                                    VALUES {dd_metric};"""
+                                
+                                st.info(cmd_metric)
+                                mycursor.execute(cmd_metric)
+                                conexao.commit()
+                                sleep(0.2)
+
+                            #else:
+                            #    ############# INSERINDO MARCOS DO PROJETO #############
+                            #    values_line = ''
+                            #    for marco_time in listMarcosTime:
+                            #        
+                            #        if len(str(marco_time).strip()) > 0: 
+                            #            cmd_line_tempo = f"""('{marco_time}', (SELECT * FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%')),"""
+                            #            values_line += cmd_line_tempo
+                            #    
+                            #    values_line = values_line[:-1]
+                            #
+                            #    if len(str(values_line).strip()) > 0:
+                            #        cmd_insert_marcos = f"""
+                            #        INSERT INTO projeu_impl_linhaTempo (marco_line_tempo, id_proj_fgkey)
+                            #            VALUES {values_line};"""
+                            #
 
 
-                        ############# INSERINDO COMPLEXIDADE #############
-                        if typ_proj != "Rápido":
-                            cmd_insert_complx = f'''INSERT INTO projeu_complexidade (proj_fgkey, date_edic) 
-                            VALUES (
-                            (SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1),
-                            '{date.today()}'
-                            );'''
-                        else:
-                            cmd_insert_complx = f'''INSERT INTO projeu_complexidade (proj_fgkey, date_edic, complxdd, check_lider, check_govern, check_avaliado) 
-                            VALUES (
-                            (SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1),
-                            '{date.today()}', 'Rápido', 1, 1, 1
-                            );'''
+                            ############# INSERINDO COMPLEXIDADE #############
+                            if typ_proj != "Rápido":
+                                cmd_insert_complx = f'''INSERT INTO projeu_complexidade (proj_fgkey, date_edic) 
+                                VALUES (
+                                (SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1),
+                                '{date.today()}'
+                                );'''
+                            else:
+                                cmd_insert_complx = f'''INSERT INTO projeu_complexidade (proj_fgkey, date_edic, complxdd, check_lider, check_govern, check_avaliado) 
+                                VALUES (
+                                (SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1),
+                                '{date.today()}', 'Rápido', 1, 1, 1
+                                );'''
 
-                        st.success(cmd_insert_complx)
-                        mycursor.execute(cmd_insert_complx)
-                        conexao.commit()
-                        print('LINHA DE COMPLEXIDADE VINCULADO AO BANCO DE DADOS!')
-                        sleep(0.2)
+                            st.success(cmd_insert_complx)
+                            mycursor.execute(cmd_insert_complx)
+                            conexao.commit()
+                            print('LINHA DE COMPLEXIDADE VINCULADO AO BANCO DE DADOS!')
+                            sleep(0.2)
 
-                        
-                        ############# INSERINDO EQUIPE #############
-                        values_ie = [f"""((SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1), (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]} limit 1), '{list_colb[1]}')""" for list_colb in list_colbs]
-                        comand_insert_colabs = f"""INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel) VALUES {str(values_ie).replace('[', '').replace(']', '').replace('"', '')} ;"""
-                        
-                        st.info(comand_insert_colabs)
-                        mycursor.execute(comand_insert_colabs)
-                        conexao.commit()
-
-                        print('COLABORADORES VINCULADOS')
-                        sleep(0.2)
-                        
-                        ############# INSERINDO PRINCIPAIS ENTREGAS #############
-                        if len(listEntregas) > 0:
-                            values_pe = list([f"""('{name_entr}',(SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1))""" 
-                                            for name_entr in listEntregas])
                             
-                            cmd_insert_princp = f'''INSERT INTO projeu_princEntregas (
-                            entreg, 
-                            id_proj_fgkey
-                            )
-                            values {str(values_pe).replace('[', '').replace(']', '').replace('"', '')};'''
+                            ############# INSERINDO EQUIPE #############
+                            values_ie = [f"""((SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1), (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]} limit 1), '{list_colb[1]}')""" for list_colb in list_colbs]
+                            comand_insert_colabs = f"""INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel) VALUES {str(values_ie).replace('[', '').replace(']', '').replace('"', '')} ;"""
                             
-                            st.error(cmd_insert_princp)
-                            mycursor.execute(cmd_insert_princp)
+                            st.info(comand_insert_colabs)
+                            mycursor.execute(comand_insert_colabs)
                             conexao.commit()
 
-                        st.toast('Sucesso na criação do Projeto!', icon='✅')
-                        
-                    except:
-                        st.toast('Erro ao cadastrar projeto na base de dados.', icon='❌')
-                    mycursor.close()
+                            print('COLABORADORES VINCULADOS')
+                            sleep(0.2)
+                            
+                            ############# INSERINDO PRINCIPAIS ENTREGAS #############
+                            if len(listEntregas) > 0:
+                                values_pe = list([f"""('{name_entr}',(SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1))""" 
+                                                for name_entr in listEntregas])
+                                
+                                cmd_insert_princp = f'''INSERT INTO projeu_princEntregas (
+                                entreg, 
+                                id_proj_fgkey
+                                )
+                                values {str(values_pe).replace('[', '').replace(']', '').replace('"', '')};'''
+                                
+                                st.error(cmd_insert_princp)
+                                mycursor.execute(cmd_insert_princp)
+                                conexao.commit()
+
+                            st.toast('Sucesso na criação do Projeto!', icon='✅')
+                            
+                        except:
+                            st.toast('Erro ao cadastrar projeto na base de dados.', icon='❌')
+                        mycursor.close()
+                    else:
+                        st.toast('Primeiramente, preencha todos os campos corretamente.', icon='❌')
                 else:
-                    st.toast('Primeiramente, preencha todos os campos corretamente.', icon='❌')
+                    st.toast('Já existe um projeto com esse nome.', icon='❌')
             else:
-                st.toast('Já existe um projeto com esse nome.', icon='❌')
-        else:
-            st.toast('Por gentileza, ajustar corretamente todas as funções da equipe selecionada.', icon='❌')
+                st.toast('Por gentileza, ajustar corretamente todas as funções da equipe selecionada.', icon='❌')
