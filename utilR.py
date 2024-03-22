@@ -3183,7 +3183,7 @@ def StyleCanvaImplantacao():
 
 def htmlButtonProjetos(projeto):
     htmlButton = f"""<div class="btProjeto">
-            <a href="http://localhost:8501/Meus_Projetos/?projeto={projeto}" target="_self">
+            <a href="https://95cf-186-232-176-19.ngrok-free.app/Meus_Projetos/?projeto={projeto}" target="_self">
                 <button type="button">Ir para o Projeto</button>
             </a>
         </div>"""
