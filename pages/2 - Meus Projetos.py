@@ -322,12 +322,7 @@ elif authentication_status:
     fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
 
     tabs1, tabs2 = st.tabs(['Meus Projetos', 'Cadastrar Projeto'])
-<<<<<<< HEAD
-
-=======
     
-    
->>>>>>> 9dfe62ab034d6acedf0a355eda8eb4d0d53f82a9
     dadosOrigin = []
     with tabs1:
         if len(ddPaging):
