@@ -1,6 +1,6 @@
 import streamlit as st
 from PIL import Image
-from utilR import font_TITLE, ninebox_home, css_9box_home, nineboxDatasUnidades_home
+from utilR import font_TITLE, ninebox_home, css_9box_home, nineboxDatasUnidades_home, htmlButtonProjetos, cssButtonProjetos
 from time import sleep
 import streamlit_authenticator as stauth
 from utilR import menuProjeuHtml, menuProjeuCss
@@ -592,7 +592,9 @@ elif authentication_status:
                     with st.expander(f"{sprint} - {projeto}"):
                         st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
                         st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
-                        if st.button("Ir para Projetos", key=f"bt-{sprint}-{projeto}"):
-                            st.switch_page("pages/2 - Meus Projetos.py")
+                        html = htmlButtonProjetos(projeto)
+                        css = cssButtonProjetos()
+                        st.write(f"{html}", unsafe_allow_html=True)
+                        st.write(f"<style>{css}<style>", unsafe_allow_html=True)
         else:
             st.info("Você não possui entregas pendentes")
