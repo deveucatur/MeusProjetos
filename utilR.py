@@ -3180,3 +3180,36 @@ def StyleCanvaImplantacao():
         }"""
     
     return cssCanvaImplantacao
+
+def htmlButtonProjetos(projeto):
+    htmlButton = f"""<div class="btProjeto">
+            <a href="http://localhost:8501/Meus_Projetos/?projeto={projeto}" target="_self">
+                <button type="button">Ir para o Projeto</button>
+            </a>
+        </div>"""
+
+    return htmlButton
+
+def cssButtonProjetos():
+    cssButton = """@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
+
+        .btProjeto a{
+            text-decoration: none;
+        }
+
+        .btProjeto button{
+            font-family: 'Poppins', sans-serif;
+            background-color: #d3cbdb;
+            color: #622673;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 8px;
+            border: 1px solid #622673;
+        }
+
+        .btProjeto button:hover{
+            background-color: #d2bce7;
+        }"""
+    
+    return cssButton
