@@ -330,7 +330,15 @@ elif authentication_status:
                 macropr_filter = st.multiselect('Macroprocesso', set([x[5] for x in ddPaging]), set([x[5] for x in ddPaging]))
                 program_filter = st.multiselect('Programas', set([x[6] for x in ddPaging if x[5] in macropr_filter]), set([x[6] for x in ddPaging if x[5] in macropr_filter]))
                 
-                project_filter = st.selectbox('Projetos', [x[1] for x in ddPaging if x[6] in program_filter])
+                if len(st.query_params.to_dict()) != 0:
+                    projUrl = st.query_params["projeto"]
+                    st.write(projUrl)
+                    listProj = [x[1] for x in ddPaging if x[6] in program_filter]
+                    indexProj = listProj.index(str(projUrl))
+                else:
+                    indexProj = 0
+
+                project_filter = st.selectbox('Projetos', [x[1] for x in ddPaging if x[6] in program_filter], indexProj)
                 
                 gestorProj = [x[3] for x in ddPaging if x[1] == project_filter][0]
 
