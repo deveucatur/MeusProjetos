@@ -589,7 +589,12 @@ elif authentication_status:
                             font-size: 16px;
                         }"""
                     
-                    with st.expander(f"{sprint} - {projeto}"):
+                    if str(sprint) == "0":
+                        sprint = "MVP"
+                    else:
+                        sprint = f"Sprint {sprint}"
+
+                    with st.expander(f"{projeto} - {sprint}"):
                         st.write(f"{cardEntregaHtml}", unsafe_allow_html=True)
                         st.write(f"<style>{cardEntregaCss}<style>", unsafe_allow_html=True)
                         html = htmlButtonProjetos(projeto)
