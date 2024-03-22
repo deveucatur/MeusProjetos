@@ -329,6 +329,7 @@ elif authentication_status:
             with st.expander('Filtro Projetos', expanded=False):
                 macropr_filter = st.multiselect('Macroprocesso', set([x[5] for x in ddPaging]), set([x[5] for x in ddPaging]))
                 program_filter = st.multiselect('Programas', set([x[6] for x in ddPaging if x[5] in macropr_filter]), set([x[6] for x in ddPaging if x[5] in macropr_filter]))
+                
                 project_filter = st.selectbox('Projetos', [x[1] for x in ddPaging if x[6] in program_filter])
                 
                 gestorProj = [x[3] for x in ddPaging if x[1] == project_filter][0]
@@ -718,7 +719,6 @@ elif authentication_status:
                     with col3:
                         dat_fim_new = st.date_input('Fim', value=dat_inc_new + timedelta(days=14), disabled=True)
                     
-                    #st.error([str(str(dadosOrigin[0][11]).split("/>")[x]).strip() for x in range(len(str(dadosOrigin[0][27]).split("/>"))) if str(str(dadosOrigin[0][45]).split("~/>")[x]).strip() == '1'])
                     colAdd, colExc = st.columns([1,7])
                     with colAdd:
                         button_addSprint = st.button('Adcionar Sprint', disabled=disabledON)
@@ -740,7 +740,7 @@ elif authentication_status:
                         mycursor.execute(cmd_addSprint)
                         conexao.commit()
                         
-                        if number_sprint_new == 1:
+                        if number_sprint_new == str(1):
                             cmdUP_stt_proj = f'UPDATE projeu_projetos SET status_proj = "Em Andamento" WHERE id_proj = {dadosOrigin[0][0]};'
                             mycursor.execute(cmdUP_stt_proj)
                             conexao.commit()
@@ -1264,7 +1264,8 @@ elif authentication_status:
 
         if btt_criar_prj:
             if len([x for x in list_colbs if x[1] == None]) < 1:
-                if nomeProjeto not in dd_proj:
+                
+                if str(nomeProjeto).strip() not in [str(x).strip() for x in dd_proj]:
                     if typ_proj == "Estratégico":
                         parametros = [len(str(x).strip()) if type(x) in (date, str) else len(x) for x in [typ_proj, MacroProjeto, gestorProjeto, mvp_name, pdt_entrFinal, nomePrograma, dat_inic, mvp_produt, result_esperd, listEntregas, list_colbs]]
                     elif typ_proj == 'Rápido':
@@ -1327,13 +1328,13 @@ elif authentication_status:
                                     '{str(nomeProjeto).strip()}', '{str(result_esperd).strip()}', 
                                     (SELECT id_user FROM projeu_users WHERE Matricula = {matric_gestor}), '{str(pdt_entrFinal).strip()}', {int(dat_inic.year)}, '{dat_inic}', 'Aguardando Início' , '{str(ivsProget).strip()}', '{impl_justific}', '{impl_stake}', '{impl_premi}', '{impl_risco}', '{impl_restric}', '{impl_obj}', '{impl_requis}');"""
 
-
+                            st.error(cmd_criar_project)
                             mycursor.execute(cmd_criar_project)
                             conexao.commit()
                             print('PROJETO CRIADO!')
                             print('---'*30)
                             print('VINCULANDO COLABORADORES AO PROJETO')
-                            sleep(0.1)
+                            sleep(0.2)
 
                             if typ_proj not in ('Implantação'):
                                 ############# INSERINDO MÉTRICAS DO PROJETO #############
@@ -1345,9 +1346,10 @@ elif authentication_status:
                                 cmd_metric = f"""INSERT INTO projeu_metricas(id_prj_fgkey, name_metric) 
                                                     VALUES {dd_metric};"""
                                 
+                                st.info(cmd_metric)
                                 mycursor.execute(cmd_metric)
                                 conexao.commit()
-                                sleep(0.1)
+                                sleep(0.2)
 
                             #else:
                             #    ############# INSERINDO MARCOS DO PROJETO #############
@@ -1381,21 +1383,23 @@ elif authentication_status:
                                 '{date.today()}', 'Rápido', 1, 1, 1
                                 );'''
 
+                            st.success(cmd_insert_complx)
                             mycursor.execute(cmd_insert_complx)
                             conexao.commit()
                             print('LINHA DE COMPLEXIDADE VINCULADO AO BANCO DE DADOS!')
-                            sleep(0.1)
+                            sleep(0.2)
 
                             
                             ############# INSERINDO EQUIPE #############
                             values_ie = [f"""((SELECT id_proj FROM projeu_projetos WHERE name_proj LIKE '%{str(nomeProjeto).strip()}%' LIMIT 1), (SELECT id_user FROM projeu_users WHERE Matricula = {list_colb[0]} limit 1), '{list_colb[1]}')""" for list_colb in list_colbs]
                             comand_insert_colabs = f"""INSERT INTO projeu_registroequipe(id_projeto, id_colab, papel) VALUES {str(values_ie).replace('[', '').replace(']', '').replace('"', '')} ;"""
                             
+                            st.info(comand_insert_colabs)
                             mycursor.execute(comand_insert_colabs)
                             conexao.commit()
 
                             print('COLABORADORES VINCULADOS')
-                            sleep(0.1)
+                            sleep(0.2)
                             
                             ############# INSERINDO PRINCIPAIS ENTREGAS #############
                             if len(listEntregas) > 0:
@@ -1408,6 +1412,7 @@ elif authentication_status:
                                 )
                                 values {str(values_pe).replace('[', '').replace(']', '').replace('"', '')};'''
                                 
+                                st.error(cmd_insert_princp)
                                 mycursor.execute(cmd_insert_princp)
                                 conexao.commit()
 
