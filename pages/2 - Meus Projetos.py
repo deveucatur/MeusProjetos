@@ -296,7 +296,7 @@ authenticator = stauth.Authenticate(credentials, "Teste", "abcde", 30)
 
 col1, col2,col3 = st.columns([1,3,1])
 with col2:
-    name, authentication_status, username = authenticator.login('Acesse o sistema PROJEU', 'main')
+    name, authentication_status, username = authenticator.login(location='main', fields={'Form name':'Acessar PROJEU', 'Username':'Login', 'Password':'Senha', 'Login':'Entrar'})
 
 if authentication_status == False:
     with col2:
@@ -322,7 +322,7 @@ elif authentication_status:
     fonte_Projeto = '''@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bungee+Inline&family=Koulen&family=Major+Mono+Display&family=Passion+One&family=Sansita+Swashed:wght@500&display=swap');'''
 
     tabs1, tabs2 = st.tabs(['Meus Projetos', 'Cadastrar Projeto'])
-    
+
     dadosOrigin = []
     with tabs1:
         if len(ddPaging):
