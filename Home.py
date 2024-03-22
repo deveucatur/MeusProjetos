@@ -587,6 +587,10 @@ elif authentication_status:
                         .status{
                             margin-top: 10px;
                             font-size: 16px;
+                        }
+                        
+                        hr{
+                            margin: 10px 0;
                         }"""
                     
                     if str(sprint) == "0":
