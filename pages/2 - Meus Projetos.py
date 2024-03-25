@@ -426,6 +426,9 @@ elif authentication_status:
                     metricas = [str(dadosOrigin[0][33]).split("~/>")[x] for x in range(len(str(dadosOrigin[0][33]).split("~/>"))) if str(str(dadosOrigin[0][42]).split("~/>")[x]).strip() == 'A'] if dadosOrigin[0][33] != None else ' '
                     prodProjetos = str(dadosOrigin[0][10]).split("~/>") if dadosOrigin[0][10] != None else " "
                     prodMvps = str(dadosOrigin[0][25]).split("~/>") if dadosOrigin[0][25] != None else " "
+
+                    complx_list = [x if x != None else '' for x in (dadosOrigin[0][36], dadosOrigin[0][37])]
+                    txt_complx = str(f'{complx_list[0]} {complx_list[1]}').strip()
                         
                     if dadosOrigin[0][4] == "Implantação":
                         dadosImplantacao = [[dadosOrigin[0][45]], [dadosOrigin[0][10]], [dadosOrigin[0][46]], [dadosOrigin[0][47]], [dadosOrigin[0][48]], [dadosOrigin[0][50]], [dadosOrigin[0][51]], dadosOrigin[0][21].split("~/>"), dadosOrigin[0][32].split("~/>"), dadosOrigin[0][52].split("~/>"), [dadosOrigin[0][9]], [dadosOrigin[0][49]], [dadosOrigin[0][8]]]
@@ -437,7 +440,7 @@ elif authentication_status:
                         st.write(f'<style>{css}</style>', unsafe_allow_html=True)
                     else:
                         #SEQUÊNCIA --> projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, especialistas, squads, entregas, investimentos
-                        canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos)
+                        canvas = PlotCanvas(projetos, mvps, prodProjetos, prodMvps, resultados, metricas, gestores, [x[0] for x in equipBD if x[1] == 'Especialista'], [x[0] for x in equipBD if x[1] == 'Executor'], entregas, investimentos, "execucao", txt_complx)
                         htmlRow = canvas.CreateHTML()
                         htmlEqp = canvas.tableEqp()
                         htmlUnic = canvas.tableUnic()
