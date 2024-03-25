@@ -40,10 +40,6 @@ def cardMyProject(nome_user, dados_user):
         opacity: 60%
     }
 
-    p {
-        margin: 0%;
-    }
-
     .linha2 {
         display: flex;
     }
